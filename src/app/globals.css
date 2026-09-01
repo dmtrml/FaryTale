@@ -1,0 +1,193 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f7f2e8;
+  --foreground: #342f2a;
+  --surface: #fffdf8;
+  --muted: #70685e;
+  --border: #ded5c8;
+}
+
+html.dark {
+  --background: #11100f;
+  --foreground: #f2ede6;
+  --surface: #1d1a18;
+  --muted: #b9afa5;
+  --border: #403a35;
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+.theme-label-dark {
+  display: none;
+}
+
+html.dark .theme-label-light {
+  display: none;
+}
+
+html.dark .theme-label-dark {
+  display: inline;
+}
+
+html.dark body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+html.dark input,
+html.dark textarea,
+html.dark select {
+  color: #f2ede6;
+  caret-color: #f2ede6;
+}
+
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+  color: #8f867d;
+}
+
+/*
+ * The app predates theme tokens and contains a compact warm palette as
+ * Tailwind arbitrary colors. Keep the existing light UI stable while mapping
+ * those canonical tokens to dark surfaces/text here. Exact class-token
+ * selectors avoid fragile generated Tailwind selector escaping.
+ */
+html.dark [class~="bg-white"],
+html.dark [class~="bg-[#fffdf8]"],
+html.dark [class~="bg-[#fff7f1]"] {
+  background-color: #1d1a18 !important;
+}
+
+html.dark [class~="bg-[#eee8dd]"],
+html.dark [class~="bg-[#e8decc]"],
+html.dark [class~="bg-[#d8d0c5]"],
+html.dark [class~="bg-[#f0ece4]"],
+html.dark [class~="bg-[#f1ece3]"],
+html.dark [class~="bg-[#f4f0e9]"],
+html.dark [class~="bg-[#f7f2e8]"],
+html.dark [class~="bg-[#f8f4ed]"] {
+  background-color: #24201d !important;
+}
+
+html.dark [class~="bg-[#efe5d3]"],
+html.dark [class~="bg-[#eadbbf]"],
+html.dark [class~="bg-[#f2e3cf]"],
+html.dark [class~="bg-[#f7e8c8]"] {
+  background-color: #30291f !important;
+}
+
+html.dark [class~="bg-[#dcebdd]"],
+html.dark [class~="bg-[#e5efe7]"],
+html.dark [class~="bg-[#e9efe5]"] {
+  background-color: #213027 !important;
+}
+
+html.dark [class~="bg-[#dbe7f3]"] {
+  background-color: #202b36 !important;
+}
+
+html.dark [class~="bg-[#f4dfd3]"],
+html.dark [class~="bg-[#f4dfd8]"],
+html.dark [class~="bg-[#f7e8e2]"] {
+  background-color: #382521 !important;
+}
+
+html.dark [class~="text-[#2d2925]"],
+html.dark [class~="text-[#342f2a]"],
+html.dark [class~="text-[#40382f]"],
+html.dark [class~="text-[#4d453d]"],
+html.dark [class~="text-[#514940]"],
+html.dark [class~="text-[#5c5349]"],
+html.dark [class~="text-[#625a51]"] {
+  color: #eee7df !important;
+}
+
+html.dark [class~="text-[#6f675d]"],
+html.dark [class~="text-[#70685e]"],
+html.dark [class~="text-[#715d52]"],
+html.dark [class~="text-[#756d64]"],
+html.dark [class~="text-[#766d62]"],
+html.dark [class~="text-[#786f65]"],
+html.dark [class~="text-[#8a8177]"] {
+  color: #b9afa5 !important;
+}
+
+html.dark [class~="text-[#8a493b]"] {
+  color: #e6a190 !important;
+}
+
+html.dark [class~="border-[#cfc5b8]"],
+html.dark [class~="border-[#d8d0c5]"],
+html.dark [class~="border-[#ded5ca]"],
+html.dark [class~="border-[#e2dbd1]"],
+html.dark [class~="border-[#e4ddd3]"] {
+  border-color: #403a35 !important;
+}
+
+html.dark [class~="border-[#625a51]"] {
+  border-color: #81766c !important;
+}
+
+html.dark [class~="border-[#d8bcae]"],
+html.dark [class~="border-[#b87666]"] {
+  border-color: #80584e !important;
+}
+
+html.dark [class~="hover:bg-[#f0ece4]"]:hover {
+  background-color: #302b27 !important;
+}
+
+html.dark .theme-toggle:hover {
+  background-color: #302b27;
+}
+
+@media print {
+  html.dark .print-root,
+  html.dark .print-root [class~="bg-white"],
+  html.dark .print-root [class~="bg-[#fffdf8]"],
+  html.dark .print-root [class~="bg-[#f4f0e9]"] {
+    background-color: white !important;
+  }
+
+  html.dark .print-root,
+  html.dark .print-root * {
+    color: #2d2925 !important;
+    color-scheme: light;
+  }
+}
+
+@media print {
+  .print-hidden {
+    display: none !important;
+  }
+
+  .print-page {
+    break-after: page;
+    page-break-after: always;
+  }
+
+  body {
+    background: white !important;
+  }
+}
+
+body {
+  margin: 0;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}

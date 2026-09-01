@@ -1,0 +1,43 @@
+# dependencies
+/node_modules
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# local env files
+.env*
+!.env.example
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# generated content cache
+/content/generated/
+
+# local agent scratch files
+/.scratch/
+
+# private local story content (do not publish)
+/content/books/*
+!/content/books/.gitkeep
+/content/characters/*
+!/content/characters/.gitkeep
+/content/archive/
