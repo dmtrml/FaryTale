@@ -59,6 +59,7 @@ Parent mode can:
 - create and edit canonical characters;
 - edit visual identity, palette, fixed traits and do-not-change rules;
 - upload/remove character reference images, edit reference roles and choose the canonical identity reference;
+- use a simplified character card that shows the main identity reference plus one ready-to-copy ChatGPT Image prompt assembled automatically from the structured character fields; palette/fixed/do-not-change fields remain available under advanced settings rather than requiring manual prompt assembly;
 - delete an unused character while blocking deletion when a book still references it;
 - create a draft book;
 - use the tool-driven Studio;

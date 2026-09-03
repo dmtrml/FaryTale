@@ -9,6 +9,8 @@ import {
   updateCharacterAction,
   updateCharacterReferenceRoleAction,
 } from "@/app/parent/actions";
+import { CopyPromptButton } from "@/components/copy-prompt-button";
+import { composeCharacterGenerationPrompt } from "@/lib/characters/prompt";
 import { loadLibrary } from "@/lib/content/loader";
 
 export default async function ParentCharactersPage() {
@@ -19,7 +21,7 @@ export default async function ParentCharactersPage() {
     <main className="mx-auto max-w-6xl px-5 py-8 sm:px-8 sm:py-10">
       <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#786f65]">Канонические персонажи</p>
       <h1 className="mt-2 text-3xl font-semibold sm:text-4xl">Персонажи</h1>
-      <p className="mt-3 max-w-3xl leading-7 text-[#70685e]">Здесь хранится единая идентичность персонажа для всех книг. Все поля и референсы редактируются без ручной правки JSON.</p>
+      <p className="mt-3 max-w-3xl leading-7 text-[#70685e]">Главное здесь — готовый промпт и визуальный референс персонажа. Технические поля сохранены для агента и автоматической сборки промптов, но спрятаны в расширенные настройки.</p>
 
       <details className="mt-7 rounded-3xl border border-[#cfc5b8] bg-[#f8f4ed] p-6 sm:p-7">
         <summary className="cursor-pointer text-xl font-semibold">+ Создать персонажа</summary>
@@ -43,6 +45,9 @@ export default async function ParentCharactersPage() {
           const addReference = addCharacterReferenceAction.bind(null, character.id);
           const removeCharacter = deleteCharacterAction.bind(null, character.id);
           const usedBy = books.filter((book) => book.characters.includes(character.id) || book.pages.some((page) => page.characters.includes(character.id)));
+          const identityReference =
+            character.references.find((reference) => reference.role === "identity") ?? null;
+          const generationPrompt = composeCharacterGenerationPrompt(character);
           return (
             <article id={`character-${character.id}`} key={character.id} className="scroll-mt-6 rounded-3xl border border-[#d8d0c5] bg-[#fffdf8] p-6 sm:p-7">
               <div className="flex flex-wrap items-start justify-between gap-3">
@@ -50,8 +55,62 @@ export default async function ParentCharactersPage() {
                 <span className="rounded-full bg-[#eee8dd] px-3 py-1 text-xs font-semibold">Используется в книгах: {usedBy.length}</span>
               </div>
 
-              <details className="mt-5" open={characters.length === 1}>
-                <summary className="cursor-pointer text-sm font-semibold">Редактировать данные персонажа</summary>
+              <div className="mt-6 grid gap-5 lg:grid-cols-[minmax(220px,0.72fr)_minmax(0,1.6fr)]">
+                <section className="rounded-2xl border border-[#e4ddd3] bg-[#f8f4ed] p-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <h3 className="text-base font-semibold">Главный референс</h3>
+                    {identityReference ? <span className="rounded-full bg-[#e5efe7] px-2.5 py-1 text-xs font-semibold">Основной ✓</span> : null}
+                  </div>
+                  {identityReference ? (
+                    <Image
+                      unoptimized
+                      width={600}
+                      height={600}
+                      src={`/api/parent/characters/${character.id}/asset?path=${encodeURIComponent(identityReference.path)}`}
+                      alt={`Главный референс персонажа ${character.name}`}
+                      className="mt-3 aspect-square w-full rounded-xl bg-white object-contain"
+                    />
+                  ) : (
+                    <div className="mt-3 flex aspect-square items-center justify-center rounded-xl border border-dashed border-[#cfc5b8] bg-white p-5 text-center text-sm text-[#756d64]">
+                      Главного референса пока нет. Сначала сгенерируйте персонажа по готовому промпту, затем загрузите утверждённую картинку.
+                    </div>
+                  )}
+                  <p className="mt-3 text-xs leading-5 text-[#756d64]">При генерации следующих изображений прикладывайте этот референс вместе с промптом.</p>
+                  <form action={addReference} className="mt-4 border-t border-[#e4ddd3] pt-4">
+                    <input type="hidden" name="role" value="reference" />
+                    <input type="hidden" name="makeIdentity" value="yes" />
+                    <label className="block text-sm font-semibold">
+                      {identityReference ? "Загрузить новый главный референс" : "Загрузить главный референс"}
+                      <input
+                        name="image"
+                        type="file"
+                        required
+                        accept="image/png,image/jpeg,image/webp,image/avif,image/gif"
+                        className="mt-2 block max-w-full text-xs"
+                      />
+                    </label>
+                    <button className="mt-3 rounded-full border border-[#d8d0c5] bg-white px-4 py-2 text-xs font-semibold">
+                      {identityReference ? "Сделать новым основным" : "Загрузить как основной"}
+                    </button>
+                  </form>
+                </section>
+
+                <section className="rounded-2xl border border-[#cfc5b8] bg-white p-5">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#786f65]">Для ChatGPT Image</p>
+                      <h3 className="mt-1 text-xl font-semibold">Готовый промпт персонажа</h3>
+                    </div>
+                    <CopyPromptButton text={generationPrompt} />
+                  </div>
+                  <pre className="mt-4 max-h-80 overflow-auto whitespace-pre-wrap rounded-2xl bg-[#f4f0e9] p-4 text-sm leading-6">{generationPrompt}</pre>
+                  <p className="mt-3 text-xs leading-5 text-[#756d64]">Ничего собирать вручную не нужно: палитра, неизменные признаки и запреты уже включены в этот текст.</p>
+                </section>
+              </div>
+
+              <details className="mt-6 rounded-2xl border border-[#e4ddd3] bg-[#f8f4ed] p-4">
+                <summary className="cursor-pointer text-sm font-semibold">Расширенные настройки персонажа</summary>
+                <p className="mt-2 text-xs leading-5 text-[#756d64]">Эти поля нужны в основном агенту. Из них автоматически собирается готовый промпт выше.</p>
                 <form action={update} className="mt-4 grid gap-4 sm:grid-cols-2">
                   <label><span className="text-sm font-semibold">Имя</span><input name="name" required maxLength={160} defaultValue={character.name} className="mt-2 min-h-12 w-full rounded-xl border border-[#d8d0c5] bg-white px-4" /></label>
                   <label><span className="text-sm font-semibold">Тип</span><input name="type" required maxLength={80} defaultValue={character.type} className="mt-2 min-h-12 w-full rounded-xl border border-[#d8d0c5] bg-white px-4" /></label>
@@ -65,8 +124,8 @@ export default async function ParentCharactersPage() {
                 </form>
               </details>
 
-              <div className="mt-6 border-t border-[#e4ddd3] pt-5">
-                <h3 className="text-lg font-semibold">Референсы</h3>
+              <details className="mt-4 rounded-2xl border border-[#e4ddd3] bg-[#f8f4ed] p-4">
+                <summary className="cursor-pointer text-sm font-semibold">Управлять референсами · {character.references.length}</summary>
                 {character.references.length ? (
                   <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     {character.references.map((reference) => {
@@ -99,7 +158,7 @@ export default async function ParentCharactersPage() {
                   <label className="mt-3 flex items-center gap-2 text-sm"><input type="checkbox" name="makeIdentity" value="yes" /> Сразу сделать главным identity-reference</label>
                   <button className="mt-3 rounded-full border border-[#d8d0c5] px-4 py-2 text-sm font-semibold">Добавить референс</button>
                 </form>
-              </div>
+              </details>
 
               <div className="mt-6 border-t border-[#e4ddd3] pt-5">
                 {usedBy.length ? (

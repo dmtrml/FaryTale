@@ -368,6 +368,17 @@ Phase 15 verification on 2026-08-29:
 - Verified the canonical book is `prompt_ready`, uses age band `18-24m`, pattern `habit-routine`, goal type `habit`, has 6 pages, 6 prompt files and 0 page images.
 - Parent book route returned HTTP 200 on the dedicated FaryTale dev server at port 3010.
 - Concrete usability finding: when `storyPattern`/goal type were omitted for the Russian potty-training goal, deterministic inference selected `emotion-regulation`. The accepted package was corrected to explicit `habit-routine` / `habit`; future agent-authored routine stories should set an explicit pattern when inference is ambiguous.
+
+## Character card UX simplification — 2026-09-03
+
+- Parent character cards now prioritize the user's manual ChatGPT Image workflow instead of exposing structured metadata as the primary UI.
+- Each character card shows the canonical identity reference first and one deterministic, ready-to-copy character-generation prompt assembled from visual identity, palette, fixed traits and do-not-change rules.
+- Structured character fields remain canonical and editable but are collapsed under `Расширенные настройки персонажа`; full reference-role management is likewise collapsed under `Управлять референсами`.
+- This is a presentation/derivation change only: Character v1 storage is unchanged, so existing books, agent materialization and page-prompt composition remain compatible.
+- Follow-up refinement removed narrative/story description from the visual character prompt so story-specific text such as potty-training context cannot accidentally leak into a reusable character reference image.
+- The main-reference block now includes a direct `Загрузить главный референс` flow; uploading there automatically makes the new image the identity reference while preserving older references as ordinary references.
+- Verification: `npm run typecheck`, `npm run lint`, `npm test` (20 files / 72 tests) and `npm run build` all passed on 2026-09-03.
+- Production smoke on port 3010 returned the Parent characters page with `Готовый промпт персонажа`, `Главный референс`, `Скопировать промпт`, `Загрузить главный референс` and collapsed `Расширенные настройки персонажа`; the smoke server was stopped after verification.
 ## Known issues / blockers
 
 - No blocker remains for the planned local/private MVP.
@@ -393,10 +404,11 @@ Read in this order:
 
 ## Exact next action
 
-The Phase 0–15 local/private MVP and first real agent-first acceptance materialization are complete. Next:
+The Phase 0–15 local/private MVP, first real agent-first materialization and character-card UX simplification are complete. Next:
 
-1. optionally add a parent-approved binary reference image for the canonical character `emi` so future illustrations can preserve her appearance more reliably;
-2. generate the 6 page illustrations manually in chat from the saved prompts and upload them to the corresponding pages;
-3. verify visual continuity of Emi and the recognizable potty (pink base, white rim, blue inner bowl) across all 6 pages;
-4. set `emi-and-her-potty` to `ready` only after the parent approves the finished illustrations and wants the book visible in child mode;
-5. keep the discovered ambiguous story-pattern inference issue in mind for later implementation improvement; do not add speculative infrastructure before another concrete need appears.
+1. parent reviews the simplified `Эми` card in `/parent/characters` and copies the single ready character prompt;
+2. generate and approve one canonical Emi reference image in chat, then upload it through the card's `Загрузить главный референс` control;
+3. generate the 6 page illustrations manually from the saved page prompts while attaching that canonical Emi reference (and any approved room/potty reference as needed), then upload them to the corresponding pages;
+4. verify visual continuity of Emi and the recognizable potty (pink base, white rim, blue inner bowl) across all 6 pages;
+5. set `emi-and-her-potty` to `ready` only after the parent approves the finished illustrations and wants the book visible in child mode;
+6. keep the discovered ambiguous story-pattern inference issue in mind for later implementation improvement; do not add speculative infrastructure before another concrete need appears.
