@@ -10,6 +10,7 @@ import {
   movePageAction,
   prepareStoryDraftAction,
   replaceBookCoverAction,
+  replaceBookEnvironmentReferenceAction,
   replacePageImageAction,
   updateBookMetadataAction,
   updatePageCharactersAction,
@@ -17,11 +18,13 @@ import {
 } from "@/app/parent/actions";
 import { CopyPromptButton } from "@/components/copy-prompt-button";
 import { loadLibrary } from "@/lib/content/loader";
-import { inspectBookPageImage, readBookPagePrompt } from "@/lib/content/mutations";
+import { inspectBookPageImage, readBookPagePrompts } from "@/lib/content/mutations";
 import { storyPatternLabels, recommendStoryPattern } from "@/lib/story/rules";
 import { getServerProviderConfig } from "@/lib/providers/server-config";
 import { assessIllustrationPrompt } from "@/lib/story/quality";
 import { listBookPageImageHistory } from "@/lib/image-generation/service";
+import { selectCanonicalIdentityReference } from "@/lib/characters/identity";
+import { composeChatBookPrompt, composeChatPagePrompt } from "@/lib/story/chat-image-prompt";
 
 const bookStatuses = [
   ["draft", "Черновик"],
@@ -53,17 +56,25 @@ export default async function ParentBookPage({
   const page = book.pages[pageNumber - 1];
   if (!page) notFound();
 
-  const [prompt, imageInspection, history] = await Promise.all([
-    readBookPagePrompt({ bookId, pageNumber }),
+  const [pagePrompts, imageInspection, history] = await Promise.all([
+    readBookPagePrompts({ bookId }),
     inspectBookPageImage({ bookId, pageNumber }),
     listBookPageImageHistory({ bookId, pageNumber }),
   ]);
+  const prompt = pagePrompts[pageNumber - 1] ?? null;
   const pageCharacters = characters.filter((character) => page.characters.includes(character.id));
+  const bookCharacters = characters.filter((character) => book.characters.includes(character.id));
+  const environmentReference = book.references.find((reference) => reference.role === "environment") ?? null;
+  const wholeBookPrompt = composeChatBookPrompt({ book, characters: bookCharacters, pagePrompts });
+  const chatPagePrompt = prompt
+    ? composeChatPagePrompt({ book, page, rawPrompt: prompt, characters: pageCharacters })
+    : null;
   const promptIssues = prompt ? assessIllustrationPrompt(prompt, pageCharacters) : [];
   const latestPreviousImage = history[0];
   const prepareStory = prepareStoryDraftAction.bind(null, book.id);
   const updateMetadata = updateBookMetadataAction.bind(null, book.id);
   const replaceCover = replaceBookCoverAction.bind(null, book.id);
+  const replaceEnvironmentReference = replaceBookEnvironmentReferenceAction.bind(null, book.id);
   const updateText = updatePageTextAction.bind(null, book.id, page.number);
   const updatePageCharacters = updatePageCharactersAction.bind(null, book.id, page.number);
   const replaceImage = replacePageImageAction.bind(null, book.id, page.number);
@@ -98,7 +109,76 @@ export default async function ParentBookPage({
           </div>
         </div>
 
-        <form action={updateMetadata} className="mt-7 grid gap-4 border-t border-[#e4ddd3] pt-6 sm:grid-cols-2">
+        <section className="mt-7 border-t border-[#e4ddd3] pt-6">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#786f65]">Ручная генерация в ChatGPT</p>
+              <h2 className="mt-1 text-2xl font-semibold">Иллюстрации всей книги</h2>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-[#70685e]">Приложите постоянные референсы ниже, скопируйте один общий промпт и попросите ChatGPT создать отдельное изображение для каждой страницы.</p>
+            </div>
+            <CopyPromptButton text={wholeBookPrompt} label="Скопировать всю книгу" />
+          </div>
+
+          <div className="mt-5 grid gap-4 lg:grid-cols-2">
+            <div className="rounded-2xl border border-[#d8d0c5] bg-[#f8f4ed] p-4">
+              <h3 className="text-base font-semibold">1. Персонаж</h3>
+              {bookCharacters.length ? (
+                <div className="mt-3 space-y-3">
+                  {bookCharacters.map((character) => {
+                    const reference = selectCanonicalIdentityReference(character);
+                    return (
+                      <div key={character.id} className="rounded-xl bg-white p-3">
+                        <p className="text-sm font-semibold">{character.name}</p>
+                        {reference ? (
+                          <Image
+                            unoptimized
+                            width={500}
+                            height={500}
+                            src={`/api/parent/characters/${character.id}/asset?path=${encodeURIComponent(reference.path)}`}
+                            alt={`Канонический референс ${character.name}`}
+                            className="mt-2 aspect-square w-full max-w-52 rounded-xl object-contain"
+                          />
+                        ) : (
+                          <p className="mt-2 text-sm text-[#8a493b]">Главный референс ещё не загружен. Добавьте его в разделе «Персонажи».</p>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : <p className="mt-3 text-sm text-[#756d64]">У книги пока нет канонического персонажа.</p>}
+            </div>
+
+            <div className="rounded-2xl border border-[#d8d0c5] bg-[#f8f4ed] p-4">
+              <h3 className="text-base font-semibold">2. Окружение и постоянные предметы</h3>
+              {environmentReference ? (
+                <Image
+                  unoptimized
+                  width={700}
+                  height={700}
+                  src={`/api/parent/books/${book.id}/asset?path=${encodeURIComponent(environmentReference.path)}`}
+                  alt={`Референс окружения книги ${book.title}`}
+                  className="mt-3 aspect-square w-full max-w-64 rounded-xl bg-white object-contain"
+                />
+              ) : (
+                <div className="mt-3 flex min-h-40 items-center justify-center rounded-xl border border-dashed border-[#cfc5b8] bg-white p-5 text-center text-sm text-[#756d64]">Загрузите одну утверждённую картинку комнаты/локации, где хорошо видны постоянные предметы и общий стиль книги.</div>
+              )}
+              <form action={replaceEnvironmentReference} className="mt-4">
+                <input name="image" type="file" required accept="image/png,image/jpeg,image/webp,image/avif,image/gif" className="block max-w-full text-sm" />
+                <button className="mt-3 rounded-full border border-[#d8d0c5] bg-white px-4 py-2 text-sm font-semibold">{environmentReference ? "Заменить референс окружения" : "Загрузить референс окружения"}</button>
+                <p className="mt-2 text-xs text-[#756d64]">Лучше использовать изображение, где одновременно читаются комната, стиль и ключевые постоянные предметы.</p>
+              </form>
+            </div>
+          </div>
+
+          <details className="mt-5 rounded-2xl bg-[#f4f0e9] p-4">
+            <summary className="cursor-pointer text-sm font-semibold">Посмотреть общий промпт всей книги</summary>
+            <pre className="mt-3 max-h-96 overflow-auto whitespace-pre-wrap rounded-xl bg-white p-4 text-sm leading-6">{wholeBookPrompt}</pre>
+          </details>
+        </section>
+
+        <details className="mt-7 border-t border-[#e4ddd3] pt-6">
+          <summary className="cursor-pointer text-lg font-semibold">Настройки книги и обложка</summary>
+        <form action={updateMetadata} className="mt-5 grid gap-4 sm:grid-cols-2">
           <label className="sm:col-span-2">
             <span className="text-sm font-semibold">Название</span>
             <input name="title" required maxLength={160} defaultValue={book.title} className="mt-2 min-h-12 w-full rounded-xl border border-[#d8d0c5] bg-white px-4" />
@@ -159,6 +239,7 @@ export default async function ParentBookPage({
             </form>
           </div>
         </div>
+        </details>
       </section>
 
       <section className="mt-6 rounded-3xl border border-[#cfc5b8] bg-[#f8f4ed] p-5 sm:p-6">
@@ -260,22 +341,33 @@ export default async function ParentBookPage({
 
         <div className="mt-6 border-t border-[#e4ddd3] pt-5">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <h3 className="text-sm font-semibold">Промпт иллюстрации</h3>
-            {prompt ? <CopyPromptButton text={prompt} /> : null}
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#786f65]">Для ChatGPT Image</p>
+              <h3 className="mt-1 text-lg font-semibold">Готовый промпт страницы</h3>
+            </div>
+            {chatPagePrompt ? <CopyPromptButton text={chatPagePrompt} label="Скопировать эту страницу" /> : null}
           </div>
-          {currentBeat ? <p className="mt-2 text-xs text-[#756d64]"><strong>Beat:</strong> {currentBeat}</p> : null}
-          {prompt ? (
+          {chatPagePrompt ? (
             <>
-              <pre className="mt-3 max-h-72 overflow-auto whitespace-pre-wrap rounded-2xl bg-[#f4f0e9] p-4 text-sm leading-6">{prompt}</pre>
+              <pre className="mt-3 max-h-72 overflow-auto whitespace-pre-wrap rounded-2xl bg-[#f4f0e9] p-4 text-sm leading-6">{chatPagePrompt}</pre>
+              <p className="mt-3 text-xs leading-5 text-[#756d64]">При ручной генерации приложите те же постоянные референсы персонажа и окружения, которые показаны в блоке «Иллюстрации всей книги».</p>
               {networkImageProvider ? (
                 <form action={generateImage} className="mt-3">
                   <button type="submit" className="rounded-full bg-[#40382f] px-5 py-2.5 text-sm font-semibold text-white">{page.imageStatus === "failed" || page.imageStatus === "ready" ? "Сгенерировать заново" : "Сгенерировать иллюстрацию"}</button>
                   <p className="mt-2 text-xs text-[#756d64]">Генерируется только эта страница через {providerConfig.FARYTALE_IMAGE_PROVIDER}.</p>
                 </form>
               ) : <p className="mt-3 text-xs text-[#756d64]">Image provider: manual. Промпт готов для ручной генерации или загрузки изображения.</p>}
-              {promptIssues.length ? <ul className="mt-3 list-disc space-y-1 pl-5 text-xs text-[#8a493b]">{promptIssues.map((issue) => <li key={issue}>{issue}</li>)}</ul> : null}
             </>
           ) : <p className="mt-3 text-sm text-[#756d64]">Промпт ещё не создан.</p>}
+
+          {prompt ? (
+            <details className="mt-4 rounded-2xl border border-[#e4ddd3] bg-white p-4">
+              <summary className="cursor-pointer text-sm font-semibold">Техническая структура промпта</summary>
+              {currentBeat ? <p className="mt-3 text-xs text-[#756d64]"><strong>Beat:</strong> {currentBeat}</p> : null}
+              <pre className="mt-3 max-h-72 overflow-auto whitespace-pre-wrap rounded-2xl bg-[#f4f0e9] p-4 text-sm leading-6">{prompt}</pre>
+              {promptIssues.length ? <ul className="mt-3 list-disc space-y-1 pl-5 text-xs text-[#8a493b]">{promptIssues.map((issue) => <li key={issue}>{issue}</li>)}</ul> : <p className="mt-3 text-xs text-[#756d64]">Техническая структура: OK.</p>}
+            </details>
+          ) : null}
         </div>
       </article>
 

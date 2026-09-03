@@ -110,6 +110,13 @@ export function validateBookExport(bytes: Uint8Array): ValidatedBookExport {
     if (!mimeType) throw new Error(`Unsupported exported cover type: ${book.cover}`);
     inspectImage(cover, mimeType);
   }
+  for (const reference of book.references) {
+    const image = entries.get(`books/${book.id}/${reference.path}`);
+    if (!image) throw new Error(`Export is missing book reference: ${reference.path}`);
+    const mimeType = mimeByExtension[path.extname(reference.path).toLowerCase()];
+    if (!mimeType) throw new Error(`Unsupported exported book reference type: ${reference.path}`);
+    inspectImage(image, mimeType);
+  }
 
   const characters = book.characters.map((characterId) => {
     const character = parseJson(

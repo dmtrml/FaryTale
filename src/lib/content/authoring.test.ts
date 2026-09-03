@@ -14,6 +14,7 @@ import {
   insertBookPage,
   moveBookPage,
   replaceBookCover,
+  replaceBookEnvironmentReference,
   removeCharacterReference,
   setCharacterIdentityReference,
   updateBookMetadata,
@@ -210,6 +211,31 @@ describe("complete book authoring", () => {
     expect(result.book.cover).toMatch(/^covers\//);
     expect(result.inspection).toMatchObject({ width: 2, height: 3, mimeType: "image/png" });
     expect(await fs.readFile(path.join(root, "books", "sample-book", ...result.relativePath.split("/")))).toEqual(Buffer.from(png));
+  });
+
+  it("stores exactly one canonical environment reference for the book", async () => {
+    const root = await makeRoot();
+    const first = await replaceBookEnvironmentReference({
+      contentRoot: root,
+      bookId: "sample-book",
+      bytes: png,
+      mimeType: "image/png",
+      today: "2026-09-03",
+    });
+    expect(first.book.references).toHaveLength(1);
+    expect(first.book.references[0]).toMatchObject({ id: "environment", role: "environment" });
+    expect(first.relativePath).toMatch(/^refs\/environment-/);
+
+    const second = await replaceBookEnvironmentReference({
+      contentRoot: root,
+      bookId: "sample-book",
+      bytes: png,
+      mimeType: "image/png",
+      today: "2026-09-03",
+    });
+    expect(second.book.references).toHaveLength(1);
+    expect(second.relativePath).not.toBe(first.relativePath);
+    await expect(fs.access(path.join(root, "books", "sample-book", ...first.relativePath.split("/")))).rejects.toThrow();
   });
 });
 

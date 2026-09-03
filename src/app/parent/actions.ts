@@ -13,6 +13,7 @@ import {
 import {
   MAX_BOOK_PAGES,
   MAX_BOOK_COVER_BYTES,
+  MAX_BOOK_REFERENCE_BYTES,
   MAX_CHARACTER_REFERENCE_BYTES,
   addCharacterReference,
   createCharacter,
@@ -22,6 +23,7 @@ import {
   insertBookPage,
   moveBookPage,
   replaceBookCover,
+  replaceBookEnvironmentReference,
   removeCharacterReference,
   setCharacterIdentityReference,
   updateBookMetadata,
@@ -191,6 +193,21 @@ export async function replaceBookCoverAction(bookId: string, formData: FormData)
   revalidatePath("/parent/books");
   revalidatePath(`/parent/books/${bookId}`);
   revalidatePath(`/books/${bookId}`);
+}
+
+export async function replaceBookEnvironmentReferenceAction(bookId: string, formData: FormData) {
+  await requireParentMode();
+  const image = formData.get("image");
+  if (!(image instanceof File)) throw new Error("Environment reference image is required.");
+  if (image.size === 0 || image.size > MAX_BOOK_REFERENCE_BYTES) {
+    throw new Error("Environment reference image must be between 1 byte and 5 MB.");
+  }
+  await replaceBookEnvironmentReference({
+    bookId,
+    bytes: new Uint8Array(await image.arrayBuffer()),
+    mimeType: image.type,
+  });
+  revalidatePath(`/parent/books/${bookId}`);
 }
 
 export async function updatePageCharactersAction(bookId: string, pageNumber: number, formData: FormData) {

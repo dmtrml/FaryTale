@@ -10,6 +10,7 @@ import {
 } from "../content/mutations";
 import type { ImageProvider, ImageReference } from "../providers/contracts";
 import { selectCanonicalIdentityReference } from "../characters/identity";
+import type { Book } from "../content/schemas";
 
 const mimeByExtension: Record<string, string> = {
   ".avif": "image/avif",
@@ -93,6 +94,7 @@ export async function listBookPageImageHistory({
 
 async function loadPageReferences(
   contentRoot: string,
+  book: Book,
   characterIds: string[],
 ): Promise<ImageReference[]> {
   const library = await loadLibrary({ contentRoot });
@@ -124,6 +126,30 @@ async function loadPageReferences(
       if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
     }
   }
+
+  const environmentReference = book.references.find((reference) => reference.role === "environment");
+  if (environmentReference && isSafeContentPath(environmentReference.path)) {
+    const mimeType = mimeByExtension[path.extname(environmentReference.path).toLowerCase()];
+    if (mimeType) {
+      const absolutePath = path.join(
+        contentRoot,
+        "books",
+        book.id,
+        ...environmentReference.path.split("/"),
+      );
+      try {
+        const bytes = new Uint8Array(await fs.readFile(absolutePath));
+        references.push({
+          path: `books/${book.id}/${environmentReference.path}`,
+          role: "environment",
+          mimeType,
+          bytes,
+        });
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+      }
+    }
+  }
   return references;
 }
 
@@ -140,7 +166,7 @@ export async function generateBookPageImage(options: GeneratePageOptions) {
   });
   if (!prompt?.trim()) throw new Error("Page prompt is required before image generation.");
 
-  const references = await loadPageReferences(contentRoot, page.characters);
+  const references = await loadPageReferences(contentRoot, book, page.characters);
   await setBookPageImageStatus({
     bookId: options.bookId,
     pageNumber: options.pageNumber,

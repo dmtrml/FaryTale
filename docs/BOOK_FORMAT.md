@@ -48,6 +48,13 @@ Suggested v1 shape:
     "description": "Показать последовательность: поиграл → помыл лапки → вытер → можно кушать."
   },
   "characters": ["miau"],
+  "references": [
+    {
+      "id": "environment",
+      "path": "refs/room.webp",
+      "role": "environment"
+    }
+  ],
   "status": "ready",
   "cover": "cover.webp",
   "createdAt": "2026-08-29",
@@ -79,6 +86,12 @@ Suggested v1 shape:
 `authoring` is optional parent-side metadata. It records the deterministic
 story-skill interpretation used to prepare a draft. It is not shown in child
 mode and does not make the skill Markdown files a runtime dependency.
+
+`references` is an optional/default-empty list of book-level visual references.
+The current Parent workflow uses one canonical `environment` reference for the
+room/location, recurring props and overall visual context of the book. Character
+identity references remain canonical under `content/characters/<id>/refs/` and
+are not duplicated into each book.
 
 Allowed `ageBand` values in v1:
 - `12-18m`
@@ -146,6 +159,11 @@ Recommended Markdown structure:
 ```
 
 Prompt files are authoring/provenance assets and are not shown in child mode.
+The Parent UI may derive a flattened ready-to-copy ChatGPT Image prompt from
+these structured sections. The Markdown remains the technical source for scene,
+environment, composition, style and continuity details, while the parent-facing
+copy prompt describes which attached character/environment image references to
+use without exposing filesystem paths or generation metadata.
 
 ## 5. `character.json`
 
@@ -235,7 +253,7 @@ characters/<referenced-character-id>/...
 }
 ```
 
-An export includes the complete canonical book directory plus the complete directories of characters referenced by the book. Import validates the ZIP, Book/Character schemas, declared assets, image signatures/dimensions and target conflicts before writing canonical content.
+An export includes the complete canonical book directory plus the complete directories of characters referenced by the book. This includes declared book-level visual references such as `refs/room.webp`. Import validates the ZIP, Book/Character schemas, declared assets, image signatures/dimensions and target conflicts before writing canonical content.
 
 ## 9. Agent authoring provenance
 

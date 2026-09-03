@@ -111,6 +111,9 @@ Contains:
 - add, duplicate, delete and reorder pages;
 - support long books (at least 100 pages) without artificial short-story limits;
 - inspect/copy prompt;
+- store one canonical book-level environment/props visual reference for manual image consistency;
+- copy a flattened ready-to-use prompt for the selected page while keeping technical prompt sections as provenance;
+- copy one whole-book manual-generation prompt that asks for separate page images and describes the attached canonical references once;
 - replace image;
 - regenerate image if a provider is configured;
 - character library with create/edit/delete and reference-image management;
@@ -178,6 +181,10 @@ A character may contain:
 A book references character IDs rather than copying the whole character definition into every page.
 
 Book-specific visual overrides are allowed when explicitly stored.
+Books may also store book-level visual references for recurring environments/props. The
+current manual workflow uses one canonical `environment` reference alongside character
+identity references so a parent can attach the same visual anchors when generating one
+page or an entire series in ChatGPT Image.
 
 ## 9. AI Studio
 

@@ -150,6 +150,20 @@ describe("loadLibrary", () => {
     );
   });
 
+  it("validates book-level visual reference paths", async () => {
+    const root = await makeContentRoot();
+    await writeJson(
+      path.join(root, "books", "reference-book", "book.json"),
+      sampleBook("reference-book", {
+        references: [{ id: "environment", path: "../../outside.png", role: "environment" }],
+        pages: [],
+      }),
+    );
+    const library = await loadLibrary({ contentRoot: root });
+    expect(library.books).toEqual([]);
+    expect(library.diagnostics).toContainEqual(expect.objectContaining({ code: "unsafe_path" }));
+  });
+
   it("rejects a book containing a path traversal attempt", async () => {
     const root = await makeContentRoot();
     await writeJson(

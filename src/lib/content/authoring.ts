@@ -26,6 +26,7 @@ type ImageMimeType = keyof typeof imageTypes;
 export const MAX_BOOK_PAGES = 200;
 export const MAX_CHARACTER_REFERENCE_BYTES = 5 * 1024 * 1024;
 export const MAX_BOOK_COVER_BYTES = 5 * 1024 * 1024;
+export const MAX_BOOK_REFERENCE_BYTES = 5 * 1024 * 1024;
 
 type AuthoringOptions = {
   contentRoot?: string;
@@ -209,6 +210,41 @@ export async function replaceBookCover({
   book.cover = relativePath;
   book.updatedAt = todayValue(options.today);
   await writeBook(filePath, book);
+  return { book, relativePath, inspection };
+}
+
+export async function replaceBookEnvironmentReference({
+  bookId,
+  bytes,
+  mimeType,
+  ...options
+}: AuthoringOptions & {
+  bookId: string;
+  bytes: Uint8Array;
+  mimeType: string;
+}) {
+  if (!(mimeType in imageTypes)) throw new Error("Unsupported image type.");
+  if (bytes.byteLength === 0 || bytes.byteLength > MAX_BOOK_REFERENCE_BYTES) {
+    throw new Error("Book reference image must be between 1 byte and 5 MB.");
+  }
+  const inspection = inspectImage(bytes, mimeType);
+  const contentRoot = resolveContentRoot(options.contentRoot);
+  const { book, filePath, bookRoot } = await readBook(contentRoot, bookId);
+  const previous = book.references.find((reference) => reference.role === "environment");
+  const extension = imageTypes[mimeType as ImageMimeType];
+  const relativePath = `refs/environment-${randomUUID()}.${extension}`;
+  const target = path.join(bookRoot, ...relativePath.split("/"));
+  await fs.mkdir(path.dirname(target), { recursive: true });
+  await fs.writeFile(target, bytes);
+  book.references = [
+    ...book.references.filter((reference) => reference.role !== "environment"),
+    { id: "environment", path: relativePath, role: "environment" },
+  ];
+  book.updatedAt = todayValue(options.today);
+  await writeBook(filePath, book);
+  if (previous && previous.path !== relativePath && isSafeContentPath(previous.path)) {
+    await fs.rm(path.join(bookRoot, ...previous.path.split("/")), { force: true });
+  }
   return { book, relativePath, inspection };
 }
 

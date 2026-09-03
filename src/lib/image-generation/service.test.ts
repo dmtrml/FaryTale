@@ -139,6 +139,40 @@ describe("generateBookPageImage", () => {
     expect(book?.pages[0]?.image).toBeUndefined();
   });
 
+  it("sends the book environment reference after canonical character references", async () => {
+    const root = await fixture();
+    await fs.mkdir(path.join(root, "books", "image-book", "refs"), { recursive: true });
+    await fs.writeFile(path.join(root, "books", "image-book", "refs", "room.png"), Buffer.from([4, 5, 6]));
+    const bookPath = path.join(root, "books", "image-book", "book.json");
+    const raw = JSON.parse(await fs.readFile(bookPath, "utf8"));
+    raw.references = [{ id: "environment", path: "refs/room.png", role: "environment" }];
+    await fs.writeFile(bookPath, JSON.stringify(raw));
+    let captured: ImageGenerationRequest | undefined;
+    const provider: ImageProvider = {
+      id: "reference-check",
+      async generate(request) {
+        captured = request;
+        return {
+          kind: "deferred",
+          imageStatus: "prompt_ready",
+          prompt: request.prompt,
+          metadata: { provider: "reference-check" },
+        };
+      },
+    };
+    const result = await generateBookPageImage({
+      bookId: "image-book",
+      pageNumber: 1,
+      provider,
+      contentRoot: root,
+    });
+    expect(result.referencePaths).toEqual([
+      "characters/miau/refs/canonical.png",
+      "books/image-book/refs/room.png",
+    ]);
+    expect(captured?.references?.map((item) => item.role)).toEqual(["identity", "environment"]);
+  });
+
   it("archives the previous ready image before a successful regeneration", async () => {
     const root = await fixture();
     await replaceBookPageImage({

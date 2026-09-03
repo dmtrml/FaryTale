@@ -32,6 +32,7 @@ const book: Book = {
   age: { minMonths: 18, maxMonths: 24, label: "18–24" },
   goal: { type: "habit", slug: "quality", description: "Goal" },
   characters: ["miau"],
+  references: [],
   status: "prompt_ready",
   createdAt: "2026-08-29",
   updatedAt: "2026-08-29",

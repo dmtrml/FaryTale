@@ -192,6 +192,9 @@ Acceptance:
 - [x] Upload/remove character reference images, edit their roles and choose the canonical identity reference.
 - [x] Delete characters only when that cannot leave existing books with broken character references.
 - [x] Manage a book's referenced character IDs from Parent mode.
+- [x] Store and replace one canonical book-level environment/props visual reference.
+- [x] Derive a flattened ready-to-copy manual image prompt for one page while keeping the structured Markdown prompt available as technical provenance.
+- [x] Derive one whole-book ChatGPT Image prompt that requests separate images for all pages and reuses canonical character/environment references.
 - [x] Extend AI Studio typed tools where needed so authoring capabilities are not UI-only.
 - [x] Add tests for 80+ page books, page insertion/duplication/deletion/reordering, character CRUD/reference safety and lifecycle transitions.
 - [x] Update README/MVP documentation and rerun typecheck, lint, tests, build and runtime smoke checks.
@@ -200,6 +203,7 @@ Acceptance:
 - an existing 80-page canonical book can be maintained from Parent mode without hand-editing JSON;
 - a parent can add, remove, duplicate and reorder pages while canonical numbering/assets remain valid;
 - a parent can create and maintain reusable characters and their reference images without hand-editing JSON;
+- a parent can keep the canonical room/props reference with the book and copy either one-page or whole-book manual-generation prompts without assembling technical sections by hand;
 - no artificial 12-page creation limit remains;
 - child/reader mode remains isolated from authoring controls;
 - the MVP may be called complete only after this phase passes its checks.

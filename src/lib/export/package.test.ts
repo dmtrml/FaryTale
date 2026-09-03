@@ -21,9 +21,11 @@ async function sourceFixture() {
   roots.push(root);
   await fs.mkdir(path.join(root, "books", "portable-book", "pages"), { recursive: true });
   await fs.mkdir(path.join(root, "books", "portable-book", "prompts"), { recursive: true });
+  await fs.mkdir(path.join(root, "books", "portable-book", "refs"), { recursive: true });
   await fs.mkdir(path.join(root, "characters", "miau", "refs"), { recursive: true });
   await fs.writeFile(path.join(root, "books", "portable-book", "pages", "001.png"), png());
   await fs.writeFile(path.join(root, "books", "portable-book", "prompts", "001.md"), "# Prompt\n");
+  await fs.writeFile(path.join(root, "books", "portable-book", "refs", "room.png"), png());
   await fs.writeFile(path.join(root, "characters", "miau", "refs", "canonical.png"), png());
   await fs.writeFile(
     path.join(root, "characters", "miau", "character.json"),
@@ -48,6 +50,7 @@ async function sourceFixture() {
       age: { minMonths: 18, maxMonths: 24, label: "18–24" },
       goal: { type: "habit", slug: "portable", description: "Portable goal" },
       characters: ["miau"],
+      references: [{ id: "environment", path: "refs/room.png", role: "environment" }],
       status: "ready",
       createdAt: "2026-08-29",
       updatedAt: "2026-08-29",
@@ -76,6 +79,7 @@ describe("FaryTale book export package", () => {
     expect(validated.book.id).toBe("portable-book");
     expect(validated.characters.map((item) => item.id)).toEqual(["miau"]);
     expect(validated.entries.has("books/portable-book/prompts/001.md")).toBe(true);
+    expect(validated.entries.has("books/portable-book/refs/room.png")).toBe(true);
     expect(validated.entries.has("characters/miau/refs/canonical.png")).toBe(true);
 
     const target = await fs.mkdtemp(path.join(os.tmpdir(), "farytale-export-target-"));
@@ -85,6 +89,7 @@ describe("FaryTale book export package", () => {
     expect(library.books.find((book) => book.id === "portable-book")?.pages[0]?.text).toBe("Мяу играет.");
     expect(library.characters.find((character) => character.id === "miau")?.visual.identity).toBe("Stable Miau.");
     expect(await fs.readFile(path.join(target, "books", "portable-book", "pages", "001.png"))).toEqual(Buffer.from(png()));
+    expect(await fs.readFile(path.join(target, "books", "portable-book", "refs", "room.png"))).toEqual(Buffer.from(png()));
   });
 
   it("rejects an export that omits a declared page image before import writes anything", async () => {

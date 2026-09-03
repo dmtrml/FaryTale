@@ -25,6 +25,7 @@ export async function GET(
   if (!book) return new Response("Not found", { status: 404 });
   const allowedAssets = new Set([
     ...(book.cover ? [book.cover] : []),
+    ...book.references.map((reference) => reference.path),
     ...book.pages.flatMap((page) => page.image ? [page.image] : []),
   ]);
   if (!allowedAssets.has(assetPath)) return new Response("Not found", { status: 404 });

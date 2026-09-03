@@ -379,6 +379,18 @@ Phase 15 verification on 2026-08-29:
 - The main-reference block now includes a direct `Загрузить главный референс` flow; uploading there automatically makes the new image the identity reference while preserving older references as ordinary references.
 - Verification: `npm run typecheck`, `npm run lint`, `npm test` (20 files / 72 tests) and `npm run build` all passed on 2026-09-03.
 - Production smoke on port 3010 returned the Parent characters page with `Готовый промпт персонажа`, `Главный референс`, `Скопировать промпт`, `Загрузить главный референс` and collapsed `Расширенные настройки персонажа`; the smoke server was stopped after verification.
+
+## Book illustration UX simplification — 2026-09-03
+
+- Parent book detail now prioritizes the manual ChatGPT Image workflow instead of exposing structured prompt Markdown as the primary copy surface.
+- Book v1 now has a default-empty `references` list. Parent mode currently uses one canonical `environment` reference stored under the book folder for room/location, recurring props and visual context; character identity references remain canonical in the character library.
+- The book screen shows the canonical character identity reference(s) and the book environment/props reference together in `Иллюстрации всей книги`; the environment reference can be uploaded/replaced directly there.
+- `src/lib/story/chat-image-prompt.ts` deterministically derives a flattened ready-to-copy prompt for one selected page from the saved technical prompt plus canonical references. The user no longer needs to manually combine `Scene`, `Characters`, `Environment`, `Composition`, `Style lock`, `Continuity` and negative sections.
+- The same helper derives one whole-book ChatGPT Image request that asks for one separate image per page, explicitly rejects collage/storyboard output, explains the attached references once and then lists every page scene in order.
+- The original Markdown prompt remains unchanged as technical/provenance source and is collapsed under `Техническая структура промпта` for inspection. Book metadata and cover controls are likewise collapsed under `Настройки книги и обложка` so the everyday illustration workflow is visually primary.
+- Book-level references are path-validated by the loader, served only through the parent-gated book asset route, validated in ZIP export/import, and added after canonical character references when an explicitly configured network image provider generates a page.
+- Runtime smoke against the real `emi-and-her-potty` book on port 3010 returned HTTP 200 and rendered `Иллюстрации всей книги`, `Скопировать всю книгу`, the character/environment reference areas, `Готовый промпт страницы`, `Скопировать эту страницу`, collapsed `Техническая структура промпта` and collapsed `Настройки книги и обложка`. No test reference image was written into the real book; the smoke server was stopped afterward.
+- Verification after the final implementation: `npm run typecheck`, `npm run lint`, `npm test` (21 files / 77 tests) and `npm run build` all passed on 2026-09-03.
 ## Known issues / blockers
 
 - No blocker remains for the planned local/private MVP.
@@ -404,11 +416,11 @@ Read in this order:
 
 ## Exact next action
 
-The Phase 0–15 local/private MVP, first real agent-first materialization and character-card UX simplification are complete. Next:
+The Phase 0–15 local/private MVP, first real agent-first materialization, character-card UX simplification and book illustration UX simplification are complete. Next:
 
-1. parent reviews the simplified `Эми` card in `/parent/characters` and copies the single ready character prompt;
-2. generate and approve one canonical Emi reference image in chat, then upload it through the card's `Загрузить главный референс` control;
-3. generate the 6 page illustrations manually from the saved page prompts while attaching that canonical Emi reference (and any approved room/potty reference as needed), then upload them to the corresponding pages;
-4. verify visual continuity of Emi and the recognizable potty (pink base, white rim, blue inner bowl) across all 6 pages;
+1. generate and approve one canonical Emi reference image in chat, then upload it through the character card's `Загрузить главный референс` control;
+2. choose/create one approved room reference for `emi-and-her-potty` where the room, blocks, recognizable potty and overall style are visible, then upload it through `Загрузить референс окружения` on the book screen;
+3. use `Скопировать всю книгу` to try one batch ChatGPT Image request for all 6 separate page images; if consistency is insufficient, use the per-page `Скопировать эту страницу` workflow with the same canonical references;
+4. upload approved page images to their corresponding pages and verify visual continuity of Emi and the recognizable potty (pink base, white rim, blue inner bowl);
 5. set `emi-and-her-potty` to `ready` only after the parent approves the finished illustrations and wants the book visible in child mode;
 6. keep the discovered ambiguous story-pattern inference issue in mind for later implementation improvement; do not add speculative infrastructure before another concrete need appears.

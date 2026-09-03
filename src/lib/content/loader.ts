@@ -131,6 +131,14 @@ function collectBookPaths(book: Book) {
     paths.push({ value: book.cover, label: "cover", required: false });
   }
 
+  for (const reference of book.references) {
+    paths.push({
+      value: reference.path,
+      label: `book reference ${reference.id}`,
+      required: false,
+    });
+  }
+
   for (const page of book.pages) {
     if (page.image) {
       paths.push({

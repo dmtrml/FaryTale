@@ -18,6 +18,7 @@ content/
   books/<book-id>/
     book.json
     cover.*                 # optional
+    refs/*                  # optional book-level room/environment references
     pages/*                 # page illustrations
     prompts/*.md            # illustration prompt + provenance
     pages/history/*         # previous generated versions when available
@@ -54,6 +55,9 @@ Parent mode can:
 - edit one page's text and page-level character membership;
 - upload/replace one page image;
 - inspect/copy illustration prompts and provenance;
+- keep one canonical book-level environment/props reference alongside character identity references;
+- copy one flattened ChatGPT Image prompt for the selected page without manually assembling Scene/Characters/Environment/Composition sections;
+- copy one whole-book ChatGPT Image request that asks for one separate image per page and explains the attached canonical references once for the full series;
 - select story pattern, character and visual-style lock;
 - generate deterministic outline/prompts without AI;
 - create and edit canonical characters;
@@ -88,6 +92,14 @@ For complete approved stories, Studio also accepts the high-level `/materialize-
 ## Image generation
 
 `manual` is the default image provider and requires no key. It stores/uses prompts and keeps pages recoverable for manual generation/upload.
+
+For the everyday manual workflow, the Parent book screen separates canonical visual
+references from technical prompt structure. Character identity references come from
+the character library; the book may additionally store one `environment` reference
+for the room/location, recurring props and visual context. The UI derives one
+ready-to-copy prompt for a selected page and one whole-book prompt for batch creation
+of separate page images. The structured Markdown prompt remains available only under
+technical details for inspection/provenance.
 
 When `openai-image` is explicitly configured, one parent-triggered page request:
 

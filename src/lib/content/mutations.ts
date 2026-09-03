@@ -207,6 +207,29 @@ export async function readBookPagePrompt({
   }
 }
 
+export async function readBookPagePrompts({
+  bookId,
+  contentRoot: customContentRoot,
+}: {
+  bookId: string;
+  contentRoot?: string;
+}) {
+  const contentRoot = resolveContentRoot(customContentRoot);
+  const { book } = await readCanonicalBook(contentRoot, bookId);
+  return Promise.all(
+    book.pages.map(async (page) => {
+      if (!page.prompt || !isSafeContentPath(page.prompt)) return null;
+      const promptPath = path.join(contentRoot, "books", bookId, ...page.prompt.split("/"));
+      try {
+        return await fs.readFile(promptPath, "utf8");
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code === "ENOENT") return null;
+        throw error;
+      }
+    }),
+  );
+}
+
 export async function inspectBookPageImage({
   bookId,
   pageNumber,

@@ -54,6 +54,12 @@ export const bookPageSchema = z.object({
   imageStatus: imageStatusSchema,
 });
 
+const visualReferenceSchema = z.object({
+  id: z.string().min(1),
+  path: z.string().min(1),
+  role: z.string().min(1),
+});
+
 export const bookSchema = z.object({
   schemaVersion: z.literal(1),
   id: contentIdSchema,
@@ -75,6 +81,7 @@ export const bookSchema = z.object({
     description: z.string().min(1),
   }),
   characters: z.array(z.string()).default([]),
+  references: z.array(visualReferenceSchema).default([]),
   status: bookStatusSchema,
   cover: z.string().optional(),
   createdAt: isoDateSchema,
@@ -109,15 +116,7 @@ export const characterSchema = z.object({
     fixedTraits: z.array(z.string()).default([]),
     doNotChange: z.array(z.string()).default([]),
   }),
-  references: z
-    .array(
-      z.object({
-        id: z.string().min(1),
-        path: z.string().min(1),
-        role: z.string().min(1),
-      }),
-    )
-    .default([]),
+  references: z.array(visualReferenceSchema).default([]),
 });
 
 export const libraryManifestEntrySchema = bookSchema.pick({

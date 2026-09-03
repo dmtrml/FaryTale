@@ -77,6 +77,12 @@ content/characters/<character-id>/
 
 Parent mode also provides browser Print/Save-as-PDF and a self-contained ZIP export/import flow so a complete book can be archived independently of the running app.
 
+For manual illustration generation, a book can keep one canonical environment/props
+reference in addition to reusable character identity references. Parent mode exposes
+one flattened ready-to-copy prompt for the selected page and one whole-book ChatGPT
+Image prompt that asks for separate images for every page; structured Markdown prompt
+sections remain available only as technical/provenance details.
+
 ## Agent-first approved story
 
 The recommended creation path is not manual form entry. An external agent can turn an approved story into an `ApprovedStoryPackage` and materialize the whole book in one operation. With a local server running:
