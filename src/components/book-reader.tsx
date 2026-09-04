@@ -10,9 +10,13 @@ import {
   previousPageIndex,
 } from "@/lib/reader/navigation";
 
+const progressKey = (bookId: string) => `farytale-reader-progress:${bookId}`;
+
 export function BookReader({ book }: { book: Book }) {
   const [pageIndex, setPageIndex] = useState(0);
   const [failedImages, setFailedImages] = useState<Set<string>>(() => new Set());
+  const [resumePageIndex, setResumePageIndex] = useState<number | null>(null);
+  const [progressReady, setProgressReady] = useState(false);
   const pointerStartX = useRef<number | null>(null);
 
   const page = book.pages[pageIndex];
@@ -25,6 +29,20 @@ export function BookReader({ book }: { book: Book }) {
   const goNext = useCallback(() => {
     setPageIndex((current) => nextPageIndex(current, pageCount));
   }, [pageCount]);
+
+  useEffect(() => {
+    const raw = window.localStorage.getItem(progressKey(book.id));
+    const saved = raw === null ? Number.NaN : Number.parseInt(raw, 10);
+    if (Number.isFinite(saved) && saved > 0 && saved < pageCount) {
+      setResumePageIndex(saved);
+    }
+    setProgressReady(true);
+  }, [book.id, pageCount]);
+
+  useEffect(() => {
+    if (!progressReady || resumePageIndex !== null) return;
+    window.localStorage.setItem(progressKey(book.id), String(pageIndex));
+  }, [book.id, pageIndex, progressReady, resumePageIndex]);
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
@@ -58,6 +76,13 @@ export function BookReader({ book }: { book: Book }) {
   const imageSrc = page.image
     ? `/api/content/books/${encodeURIComponent(book.id)}/asset?path=${encodeURIComponent(page.image)}`
     : null;
+  const isLastPage = pageIndex === pageCount - 1;
+
+  function restartBook() {
+    setPageIndex(0);
+    setResumePageIndex(null);
+    window.localStorage.setItem(progressKey(book.id), "0");
+  }
 
   return (
     <main className="min-h-dvh bg-[#f7f2e8] px-3 py-3 sm:px-6 sm:py-5">
@@ -77,6 +102,33 @@ export function BookReader({ book }: { book: Book }) {
             {pageIndex + 1} / {pageCount}
           </div>
         </header>
+
+        {resumePageIndex !== null ? (
+          <section className="mb-3 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#d8d0c5] bg-white/80 px-4 py-3 text-sm shadow-sm">
+            <p className="font-medium text-[#514940]">
+              Вы остановились на странице {resumePageIndex + 1}.
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setPageIndex(resumePageIndex);
+                  setResumePageIndex(null);
+                }}
+                className="rounded-full bg-[#40382f] px-4 py-2 font-semibold text-white"
+              >
+                Продолжить
+              </button>
+              <button
+                type="button"
+                onClick={restartBook}
+                className="rounded-full border border-[#d8d0c5] bg-white px-4 py-2 font-semibold"
+              >
+                Начать сначала
+              </button>
+            </div>
+          </section>
+        ) : null}
 
         <article
           className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-[1.75rem] border border-[var(--border)] bg-[var(--surface)] shadow-[0_20px_70px_rgba(77,62,43,0.1)] sm:rounded-[2.5rem]"
@@ -156,6 +208,27 @@ export function BookReader({ book }: { book: Book }) {
               {page.text}
             </p>
 
+            {isLastPage ? (
+              <div className="mx-auto mt-6 max-w-xl rounded-2xl bg-[#f4f0e9] px-5 py-5">
+                <p className="text-lg font-semibold">Конец ❤️</p>
+                <div className="mt-4 flex flex-wrap justify-center gap-3">
+                  <button
+                    type="button"
+                    onClick={restartBook}
+                    className="min-h-12 rounded-full bg-[#40382f] px-5 font-semibold text-white"
+                  >
+                    Прочитать ещё раз
+                  </button>
+                  <Link
+                    href="/"
+                    className="inline-flex min-h-12 items-center rounded-full border border-[var(--border)] bg-white px-5 font-semibold"
+                  >
+                    Выбрать другую сказку
+                  </Link>
+                </div>
+              </div>
+            ) : null}
+
             <div className="mx-auto mt-6 flex max-w-md items-center justify-between gap-4">
               <button
                 type="button"
@@ -166,20 +239,31 @@ export function BookReader({ book }: { book: Book }) {
               >
                 Назад
               </button>
-              <div className="flex gap-1.5" aria-hidden="true">
-                {book.pages.map((item, index) => (
-                  <span
-                    key={item.number}
-                    className={`size-2 rounded-full ${
-                      index === pageIndex ? "bg-[#5c5349]" : "bg-[#d8d0c5]"
-                    }`}
-                  />
-                ))}
-              </div>
+              {pageCount <= 10 ? (
+                <div className="flex gap-1.5" aria-hidden="true">
+                  {book.pages.map((item, index) => (
+                    <span
+                      key={item.number}
+                      className={`size-2 rounded-full ${
+                        index === pageIndex ? "bg-[#5c5349]" : "bg-[#d8d0c5]"
+                      }`}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="min-w-24 flex-1" aria-hidden="true">
+                  <div className="h-2 overflow-hidden rounded-full bg-[#d8d0c5]">
+                    <div
+                      className="h-full rounded-full bg-[#5c5349] transition-[width]"
+                      style={{ width: `${((pageIndex + 1) / pageCount) * 100}%` }}
+                    />
+                  </div>
+                </div>
+              )}
               <button
                 type="button"
                 onClick={goNext}
-                disabled={pageIndex === pageCount - 1}
+                disabled={isLastPage}
                 className="min-h-12 min-w-28 rounded-full bg-[#40382f] px-5 font-semibold text-white disabled:cursor-default disabled:opacity-30"
                 aria-label="Следующая страница"
               >

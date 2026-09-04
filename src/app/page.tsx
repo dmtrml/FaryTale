@@ -70,21 +70,10 @@ async function LibraryShelf() {
             </div>
           )}
 
-          <div className="p-7">
-            <div className="flex flex-wrap gap-2 text-sm font-medium text-[var(--muted)]">
-              <span className="rounded-full bg-[#f0ece4] px-3 py-1.5">
-                {book.age.label}
-              </span>
-              <span className="rounded-full bg-[#f0ece4] px-3 py-1.5">
-                {book.pages.length} стр.
-              </span>
-            </div>
-            <h2 className="mt-5 text-2xl font-semibold leading-tight tracking-tight sm:text-3xl">
+          <div className="p-6 sm:p-7">
+            <h2 className="text-2xl font-semibold leading-tight tracking-tight sm:text-3xl">
               {book.title}
             </h2>
-            <p className="mt-3 line-clamp-2 leading-7 text-[var(--muted)]">
-              {book.goal.description}
-            </p>
           </div>
         </Link>
       ))}
