@@ -1,4 +1,4 @@
-# UX review — 14 experimental improvements
+# UX review — 14 core improvements + reader additions
 
 Branch: `ux/14-experience-improvements`
 
@@ -135,6 +135,27 @@ Check:
 - the final page illustration remains the same size as on the preceding page;
 - `Ещё раз` resets to page 1;
 - `На полку` returns to the shelf.
+
+## 15. Fullscreen reader
+
+Open any child book and press `Во весь экран`.
+
+Check:
+- the reader enters the browser/system fullscreen mode;
+- the whole reading surface, including navigation, remains usable;
+- the button changes to `Выйти из экрана` while fullscreen is active;
+- exiting fullscreen returns to the same page without resetting reading progress.
+
+## 16. Automatic slideshow
+
+Open any child book and use the `Слайды` selector in the top reader bar.
+
+Check:
+- available intervals are 5, 10, 15 and 20 seconds;
+- after choosing an interval, the reader advances without pressing `Дальше`;
+- manually changing the page restarts the countdown for the newly shown page;
+- slideshow pauses while the `Вы остановились...` resume choice is visible;
+- slideshow stops automatically on the last page rather than looping back to page 1.
 
 ## Review rule
 

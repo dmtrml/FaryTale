@@ -17,7 +17,10 @@ export function BookReader({ book }: { book: Book }) {
   const [failedImages, setFailedImages] = useState<Set<string>>(() => new Set());
   const [resumePageIndex, setResumePageIndex] = useState<number | null>(null);
   const [progressReady, setProgressReady] = useState(false);
+  const [autoAdvanceSeconds, setAutoAdvanceSeconds] = useState<number | null>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const pointerStartX = useRef<number | null>(null);
+  const readerRootRef = useRef<HTMLElement | null>(null);
 
   const page = book.pages[pageIndex];
   const pageCount = book.pages.length;
@@ -62,6 +65,35 @@ export function BookReader({ book }: { book: Book }) {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [goNext, goPrevious]);
 
+  useEffect(() => {
+    function onFullscreenChange() {
+      setIsFullscreen(document.fullscreenElement === readerRootRef.current);
+    }
+
+    document.addEventListener("fullscreenchange", onFullscreenChange);
+    return () => document.removeEventListener("fullscreenchange", onFullscreenChange);
+  }, []);
+
+  useEffect(() => {
+    if (
+      autoAdvanceSeconds === null ||
+      resumePageIndex !== null ||
+      pageIndex >= pageCount - 1
+    ) {
+      return;
+    }
+
+    const timeout = window.setTimeout(() => {
+      const nextIndex = nextPageIndex(pageIndex, pageCount);
+      setPageIndex(nextIndex);
+      if (nextIndex >= pageCount - 1) {
+        setAutoAdvanceSeconds(null);
+      }
+    }, autoAdvanceSeconds * 1000);
+
+    return () => window.clearTimeout(timeout);
+  }, [autoAdvanceSeconds, pageCount, pageIndex, resumePageIndex]);
+
   if (!page) {
     return (
       <main className="grid min-h-dvh place-items-center px-6 py-12">
@@ -87,10 +119,27 @@ export function BookReader({ book }: { book: Book }) {
     window.localStorage.setItem(progressKey(book.id), "0");
   }
 
+  async function toggleFullscreen() {
+    const element = readerRootRef.current;
+    if (!element) return;
+
+    if (document.fullscreenElement === element) {
+      await document.exitFullscreen();
+      return;
+    }
+
+    if (element.requestFullscreen) {
+      await element.requestFullscreen();
+    }
+  }
+
   return (
-    <main className="min-h-dvh bg-[#f7f2e8] px-3 py-3 sm:px-6 sm:py-5">
+    <main
+      ref={readerRootRef}
+      className="min-h-dvh bg-[var(--background)] px-3 py-3 sm:px-6 sm:py-5"
+    >
       <div className="mx-auto flex min-h-[calc(100dvh-1.5rem)] max-w-6xl flex-col sm:min-h-[calc(100dvh-2.5rem)]">
-        <header className="mb-3 flex items-center justify-between gap-4 px-1 sm:mb-4">
+        <header className="mb-3 flex flex-wrap items-center justify-between gap-3 px-1 sm:mb-4">
           <Link
             href="/"
             className="inline-flex min-h-11 items-center rounded-full px-4 font-semibold text-[#514940] focus-visible:outline-2 focus-visible:outline-offset-2"
@@ -98,11 +147,39 @@ export function BookReader({ book }: { book: Book }) {
           >
             ← Полка
           </Link>
-          <div
-            className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-4 py-2 text-sm font-semibold text-[var(--muted)] shadow-sm"
-            aria-live="polite"
-          >
-            {pageIndex + 1} / {pageCount}
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            <label className="inline-flex min-h-10 items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 text-sm font-semibold text-[var(--muted)] shadow-sm">
+              <span>Слайды</span>
+              <select
+                aria-label="Интервал автоматического перелистывания"
+                value={autoAdvanceSeconds ?? ""}
+                onChange={(event) => {
+                  const value = event.target.value;
+                  setAutoAdvanceSeconds(value ? Number(value) : null);
+                }}
+                className="bg-transparent text-sm font-semibold text-[var(--foreground)] outline-none"
+              >
+                <option value="">Выкл</option>
+                <option value="5">5 сек</option>
+                <option value="10">10 сек</option>
+                <option value="15">15 сек</option>
+                <option value="20">20 сек</option>
+              </select>
+            </label>
+            <button
+              type="button"
+              onClick={toggleFullscreen}
+              className="inline-flex min-h-10 items-center rounded-full border border-[var(--border)] bg-[var(--surface)] px-4 text-sm font-semibold text-[var(--foreground)] shadow-sm"
+              aria-label={isFullscreen ? "Выйти из полноэкранного режима" : "Открыть во весь экран"}
+            >
+              {isFullscreen ? "Выйти из экрана" : "Во весь экран"}
+            </button>
+            <div
+              className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-4 py-2 text-sm font-semibold text-[var(--muted)] shadow-sm"
+              aria-live="polite"
+            >
+              {pageIndex + 1} / {pageCount}
+            </div>
           </div>
         </header>
 
