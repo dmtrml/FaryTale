@@ -6,7 +6,7 @@
 
 ## Current status
 
-**Current phase:** local/private MVP complete — experimental 14-point UX review branch in progress.
+**Current phase:** local/private MVP complete — reviewed UX improvements accepted and merged to `main`.
 
 **Overall state:** FaryTale is a working reader-first family storybook app with parent-only authoring. The primary creation workflow is agent-first: an approved story can be materialized into canonical book/character files plus one prompt per page without manual technical form entry. Existing books remain readable without AI, credentials, a database or internet access.
 
@@ -41,16 +41,16 @@ Current local content:
 - Parent uploads validate actual page/environment aspect ratio before accepting assets.
 - Network image generation, when explicitly configured, requests a 16:9 output and remains per-page.
 
-### Experimental UX review branch — 2026-09-04
+### Accepted UX improvements — 2026-09-04
 
-- Current branch: `ux/14-experience-improvements`; do not treat these UX choices as accepted until the parent reviews them.
-- The branch implements the original 14 proposed UX experiments plus two reader additions (fullscreen and slideshow), all documented in `docs/UX_REVIEW_14.md`.
-- Major experimental changes include: parent book progress/continue CTA, previous/next page workflow, page filters, ordered prompt→generate→upload flow, drag/drop previews, visual Parent book cards, agent-first new-book entry, conversational Helper presentation, simplified character prompt presentation, simplified child shelf, long-book reader progress, local reading resume, a dedicated end-of-book state, fullscreen reading and configurable automatic page advance.
+- The parent reviewed and accepted the full `ux/14-experience-improvements` branch; it was fast-forward merged into `main`.
+- The accepted set includes the original 14 UX improvements plus fullscreen reading and configurable automatic page advance, documented in `docs/UX_REVIEW_14.md`.
+- Major accepted changes include: parent book progress/continue CTA, previous/next page workflow, page filters, ordered prompt→generate→upload flow, drag/drop previews, visual Parent book cards, agent-first new-book entry, conversational Helper presentation, simplified character prompt presentation, simplified child shelf, long-book reader progress, local reading resume, a dedicated end-of-book state, fullscreen reading and configurable automatic page advance.
 - The end-of-book state reuses the normal navigation row (`Ещё раз · Конец ❤️ · На полку`) instead of adding a taller extra panel, preventing the final-page illustration from shrinking.
 - During review, the child-shelf `Для родителей` entry was moved from the page footer into the top header. Reader page progress and the resume-reading banner now use theme tokens instead of translucent light-only backgrounds, so both render correctly in dark mode.
 - The reader now has optional fullscreen mode and a slideshow selector with 5/10/15/20-second intervals. Automatic advance resets after each page change, pauses behind the resume-reading decision, stops on the last page, and uses a short fade/slide transition. The slideshow selector/options use theme tokens so the opened menu also follows dark mode.
 - The built-in Helper accepts simple natural-language list requests locally. Creative free-text authoring still requires a configured text provider; when absent, the UI now explains that limitation and points to the external agent-first workflow instead of returning a technical error.
-- Full review instructions are in `docs/UX_REVIEW_14.md`.
+- The final accepted review checklist is preserved in `docs/UX_REVIEW_14.md` as product-history/reference documentation.
 
 ## Important architecture decisions
 
@@ -101,17 +101,18 @@ UX review branch verification on 2026-09-04:
 - Production runtime smoke on port 3010 returned HTTP 200 for the child library, Parent book list, selected Parent book page, Characters, New Book, Helper and reader. Parent screens rendered their new UX markers with the parent cookie.
 - After parent review, the final-page reader controls were revised so they reuse the normal navigation row and no longer add vertical height that can shrink the illustration.
 - Fullscreen/slideshow reader additions passed `npm run typecheck`, `npm run lint`, reader navigation tests, `npm run build`, and `git diff --check`. Actual fullscreen entry remains a manual browser check because the Fullscreen API requires a user gesture.
+- After the parent approved the complete UX package and it was merged into `main`, full post-merge verification passed: `npm run typecheck`, `npm run lint`, `npm test` (21 files / 86 tests), `npm run build`, and `git diff --check`.
 - Slideshow dark-menu styling and automatic fade/slide page transition also passed `npm run typecheck`, `npm run lint`, reader navigation tests, `npm run build`, and `git diff --check`.
 
 ## Git / working state
 
-- Branch: `ux/14-experience-improvements`, created from local `main` after commits `1e6a71a` and `b201dc3`.
+- Branch: `main`.
 - Remote: `origin` → `https://github.com/dmtrml/FaryTale.git`.
 - The substantial post-`89d473a` working set has been consolidated: compact book-editor UX, global 16:9 handling, prompt refinements, reusable-character cleanup, routine-pattern inference tests and documentation/state cleanup.
 - The verified consolidation is committed locally on `main`.
 - `AGENTS.md` now requires Git checkpoints for each coherent verified change and requires push when the configured remote is writable; failures must be recorded here rather than left implicit in chat.
 - Push to `origin/main` is currently blocked by GitHub authentication: the active GitHub CLI/credential-manager account is `melkamsar`, which receives HTTP 403 for `dmtrml/FaryTale`; SSH also has no usable GitHub key on this machine. Do not rewrite repository history to work around this. Authenticate an account with push access and retry the normal push.
-- UX branch implementation checkpoints include `e117d0c`, `d4babef`, `860fb80`, `d6675ec`, `5662f89`, `789be13`, and `c74327c`; later review refinements continue as separate Git checkpoints.
+- The accepted UX work was merged from `ux/14-experience-improvements` into `main` by fast-forward through commit `7b85103`.
 
 ## Files that define the project
 
@@ -127,7 +128,6 @@ Read in this order:
 
 ## Exact next action
 
-1. Parent reviews the 14 core items plus reader additions in `docs/UX_REVIEW_14.md` and marks each as keep / change / remove.
-2. Revise or drop rejected UX experiments on this branch; do not merge the whole branch automatically.
-3. After the accepted subset is settled, run the full verification suite again and merge/cherry-pick only the approved result into `main`.
-4. GitHub push remains separately blocked until an account with write access to `dmtrml/FaryTale` is authenticated on this computer.
+1. Use the accepted UX in real book creation/reading and change it only when concrete usage reveals a new problem.
+2. Keep future UX work checkpointed as separate coherent commits.
+3. GitHub push remains separately blocked until an account with write access to `dmtrml/FaryTale` is authenticated on this computer.

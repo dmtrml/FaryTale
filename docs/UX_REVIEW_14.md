@@ -1,8 +1,9 @@
-# UX review — 14 core improvements + reader additions
+# Accepted UX — 14 core improvements + reader additions
 
-Branch: `ux/14-experience-improvements`
+Reviewed on branch: `ux/14-experience-improvements`
+Accepted and merged into `main`: 2026-09-04
 
-These changes are experimental and are **not** accepted product decisions yet. Review each item independently and mark it as keep / change / remove before merging the branch.
+This document preserves the checklist used to review the UX package. The parent reviewed the complete set and approved it for `main` on 2026-09-04.
 
 ## 1. Book work summary
 
@@ -159,6 +160,6 @@ Check:
 - slideshow pauses while the `Вы остановились...` resume choice is visible;
 - slideshow stops automatically on the last page rather than looping back to page 1.
 
-## Review rule
+## Review result
 
-Do not merge this branch wholesale until the parent has reviewed the 14 items. Individual items may be revised or removed before merge.
+All listed items, including fullscreen and slideshow additions plus the later dark-theme/final-page refinements, were accepted and merged into `main`.
