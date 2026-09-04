@@ -240,6 +240,7 @@ Acceptance:
 - [x] Add one high-level materialization service that creates/replaces a canonical draft without one tool call per page.
 - [x] Treat approved page text as immutable input during materialization; do not silently rewrite it.
 - [x] Infer age band, story pattern and safe technical metadata when the package omits them.
+- [x] Persist agent-assigned library classification (meaning, situation, collections/tags and custom parent-defined facets) in approved-story materialization.
 - [x] Reuse existing canonical characters and create complete textual definitions for new characters.
 - [x] Save explicit page-character membership for every page.
 - [x] Generate and persist one final illustration prompt per scene/page using canonical identity, continuity and available reference paths.

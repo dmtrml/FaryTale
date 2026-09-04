@@ -199,15 +199,16 @@ Required behavior:
 
 1. Read the children's-story skill before materializing child-facing content.
 2. Treat the user's approved page text/story as source-of-truth. Do not silently rewrite approved text during saving.
-3. Infer implementation metadata such as canonical id, language, age band, story pattern, goal slug, lifecycle state and page-character membership when safely derivable.
+3. Infer implementation metadata such as canonical id, language, age band, story pattern, goal slug, lifecycle state, page-character membership and book classification when safely derivable.
    For clearly recognizable everyday routines, set the matching story pattern explicitly in the approved package rather than relying on ambiguous wording in automatic inference.
-4. Reuse existing canonical recurring characters. Do not recreate or redesign an existing character such as `miau`.
-5. Create complete textual canonical definitions for genuinely new characters when enough information is available; if no binary reference image exists, save the character anyway and report that reference art is pending.
-6. Create the full page set in one approved-story materialization workflow rather than asking the user to add pages or tick checkboxes manually.
-7. Save one final illustration prompt for **every page/scene**, using canonical identity, continuity and any available character reference paths.
-8. In the current workflow, **do not generate images automatically**. Leave pages `prompt_ready` and let the user generate images in chat and upload them manually.
-9. Validate the resulting canonical book and prompts and report a concise result: book id/title, page count, prompt count, characters, status and unresolved warnings.
-10. Ask the user only for genuinely non-inferable creative decisions or missing source material, not for internal technical fields.
+4. Classify every materialized story for future filtering. Use canonical `characters` for character filtering; do not duplicate character names as ordinary tags. Fill `classification.meanings` and `classification.situations` whenever they are clear from the approved story. Add `collections` only when a collection is explicit or strongly established by project usage. Put useful uncategorized cross-cutting labels in `tags`. Preserve user-defined dimensions under `classification.custom` (for example `место`, `сложность навыка`, or another parameter the parent introduces). Do not ask the parent to manually fill these fields when the values are inferable.
+5. Reuse existing canonical recurring characters. Do not recreate or redesign an existing character such as `miau`.
+6. Create complete textual canonical definitions for genuinely new characters when enough information is available; if no binary reference image exists, save the character anyway and report that reference art is pending.
+7. Create the full page set in one approved-story materialization workflow rather than asking the user to add pages or tick checkboxes manually.
+8. Save one final illustration prompt for **every page/scene**, using canonical identity, continuity and any available character reference paths.
+9. In the current workflow, **do not generate images automatically**. Leave pages `prompt_ready` and let the user generate images in chat and upload them manually.
+10. Validate the resulting canonical book and prompts and report a concise result: book id/title, page count, prompt count, characters, classification, status and unresolved warnings.
+11. Ask the user only for genuinely non-inferable creative decisions or missing source material, not for internal technical fields.
 
 Use the versioned approved-story package/materializer documented in `docs/AGENT_AUTHORING.md` when available. External coding agents should prefer that high-level workflow over hand-editing dozens of canonical files independently.
 

@@ -22,6 +22,7 @@ export type ApprovedStoryMaterializationReport = {
   status: "prompt_ready";
   storyPattern: string;
   ageBand: string;
+  classification: ApprovedStoryPackage["classification"];
   characters: Array<{
     id: string;
     name: string;
@@ -171,6 +172,7 @@ export async function materializeApprovedStory(
       description: story.goal.description,
     },
     characters: bookCharacterIds,
+    classification: story.classification,
     status: "prompt_ready",
     createdAt: today,
     updatedAt: today,
@@ -301,6 +303,12 @@ export async function materializeApprovedStory(
     const warnings = [...resolvedCharacters.values()]
       .filter((character) => character.references.length === 0)
       .map((character) => `Character "${character.id}" has no reference image yet; upload one manually when available.`);
+    if (story.classification.meanings.length === 0) {
+      warnings.push("Book classification has no meanings; the authoring agent should infer at least one when the story meaning is clear.");
+    }
+    if (story.classification.situations.length === 0) {
+      warnings.push("Book classification has no situations; the authoring agent should infer at least one when the story situation is clear.");
+    }
     const relatedDiagnostics = verified.diagnostics.filter(
       (item) => item.itemId === story.id || resolvedCharacters.has(item.itemId ?? ""),
     );
@@ -316,6 +324,7 @@ export async function materializeApprovedStory(
       status: "prompt_ready",
       storyPattern,
       ageBand: ageRule.id,
+      classification: savedBook.classification,
       characters: [...resolvedCharacters.values()].map((character) => ({
         id: character.id,
         name: character.name,

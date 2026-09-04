@@ -40,6 +40,15 @@ Minimum practical shape:
   "goal": {
     "description": "Показать спокойную последовательность чистки зубов."
   },
+  "classification": {
+    "meanings": ["гигиена", "самостоятельность"],
+    "situations": ["чистка зубов"],
+    "collections": ["вечерние ритуалы"],
+    "tags": ["ванная"],
+    "custom": {
+      "место": ["ванная"]
+    }
+  },
   "visualStyle": "Тёплая простая иллюстрация для ребёнка 1–3 лет, крупные формы, минимум деталей.",
   "characters": [
     { "id": "miau" }
@@ -70,8 +79,22 @@ The parent does not need to specify these directly:
 - page numbers and prompt paths;
 - lifecycle/image status — materialization sets the book/pages to `prompt_ready`;
 - page character membership — the agent should fill `characterIds` from the approved scene.
+- classification tags/facets — the agent should infer `meanings` and `situations`, keep characters in the canonical `characters` field, use `collections` only when established, and preserve parent-defined dimensions in `custom`.
 
 Deterministic inference is a fallback, not a reason to discard an obvious creative classification. When the approved story clearly describes a concrete everyday routine (for example potty use, tooth brushing, washing, dressing or hair care), the agent should prefer an explicit `habit-routine` value rather than rely on incidental words such as “feels” or “calm” in the goal description.
+
+### Classification rules
+
+Classification is parent/library metadata and never appears in child-facing story text.
+
+- `characters` remain canonical character IDs and are the source for character filtering. Do not repeat character names in ordinary tags just to enable filtering.
+- `classification.meanings` answers **what the story helps with / teaches**, for example `гигиена`, `самостоятельность`, `безопасность`, `эмоции`.
+- `classification.situations` answers **what concrete situation or skill is shown**, for example `чистка зубов`, `горшок`, `мытьё рук`, `поход к врачу`.
+- `classification.collections` is for established parent-facing groupings such as `перед сном` or `сейчас актуально`. Do not invent personal collections without evidence.
+- `classification.tags` is for useful cross-cutting labels that do not deserve their own dimension.
+- `classification.custom` stores parent-defined dimensions without a schema change, for example `{ "место": ["ванная"], "сложность навыка": ["простая"] }`.
+
+When materializing an approved story, the agent should normally provide at least one meaningful `meanings` value and one `situations` value if those concepts are clear from context. The schema remains backward-compatible with older v1 books/packages by defaulting missing classification to empty lists, but new agent-first materializations should not intentionally leave obvious classification empty.
 
 ## Characters
 
@@ -191,6 +214,7 @@ Successful materialization reports at least:
 - prompt count;
 - `prompt_ready` status;
 - selected age band and story pattern;
+- saved classification;
 - reused/created characters;
 - whether characters have reference images;
 - archived previous book path for an intentional replace;

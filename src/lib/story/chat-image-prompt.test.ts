@@ -25,6 +25,7 @@ const book: Book = {
   age: { minMonths: 18, maxMonths: 24, label: "18–24 мес." },
   goal: { type: "habit", slug: "potty", description: "Горшок" },
   characters: ["emi"],
+  classification: { meanings: [], situations: [], collections: [], tags: [], custom: {} },
   references: [{ id: "environment", path: "refs/room.png", role: "environment" }],
   status: "prompt_ready",
   createdAt: "2026-09-01",

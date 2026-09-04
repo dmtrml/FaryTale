@@ -40,8 +40,9 @@ Read as needed:
 7. Resolve recurring characters from the character library.
 8. Create an illustration prompt for each page.
 9. Add continuity constraints and references.
-10. Save structured story + prompts.
-11. Generate images only when the active workflow/provider calls for it.
+10. Classify the story for the library when materializing it: meaning, concrete situation/skill, established collections/tags and applicable parent-defined custom facets. Keep character filtering tied to canonical character IDs rather than duplicating names as tags.
+11. Save structured story + prompts.
+12. Generate images only when the active workflow/provider calls for it.
 
 ## Story quality rules
 
@@ -82,6 +83,7 @@ Never place important generation state only in chat text.
 
 Write:
 - story structure to the canonical book file;
+- library classification to the canonical book file;
 - illustration prompts to page prompt files;
 - generation metadata to prompt/provenance sections;
 - reusable identity information to character files.

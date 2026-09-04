@@ -212,7 +212,16 @@ describe("writeLibraryManifest", () => {
     );
     await writeJson(
       path.join(root, "books", "first-book", "book.json"),
-      sampleBook("first-book", { pages: [] }),
+      sampleBook("first-book", {
+        pages: [],
+        classification: {
+          meanings: ["hygiene"],
+          situations: ["washing hands"],
+          collections: [],
+          tags: ["routine"],
+          custom: { place: ["bathroom"] },
+        },
+      }),
     );
 
     const firstWrite = await writeLibraryManifest({ contentRoot: root });
@@ -224,6 +233,13 @@ describe("writeLibraryManifest", () => {
       "first-book",
       "second-book",
     ]);
+    expect(firstWrite.manifest.books[0]?.classification).toEqual({
+      meanings: ["hygiene"],
+      situations: ["washing hands"],
+      collections: [],
+      tags: ["routine"],
+      custom: { place: ["bathroom"] },
+    });
     expect(firstRaw).toBe(secondRaw);
   });
 });

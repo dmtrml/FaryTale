@@ -417,6 +417,8 @@ export function createLibraryManifest(books: Book[]): LibraryManifest {
         language: book.language,
         age: book.age,
         goal: book.goal,
+        characters: book.characters,
+        classification: book.classification,
         status: book.status,
         ...(book.cover ? { cover: book.cover } : {}),
         updatedAt: book.updatedAt,

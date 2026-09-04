@@ -18,6 +18,7 @@
 - Reader mode: library, one-page reader, tap/swipe/keyboard navigation, offline/PWA support, no authoring controls.
 - Parent mode: book/character editing, prompt review/copying, image/reference upload, page operations, print/PDF, ZIP export/import, AI Studio.
 - Authoring: versioned `ApprovedStoryPackage` + high-level materializer, exact approved-text preservation, character reuse, per-page prompts, 1–200 pages.
+- Agent-first materialization also persists canonical library classification: meanings, situations, collections, free tags and arbitrary parent-defined custom facets; character filtering continues to use canonical character IDs.
 - AI providers: optional and replaceable. Manual image mode remains the default; agent-first materialization does not generate images.
 - Theme: persistent light/dark UI; print remains light.
 - Illustration format: page images and book environment/props references are horizontal 16:9; covers and character identity references are unconstrained.
@@ -64,6 +65,7 @@ Current local content:
 8. **Recurring characters are reusable assets.** Character narrative/identity definitions must stay book-agnostic; book-specific goals belong to books.
 9. **Routine story classification should be explicit when obvious.** Deterministic inference is only a fallback; ordinary routines such as potty use, tooth brushing, washing, dressing and hair care should use `habit-routine` rather than be misclassified by incidental emotional wording.
 10. **Do not add speculative SaaS infrastructure.** Accounts, payments, public sharing, marketplace, native wrappers and complex analytics remain deferred until a concrete need appears.
+11. **Agent-created books are classified automatically.** When a story is materialized, the agent should infer obvious meanings and situations, keep character filtering on canonical character IDs, use collections only when established, and preserve any parent-defined custom classification dimensions rather than asking for routine manual metadata entry.
 
 ## Safety / privacy boundaries
 
@@ -103,6 +105,7 @@ UX review branch verification on 2026-09-04:
 - Fullscreen/slideshow reader additions passed `npm run typecheck`, `npm run lint`, reader navigation tests, `npm run build`, and `git diff --check`. Actual fullscreen entry remains a manual browser check because the Fullscreen API requires a user gesture.
 - After the parent approved the complete UX package and it was merged into `main`, full post-merge verification passed: `npm run typecheck`, `npm run lint`, `npm test` (21 files / 86 tests), `npm run build`, and `git diff --check`.
 - Slideshow dark-menu styling and automatic fade/slide page transition also passed `npm run typecheck`, `npm run lint`, reader navigation tests, `npm run build`, and `git diff --check`.
+- Agent-assigned library classification was added to canonical Book v1 / `ApprovedStoryPackage` with backward-compatible empty defaults for existing books. Verification passed: `npm run typecheck`, `npm run lint`, targeted classification/materializer/loader/prompt tests (26/26), full `npm test` (21 files / 87 tests), `npm run build`, and `git diff --check`.
 
 ## Git / working state
 
@@ -129,5 +132,6 @@ Read in this order:
 ## Exact next action
 
 1. Use the accepted UX in real book creation/reading and change it only when concrete usage reveals a new problem.
-2. Keep future UX work checkpointed as separate coherent commits.
-3. GitHub push remains separately blocked until an account with write access to `dmtrml/FaryTale` is authenticated on this computer.
+2. When library sorting/filtering is implemented, build it on canonical `characters` plus `classification.meanings`, `classification.situations`, `classification.collections`, `classification.tags` and `classification.custom` rather than inventing a second metadata system.
+3. Keep future UX work checkpointed as separate coherent commits.
+4. GitHub push remains separately blocked until an account with write access to `dmtrml/FaryTale` is authenticated on this computer.

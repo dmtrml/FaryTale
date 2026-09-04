@@ -48,6 +48,13 @@ function basicPackage() {
     title: "Мяу чистит зубки",
     age: { minMonths: 18, maxMonths: 24 },
     goal: { description: "Показать спокойную вечернюю чистку зубов." },
+    classification: {
+      meanings: ["гигиена", "самостоятельность"],
+      situations: ["чистка зубов"],
+      collections: ["вечерние ритуалы"],
+      tags: ["ванная"],
+      custom: { "место": ["ванная"] },
+    },
     visualStyle: "Тёплая простая иллюстрация для малыша, крупные формы.",
     characters: [{ id: "miau" }],
     pages: [
@@ -82,13 +89,27 @@ describe("approved-story materialization", () => {
       pageCount: 2,
       promptCount: 2,
       status: "prompt_ready",
+      classification: {
+        meanings: ["гигиена", "самостоятельность"],
+        situations: ["чистка зубов"],
+      },
       characters: [{ id: "miau", source: "reused", hasReferenceImage: false }],
     });
     expect(report.warnings.join(" ")).toContain("no reference image");
 
     const saved = JSON.parse(
       await fs.readFile(path.join(root, "books", input.id, "book.json"), "utf8"),
-    ) as { pages: Array<{ text: string; prompt: string; imageStatus: string }> };
+    ) as {
+      classification: {
+        meanings: string[];
+        situations: string[];
+        collections: string[];
+        tags: string[];
+        custom: Record<string, string[]>;
+      };
+      pages: Array<{ text: string; prompt: string; imageStatus: string }>;
+    };
+    expect(saved.classification).toEqual(input.classification);
     expect(saved.pages[0]?.text).toBe(input.pages[0]?.text);
     expect(saved.pages[1]?.text).toBe(input.pages[1]?.text);
     expect(saved.pages.every((page) => page.imageStatus === "prompt_ready")).toBe(true);

@@ -145,14 +145,15 @@ Default authoring flow:
 
 1. Parent discusses a story with an agent and approves the final story/scenario.
 2. Parent says, in natural language, to save/materialize the approved story in FaryTale.
-3. The agent must infer technical metadata from the approved story and project rules instead of asking the parent to fill implementation fields such as age band, story pattern, slug, lifecycle status or page-character checkboxes.
+3. The agent must infer technical metadata from the approved story and project rules instead of asking the parent to fill implementation fields such as age band, story pattern, slug, lifecycle status, page-character checkboxes or obvious library classification.
 4. The approved read-aloud text is treated as source-of-truth and is not silently rewritten during materialization.
 5. The agent resolves existing canonical characters and creates complete textual canonical definitions for genuinely new characters.
 6. The agent creates/updates the canonical book, all pages and per-page character membership in one high-level workflow.
-7. The agent creates one final illustration prompt for every scene/page, including canonical identity/continuity constraints and any available reference-image paths.
-8. In the current default workflow, images are **not generated automatically**. Every page is left in `prompt_ready` state for manual image generation/upload by the parent.
-9. The workflow validates the saved book, page count, prompts and character references and returns a concise completion report with warnings such as a missing character reference image.
-10. Manual Parent-mode forms remain available for inspection, recovery and occasional corrections.
+7. The agent assigns library classification for future filtering: canonical characters, story meanings, concrete situations/skills, established collections, useful tags and any parent-defined custom dimensions that apply.
+8. The agent creates one final illustration prompt for every scene/page, including canonical identity/continuity constraints and any available reference-image paths.
+9. In the current default workflow, images are **not generated automatically**. Every page is left in `prompt_ready` state for manual image generation/upload by the parent.
+10. The workflow validates the saved book, page count, prompts, classification and character references and returns a concise completion report with warnings such as a missing character reference image.
+11. Manual Parent-mode forms remain available for inspection, recovery and occasional corrections.
 
 ## 7. File-based content model
 

@@ -45,6 +45,29 @@ export const storyPatternSchema = z.enum([
   "family-memory",
 ]);
 
+const classificationValueSchema = z.string().trim().min(1).max(120);
+const classificationListSchema = z.array(classificationValueSchema).max(40).default([]);
+
+export const bookClassificationSchema = z.object({
+  meanings: classificationListSchema,
+  situations: classificationListSchema,
+  collections: classificationListSchema,
+  tags: classificationListSchema,
+  custom: z
+    .record(z.string().trim().min(1).max(80), classificationListSchema)
+    .default({}),
+});
+
+export function createEmptyBookClassification() {
+  return {
+    meanings: [],
+    situations: [],
+    collections: [],
+    tags: [],
+    custom: {},
+  };
+}
+
 export const bookPageSchema = z.object({
   number: z.number().int().positive(),
   text: z.string(),
@@ -81,6 +104,7 @@ export const bookSchema = z.object({
     description: z.string().min(1),
   }),
   characters: z.array(z.string()).default([]),
+  classification: bookClassificationSchema.default(createEmptyBookClassification),
   references: z.array(visualReferenceSchema).default([]),
   status: bookStatusSchema,
   cover: z.string().optional(),
@@ -125,6 +149,8 @@ export const libraryManifestEntrySchema = bookSchema.pick({
   language: true,
   age: true,
   goal: true,
+  characters: true,
+  classification: true,
   status: true,
   cover: true,
   updatedAt: true,
@@ -143,3 +169,4 @@ export type Character = z.infer<typeof characterSchema>;
 export type LibraryManifest = z.infer<typeof libraryManifestSchema>;
 export type AgeBand = z.infer<typeof ageBandSchema>;
 export type StoryPattern = z.infer<typeof storyPatternSchema>;
+export type BookClassification = z.infer<typeof bookClassificationSchema>;

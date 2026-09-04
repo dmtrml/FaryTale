@@ -1,6 +1,10 @@
 import { z } from "zod";
 import { MAX_BOOK_PAGES } from "../content/authoring";
-import { storyPatternSchema } from "../content/schemas";
+import {
+  bookClassificationSchema,
+  createEmptyBookClassification,
+  storyPatternSchema,
+} from "../content/schemas";
 
 const contentIdSchema = z
   .string()
@@ -49,6 +53,7 @@ export const approvedStoryPackageSchema = z
       type: z.string().trim().min(1).max(80).optional(),
       slug: z.string().trim().min(1).max(120).optional(),
     }),
+    classification: bookClassificationSchema.default(createEmptyBookClassification),
     storyPattern: storyPatternSchema.optional(),
     visualStyle: z.string().trim().min(1).max(1200).optional(),
     characters: z.array(approvedStoryCharacterSchema).max(50).default([]),

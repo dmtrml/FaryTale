@@ -48,6 +48,15 @@ Suggested v1 shape:
     "description": "Показать последовательность: поиграл → помыл лапки → вытер → можно кушать."
   },
   "characters": ["miau"],
+  "classification": {
+    "meanings": ["гигиена", "самостоятельность"],
+    "situations": ["мытьё рук перед едой"],
+    "collections": [],
+    "tags": ["рутина"],
+    "custom": {
+      "место": ["ванная"]
+    }
+  },
   "references": [
     {
       "id": "environment",
@@ -86,6 +95,13 @@ Suggested v1 shape:
 `authoring` is optional parent-side metadata. It records the deterministic
 story-skill interpretation used to prepare a draft. It is not shown in child
 mode and does not make the skill Markdown files a runtime dependency.
+
+`classification` is canonical library/filter metadata. It is safe for older v1
+books to omit it; the schema supplies empty lists. New agent-first books should
+normally populate `meanings` and `situations` when they are clear. `characters`
+remains the source for character filtering, while `collections`, free `tags`,
+and the `custom` map support parent-defined groupings and future filter facets
+without changing the book schema for every new parameter.
 
 `references` is an optional/default-empty list of book-level visual references.
 The current Parent workflow uses one canonical `environment` reference for the
