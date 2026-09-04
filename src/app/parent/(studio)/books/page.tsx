@@ -1,12 +1,12 @@
 import Link from "next/link";
-import Image from "next/image";
 import { connection } from "next/server";
 import { loadLibrary } from "@/lib/content/loader";
-import { bookIllustrationProgress, bookStatusLabel } from "@/lib/books/presentation";
+import { ParentBookLibrary } from "@/components/parent-book-library";
 
 export default async function ParentBooksPage() {
   await connection();
-  const { books, diagnostics } = await loadLibrary();
+  const { books, characters, diagnostics } = await loadLibrary();
+  const characterNames = Object.fromEntries(characters.map((character) => [character.id, character.name]));
 
   return (
     <main className="mx-auto max-w-6xl px-5 py-8 sm:px-8 sm:py-10">
@@ -29,39 +29,7 @@ export default async function ParentBooksPage() {
         </aside>
       ) : null}
 
-      <section className="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {books.map((book) => {
-          const progress = bookIllustrationProgress(book);
-          return (
-            <Link key={book.id} href={`/parent/books/${book.id}`} className="overflow-hidden rounded-3xl border border-[#d8d0c5] bg-[#fffdf8] shadow-sm transition-transform active:scale-[0.99]">
-              {book.cover ? (
-                <div className="relative aspect-[4/3] bg-[#f4f0e9]">
-                  <Image
-                    unoptimized
-                    fill
-                    sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-                    src={`/api/parent/books/${book.id}/asset?path=${encodeURIComponent(book.cover)}`}
-                    alt={`Обложка книги «${book.title}»`}
-                    className="object-cover"
-                  />
-                </div>
-              ) : (
-                <div className="grid aspect-[4/3] place-items-center bg-[#f4f0e9] text-5xl">📕</div>
-              )}
-              <div className="p-5">
-                <div className="flex items-center justify-between gap-3 text-sm text-[#756d64]">
-                  <span>{progress.ready}/{progress.total} иллюстраций</span>
-                  <span className="rounded-full bg-[#eee8dd] px-3 py-1 font-semibold">{bookStatusLabel(book.status)}</span>
-                </div>
-                <h2 className="mt-4 text-2xl font-semibold leading-tight">{book.title}</h2>
-                <p className="mt-4 text-sm font-semibold">
-                  {progress.complete ? "Готово ✓" : `Продолжить · осталось ${progress.remaining} →`}
-                </p>
-              </div>
-            </Link>
-          );
-        })}
-      </section>
+      <ParentBookLibrary books={books} characterNames={characterNames} />
 
       <details className="mt-8 rounded-2xl border border-[#d8d0c5] bg-[#fffdf8] p-4">
         <summary className="cursor-pointer text-sm font-semibold">Технические инструменты</summary>

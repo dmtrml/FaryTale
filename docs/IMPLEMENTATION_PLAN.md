@@ -261,3 +261,20 @@ Acceptance:
 - new textual character definitions are saved automatically, while missing binary reference images are reported as warnings rather than blocking book creation;
 - no image-generation provider call is made by approved-story materialization;
 - an 80-page approved story completes through one high-level workflow and validates successfully.
+
+## Phase 16 — Library classification filters and sorting
+
+- [x] Add deterministic filtering/sorting helpers over canonical book metadata.
+- [x] Filter by canonical character IDs, meanings and situations.
+- [x] Support collections, free tags and arbitrary `classification.custom` facets in Parent mode.
+- [x] Keep the child shelf simpler while still allowing useful character/meaning/situation filtering.
+- [x] Sort by recently updated, newly created or title.
+- [x] Show classification labels on Parent book cards for quick inspection.
+- [x] Add regression tests for facet collection, combined filters and sorting.
+- [x] Backfill classification metadata for the current local private books without changing story text or illustrations.
+
+Acceptance:
+- adding a new classification value to canonical book data makes it appear as a filter without hardcoding that value in the UI;
+- adding a new custom classification dimension makes that dimension appear automatically in Parent filters;
+- filters can be combined and reset without changing canonical content;
+- child mode remains calm and does not expose technical classification structure.

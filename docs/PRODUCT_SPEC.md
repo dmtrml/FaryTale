@@ -70,7 +70,14 @@ Each card may show:
 - age label;
 - optional theme/goal.
 
-Filtering can be added after the basic library works.
+The library supports lightweight filtering and sorting from canonical metadata:
+- character — from canonical book character IDs;
+- meaning;
+- situation / concrete skill;
+- collections and free tags;
+- arbitrary parent-defined custom facets when they exist in book classification.
+
+Parent mode exposes the complete filter set plus sorting by recent update, creation date or title. Child mode keeps the controls intentionally simpler: character, meaning, situation and basic order only when those choices are useful for the current shelf.
 
 ### Reader
 

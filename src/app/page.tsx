@@ -1,8 +1,8 @@
 import { Suspense } from "react";
 import { connection } from "next/server";
 import Link from "next/link";
-import Image from "next/image";
 import { loadLibrary } from "@/lib/content/loader";
+import { ChildLibraryShelf } from "@/components/child-library-shelf";
 
 function LibraryLoading() {
   return (
@@ -19,8 +19,9 @@ function LibraryLoading() {
 
 async function LibraryShelf() {
   await connection();
-  const { books } = await loadLibrary();
+  const { books, characters } = await loadLibrary();
   const visibleBooks = books.filter((book) => book.status === "ready");
+  const characterNames = Object.fromEntries(characters.map((character) => [character.id, character.name]));
 
   if (visibleBooks.length === 0) {
     return (
@@ -36,49 +37,7 @@ async function LibraryShelf() {
     );
   }
 
-  return (
-    <section className="grid gap-5 sm:grid-cols-2" aria-label="Книги">
-      {visibleBooks.map((book, index) => (
-        <Link
-          key={book.id}
-          href={`/books/${book.id}`}
-          className="group overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] shadow-[0_18px_60px_rgba(77,62,43,0.08)] transition-transform focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#6f675d] active:scale-[0.99]"
-          aria-label={`Открыть книгу «${book.title}»`}
-        >
-          {book.cover ? (
-            <div className="relative aspect-[4/3] overflow-hidden bg-[#f4f0e9]">
-              <Image
-                unoptimized
-                fill
-                sizes="(min-width: 640px) 50vw, 100vw"
-                src={`/api/content/books/${book.id}/asset?path=${encodeURIComponent(book.cover)}`}
-                alt={`Обложка книги «${book.title}»`}
-                className="object-cover"
-              />
-            </div>
-          ) : (
-            <div
-              className={`flex min-h-56 items-end p-7 ${
-                index % 2 === 0
-                  ? "bg-[linear-gradient(145deg,#dcebdd,#f7e8c8)]"
-                  : "bg-[linear-gradient(145deg,#dbe7f3,#f4dfd3)]"
-              }`}
-            >
-              <div className="grid size-20 place-items-center rounded-[1.6rem] bg-white/75 text-4xl shadow-sm backdrop-blur-sm">
-                {index % 2 === 0 ? "🐾" : "🧸"}
-              </div>
-            </div>
-          )}
-
-          <div className="p-6 sm:p-7">
-            <h2 className="text-2xl font-semibold leading-tight tracking-tight sm:text-3xl">
-              {book.title}
-            </h2>
-          </div>
-        </Link>
-      ))}
-    </section>
-  );
+  return <ChildLibraryShelf books={visibleBooks} characterNames={characterNames} />;
 }
 
 export default function Home() {

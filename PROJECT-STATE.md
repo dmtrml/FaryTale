@@ -6,7 +6,7 @@
 
 ## Current status
 
-**Current phase:** local/private MVP complete — reviewed UX improvements accepted and merged to `main`.
+**Current phase:** local/private MVP complete — canonical library classification plus filtering/sorting implemented.
 
 **Overall state:** FaryTale is a working reader-first family storybook app with parent-only authoring. The primary creation workflow is agent-first: an approved story can be materialized into canonical book/character files plus one prompt per page without manual technical form entry. Existing books remain readable without AI, credentials, a database or internet access.
 
@@ -19,6 +19,7 @@
 - Parent mode: book/character editing, prompt review/copying, image/reference upload, page operations, print/PDF, ZIP export/import, AI Studio.
 - Authoring: versioned `ApprovedStoryPackage` + high-level materializer, exact approved-text preservation, character reuse, per-page prompts, 1–200 pages.
 - Agent-first materialization also persists canonical library classification: meanings, situations, collections, free tags and arbitrary parent-defined custom facets; character filtering continues to use canonical character IDs.
+- Library browsing uses that canonical classification directly: Parent mode has full filters including dynamic custom facets, while the child shelf exposes only compact character/meaning/situation filters plus simple ordering.
 - AI providers: optional and replaceable. Manual image mode remains the default; agent-first materialization does not generate images.
 - Theme: persistent light/dark UI; print remains light.
 - Illustration format: page images and book environment/props references are horizontal 16:9; covers and character identity references are unconstrained.
@@ -41,6 +42,8 @@ Current local content:
 - A whole-book manual image prompt requests separate 16:9 images per page; sensitive workflows may opt into page-by-page-only prompt mode.
 - Parent uploads validate actual page/environment aspect ratio before accepting assets.
 - Network image generation, when explicitly configured, requests a 16:9 output and remains per-page.
+- Parent library filters can be combined across character, meaning, situation, collection, tag and any custom classification dimension. Custom dimensions appear automatically from canonical data rather than requiring UI code changes.
+- Child library keeps only character, meaning and situation filters when there are multiple useful choices; both libraries can sort by recent update, creation date or title.
 
 ### Accepted UX improvements — 2026-09-04
 
@@ -66,6 +69,7 @@ Current local content:
 9. **Routine story classification should be explicit when obvious.** Deterministic inference is only a fallback; ordinary routines such as potty use, tooth brushing, washing, dressing and hair care should use `habit-routine` rather than be misclassified by incidental emotional wording.
 10. **Do not add speculative SaaS infrastructure.** Accounts, payments, public sharing, marketplace, native wrappers and complex analytics remain deferred until a concrete need appears.
 11. **Agent-created books are classified automatically.** When a story is materialized, the agent should infer obvious meanings and situations, keep character filtering on canonical character IDs, use collections only when established, and preserve any parent-defined custom classification dimensions rather than asking for routine manual metadata entry.
+12. **Library filters are schema-driven.** Filter options must be derived from canonical `characters` / `classification`, including dynamic custom facets, rather than maintained as a separate hardcoded taxonomy in UI code.
 
 ## Safety / privacy boundaries
 
@@ -106,6 +110,7 @@ UX review branch verification on 2026-09-04:
 - After the parent approved the complete UX package and it was merged into `main`, full post-merge verification passed: `npm run typecheck`, `npm run lint`, `npm test` (21 files / 86 tests), `npm run build`, and `git diff --check`.
 - Slideshow dark-menu styling and automatic fade/slide page transition also passed `npm run typecheck`, `npm run lint`, reader navigation tests, `npm run build`, and `git diff --check`.
 - Agent-assigned library classification was added to canonical Book v1 / `ApprovedStoryPackage` with backward-compatible empty defaults for existing books. Verification passed: `npm run typecheck`, `npm run lint`, targeted classification/materializer/loader/prompt tests (26/26), full `npm test` (21 files / 87 tests), `npm run build`, and `git diff --check`.
+- Library filtering/sorting now consumes canonical classification directly. Parent mode supports character, meaning, situation, collection, tag and dynamic custom facets; child mode keeps compact character/meaning/situation filters. Verification passed: `npm run typecheck`, `npm run lint`, full `npm test` (22 files / 90 tests), `npm run build`, and `git diff --check`. The three current ignored private books were backfilled with classification metadata only; their approved story text and illustrations were not changed.
 
 ## Git / working state
 
@@ -131,7 +136,7 @@ Read in this order:
 
 ## Exact next action
 
-1. Use the accepted UX in real book creation/reading and change it only when concrete usage reveals a new problem.
-2. When library sorting/filtering is implemented, build it on canonical `characters` plus `classification.meanings`, `classification.situations`, `classification.collections`, `classification.tags` and `classification.custom` rather than inventing a second metadata system.
+1. Review the new library filters/sorting in real use and adjust only concrete UX issues that appear.
+2. Keep new user-defined classification dimensions in `classification.custom`; Parent filters will discover them automatically.
 3. Keep future UX work checkpointed as separate coherent commits.
 4. GitHub push remains separately blocked until an account with write access to `dmtrml/FaryTale` is authenticated on this computer.
