@@ -44,6 +44,7 @@ Current local content:
 - Network image generation, when explicitly configured, requests a 16:9 output and remains per-page.
 - Parent library filters can be combined across character, meaning, situation, collection, tag and any custom classification dimension. Custom dimensions appear automatically from canonical data rather than requiring UI code changes.
 - Child library keeps only character, meaning and situation filters when there are multiple useful choices; both libraries can sort by recent update, creation date or title.
+- Child shelf is intentionally compact and library-like: the large `Наши сказки` heading/subtitle are removed, the shelf can use up to a 1600px-wide content area, and book cards flow through an auto-fill grid with a ~220px minimum width instead of being locked to two large columns.
 - Reader resume treats the final page as completed reading: reaching the last page clears saved resume progress, so reopening the book starts from page 1 without the “Вы остановились…” prompt. Only unfinished interior pages are resumable.
 
 ### Accepted UX improvements — 2026-09-04
@@ -139,7 +140,7 @@ Read in this order:
 
 ## Exact next action
 
-1. Review the new library filters/sorting in real use and adjust only concrete UX issues that appear.
+1. Review the denser child-shelf layout in real use across desktop/tablet widths and adjust only concrete sizing issues that appear.
 2. Keep new user-defined classification dimensions in `classification.custom`; Parent filters will discover them automatically.
 3. Keep future UX work checkpointed as separate coherent commits.
 4. GitHub push remains separately blocked until an account with write access to `dmtrml/FaryTale` is authenticated on this computer.

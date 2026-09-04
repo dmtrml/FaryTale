@@ -6,11 +6,14 @@ import { ChildLibraryShelf } from "@/components/child-library-shelf";
 
 function LibraryLoading() {
   return (
-    <div className="grid gap-5 sm:grid-cols-2" aria-label="Загрузка библиотеки">
-      {[0, 1].map((item) => (
+    <div
+      className="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-4"
+      aria-label="Загрузка библиотеки"
+    >
+      {[0, 1, 2, 3].map((item) => (
         <div
           key={item}
-          className="min-h-72 animate-pulse rounded-[2rem] border border-[var(--border)] bg-[var(--surface)]"
+          className="aspect-[4/3] animate-pulse rounded-[1.4rem] border border-[var(--border)] bg-[var(--surface)]"
         />
       ))}
     </div>
@@ -42,12 +45,12 @@ async function LibraryShelf() {
 
 export default function Home() {
   return (
-    <main className="min-h-screen px-5 py-8 sm:px-8 sm:py-12">
-      <div className="mx-auto max-w-5xl">
-        <header className="mb-8 sm:mb-10">
-          <div className="mb-5 flex items-center justify-between gap-4">
+    <main className="min-h-screen px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
+      <div className="mx-auto max-w-[1600px]">
+        <header className="mb-5">
+          <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="grid size-12 place-items-center rounded-2xl bg-[#eadbbf] text-2xl shadow-sm">
+              <div className="grid size-10 place-items-center rounded-xl bg-[#eadbbf] text-xl shadow-sm">
                 ✨
               </div>
               <span className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
@@ -61,12 +64,6 @@ export default function Home() {
               Для родителей
             </Link>
           </div>
-          <h1 className="max-w-3xl text-4xl font-semibold tracking-tight sm:text-5xl">
-            Наши сказки
-          </h1>
-          <p className="mt-3 max-w-2xl text-lg leading-8 text-[var(--muted)]">
-            Выберите знакомую историю и устройтесь поудобнее.
-          </p>
         </header>
 
         <Suspense fallback={<LibraryLoading />}>

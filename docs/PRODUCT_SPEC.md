@@ -64,6 +64,8 @@ Do not prioritize:
 
 A grid/list of covers.
 
+The child shelf should behave like a compact visual library rather than a landing page: use the available screen width, keep introductory copy minimal, and fit multiple book cards per row on tablet/desktop while preserving touch-friendly targets.
+
 Each card may show:
 - cover;
 - title;

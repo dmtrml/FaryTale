@@ -42,7 +42,7 @@ export function ChildLibraryShelf({ books, characterNames }: ChildLibraryShelfPr
     <div>
       {showFilters || books.length > 1 ? (
         <section
-          className="mb-5 flex flex-wrap items-center gap-2 rounded-[1.5rem] border border-[var(--border)] bg-[var(--surface)] p-3 shadow-sm"
+          className="mb-4 flex flex-wrap items-center gap-2 rounded-[1.25rem] border border-[var(--border)] bg-[var(--surface)] p-2.5 shadow-sm"
           aria-label="Подбор сказок"
         >
           {facets.characters.length > 1 ? (
@@ -130,12 +130,15 @@ export function ChildLibraryShelf({ books, characterNames }: ChildLibraryShelfPr
           </button>
         </section>
       ) : (
-        <section className="grid gap-5 sm:grid-cols-2" aria-label="Книги">
+        <section
+          className="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-4"
+          aria-label="Книги"
+        >
           {visibleBooks.map((book, index) => (
             <Link
               key={book.id}
               href={`/books/${book.id}`}
-              className="group overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] shadow-[0_18px_60px_rgba(77,62,43,0.08)] transition-transform focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#6f675d] active:scale-[0.99]"
+              className="group overflow-hidden rounded-[1.4rem] border border-[var(--border)] bg-[var(--surface)] shadow-[0_12px_36px_rgba(77,62,43,0.07)] transition-transform focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#6f675d] active:scale-[0.99]"
               aria-label={`Открыть книгу «${book.title}»`}
             >
               {book.cover ? (
@@ -143,7 +146,7 @@ export function ChildLibraryShelf({ books, characterNames }: ChildLibraryShelfPr
                   <Image
                     unoptimized
                     fill
-                    sizes="(min-width: 640px) 50vw, 100vw"
+                    sizes="(min-width: 1536px) 20vw, (min-width: 1024px) 25vw, (min-width: 640px) 33vw, 100vw"
                     src={`/api/content/books/${book.id}/asset?path=${encodeURIComponent(book.cover)}`}
                     alt={`Обложка книги «${book.title}»`}
                     className="object-cover"
@@ -151,20 +154,20 @@ export function ChildLibraryShelf({ books, characterNames }: ChildLibraryShelfPr
                 </div>
               ) : (
                 <div
-                  className={`flex min-h-56 items-end p-7 ${
+                  className={`flex aspect-[4/3] items-end p-5 ${
                     index % 2 === 0
                       ? "bg-[linear-gradient(145deg,#dcebdd,#f7e8c8)]"
                       : "bg-[linear-gradient(145deg,#dbe7f3,#f4dfd3)]"
                   }`}
                 >
-                  <div className="grid size-20 place-items-center rounded-[1.6rem] bg-white/75 text-4xl shadow-sm backdrop-blur-sm">
+                  <div className="grid size-14 place-items-center rounded-[1.1rem] bg-white/75 text-3xl shadow-sm backdrop-blur-sm">
                     {index % 2 === 0 ? "🐾" : "🧸"}
                   </div>
                 </div>
               )}
 
-              <div className="p-6 sm:p-7">
-                <h2 className="text-2xl font-semibold leading-tight tracking-tight sm:text-3xl">
+              <div className="p-4">
+                <h2 className="text-lg font-semibold leading-snug tracking-tight sm:text-xl">
                   {book.title}
                 </h2>
               </div>
