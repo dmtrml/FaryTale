@@ -259,9 +259,19 @@ These can be added later without blocking the core product.
 
 Never end a development session with repository state documented only in chat.
 
+### Git checkpoint rule
+
+- After finishing a coherent logical change and passing the relevant verification, create a Git commit with a concise message that describes that change.
+- Do not accumulate multiple unrelated completed changes into one large uncommitted working tree when they could be safely checkpointed separately.
+- If a Git remote is configured and the current credentials have permission, push the verified commit before ending the session.
+- Never commit secrets, credentials, ignored private family content, or other files intentionally excluded by `.gitignore`.
+- If commit or push cannot be completed, do not hide the failure: record the exact reason and the current Git state in `PROJECT-STATE.md`, and leave the normal next command needed to finish it.
+
 Before stopping:
 - make the working tree internally coherent;
 - run the strongest relevant verification available;
+- commit the completed logical change;
+- push it when a configured remote is writable with the current credentials;
 - update `PROJECT-STATE.md`;
 - update implementation-plan checkboxes that are genuinely complete;
 - leave the exact next executable step in `PROJECT-STATE.md`.
