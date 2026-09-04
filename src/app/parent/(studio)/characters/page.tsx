@@ -20,12 +20,12 @@ export default async function ParentCharactersPage() {
 
   return (
     <main className="mx-auto max-w-6xl px-5 py-8 sm:px-8 sm:py-10">
-      <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#786f65]">Канонические персонажи</p>
+      <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#786f65]">Герои книг</p>
       <h1 className="mt-2 text-3xl font-semibold sm:text-4xl">Персонажи</h1>
       <p className="mt-3 max-w-3xl leading-7 text-[#70685e]">Главное здесь — готовый промпт и визуальный референс персонажа. Технические поля сохранены для агента и автоматической сборки промптов, но спрятаны в расширенные настройки.</p>
 
       <details className="mt-7 rounded-3xl border border-[#cfc5b8] bg-[#f8f4ed] p-6 sm:p-7">
-        <summary className="cursor-pointer text-xl font-semibold">+ Создать персонажа</summary>
+        <summary className="cursor-pointer text-xl font-semibold">+ Создать персонажа вручную</summary>
         <form action={createCharacterAction} className="mt-5 grid gap-4 sm:grid-cols-2">
           <label><span className="text-sm font-semibold">ID</span><input name="id" required pattern="[a-z0-9]+(?:-[a-z0-9]+)*" placeholder="miau" className="mt-2 min-h-12 w-full rounded-xl border border-[#d8d0c5] bg-white px-4" /></label>
           <label><span className="text-sm font-semibold">Имя</span><input name="name" required maxLength={160} className="mt-2 min-h-12 w-full rounded-xl border border-[#d8d0c5] bg-white px-4" /></label>
@@ -151,7 +151,7 @@ export default async function ParentCharactersPage() {
 
                 <form action={addReference} className="mt-5 rounded-2xl border border-[#d8d0c5] bg-white p-4">
                   <div className="grid gap-3 sm:grid-cols-2">
-                    <label><span className="text-sm font-semibold">Изображение</span><input name="image" type="file" required accept="image/png,image/jpeg,image/webp,image/avif,image/gif" className="mt-2 block max-w-full text-sm" /></label>
+                    <ImageUploadField label="Дополнительный референс" aspect="square" />
                     <label><span className="text-sm font-semibold">Роль</span><input name="role" defaultValue="reference" maxLength={80} className="mt-2 min-h-11 w-full rounded-xl border border-[#d8d0c5] px-3" /></label>
                   </div>
                   <label className="mt-3 flex items-center gap-2 text-sm"><input type="checkbox" name="makeIdentity" value="yes" /> Сразу сделать главным identity-reference</label>

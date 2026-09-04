@@ -63,6 +63,22 @@ describe("Studio local orchestrator", () => {
     expect(result.tool).toBe("unrecognized");
   });
 
+  it("accepts simple parent-facing natural-language list requests without a text provider", async () => {
+    const root = await fixture();
+    const result = await runStudioMessage("Покажи мои книги", { contentRoot: root });
+    expect(result.tool).toBe("list_books");
+  });
+
+  it("gives a friendly setup explanation for creative requests when no text provider is configured", async () => {
+    const root = await fixture();
+    const result = await runStudioMessage("Хочу создать новую сказку про уборку игрушек", {
+      contentRoot: root,
+    });
+    expect(result.tool).toBe("conversation_unavailable");
+    expect(result.text).toContain("текстовая модель");
+    expect(result.text).toContain("ChatGPT");
+  });
+
   it("exposes long-book and character authoring through explicit Studio tools", async () => {
     const root = await fixture();
     const options = { contentRoot: root, today: "2026-08-29" };

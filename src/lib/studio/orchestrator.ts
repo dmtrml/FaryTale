@@ -57,8 +57,16 @@ function help(): StudioToolResult {
 export async function runStudioMessage(message: string, options: OrchestratorOptions = {}) {
   const input = message.trim();
   if (!input || input === "/help" || /^помощь$/i.test(input)) return help();
-  if (input === "/books" || /^книги$/i.test(input)) return listBooksTool(options);
-  if (input === "/characters" || /^персонажи$/i.test(input)) return listCharactersTool(options);
+  if (input === "/books" || /^книги$/i.test(input) || /^(покажи|открой|список).*(книг)/i.test(input)) {
+    return listBooksTool(options);
+  }
+  if (
+    input === "/characters" ||
+    /^персонажи$/i.test(input) ||
+    /^(покажи|открой|список).*(персонаж|геро)/i.test(input)
+  ) {
+    return listCharactersTool(options);
+  }
 
   const book = input.match(/^\/book\s+([a-z0-9-]+)$/i);
   if (book) return getBookTool({ bookId: book[1] }, options);
@@ -188,8 +196,19 @@ export async function runStudioMessage(message: string, options: OrchestratorOpt
     return runStudioMessage(command, { ...options, textProvider: null });
   }
 
+  if (/(сказк|истори|книг)/i.test(input)) {
+    return {
+      tool: "conversation_unavailable",
+      text: [
+        "Идею понял. Для полноценного свободного разговора и творческого создания истории встроенному помощнику нужна настроенная текстовая модель.",
+        "Пока самый удобный путь — обсудить и утвердить историю с внешним агентом ChatGPT, а затем попросить его сохранить утверждённую книгу в FaryTale.",
+        "Без текстовой модели здесь всё равно работают быстрые действия: показать книги и персонажей, а также технические команды из /help.",
+      ].join("\n\n"),
+    } satisfies StudioToolResult;
+  }
+
   return {
     tool: "unrecognized",
-    text: `Локальный интерпретатор не понял команду. Используйте /help. При настроенном text provider свободный текст переводится только в разрешённые project tools.`,
+    text: "Не удалось однозначно понять запрос без настроенной текстовой модели. Попробуйте «покажи мои книги» или «покажи персонажей». Технические команды доступны через /help.",
   } satisfies StudioToolResult;
 }
