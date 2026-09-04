@@ -106,6 +106,7 @@ Open the child library `/`.
 Check:
 - each book card primarily shows the cover and title;
 - age, page count and parent-facing goal description are no longer shown on the visible card.
+- `Для родителей` is available in the top header rather than below the whole shelf.
 
 ## 12. Long books do not render hundreds of dots
 
@@ -123,6 +124,7 @@ Check:
 - a banner says where you stopped;
 - `Продолжить` returns to that page;
 - `Начать сначала` resets progress.
+- in dark mode, both the resume banner and the page counter use dark theme surfaces/text instead of pale translucent backgrounds.
 
 ## 14. A book has a clear ending
 

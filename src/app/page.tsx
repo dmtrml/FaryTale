@@ -86,13 +86,21 @@ export default function Home() {
     <main className="min-h-screen px-5 py-8 sm:px-8 sm:py-12">
       <div className="mx-auto max-w-5xl">
         <header className="mb-8 sm:mb-10">
-          <div className="mb-5 flex items-center gap-3">
-            <div className="grid size-12 place-items-center rounded-2xl bg-[#eadbbf] text-2xl shadow-sm">
-              ✨
+          <div className="mb-5 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="grid size-12 place-items-center rounded-2xl bg-[#eadbbf] text-2xl shadow-sm">
+                ✨
+              </div>
+              <span className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
+                FaryTale
+              </span>
             </div>
-            <span className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
-              FaryTale
-            </span>
+            <Link
+              href="/parent"
+              className="inline-flex min-h-11 shrink-0 items-center rounded-full border border-[var(--border)] bg-[var(--surface)] px-4 text-sm font-semibold text-[var(--muted)] shadow-sm transition-colors hover:text-[var(--foreground)]"
+            >
+              Для родителей
+            </Link>
           </div>
           <h1 className="max-w-3xl text-4xl font-semibold tracking-tight sm:text-5xl">
             Наши сказки
@@ -105,15 +113,6 @@ export default function Home() {
         <Suspense fallback={<LibraryLoading />}>
           <LibraryShelf />
         </Suspense>
-
-        <footer className="mt-10 text-center">
-          <Link
-            href="/parent"
-            className="inline-flex min-h-11 items-center rounded-full px-4 text-sm font-semibold text-[#756d64] underline-offset-4 hover:underline"
-          >
-            Для родителей
-          </Link>
-        </footer>
       </div>
     </main>
   );

@@ -99,7 +99,7 @@ export function BookReader({ book }: { book: Book }) {
             ← Полка
           </Link>
           <div
-            className="rounded-full bg-white/75 px-4 py-2 text-sm font-semibold text-[#70685e] shadow-sm"
+            className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-4 py-2 text-sm font-semibold text-[var(--muted)] shadow-sm"
             aria-live="polite"
           >
             {pageIndex + 1} / {pageCount}
@@ -107,8 +107,8 @@ export function BookReader({ book }: { book: Book }) {
         </header>
 
         {resumePageIndex !== null ? (
-          <section className="mb-3 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#d8d0c5] bg-white/80 px-4 py-3 text-sm shadow-sm">
-            <p className="font-medium text-[#514940]">
+          <section className="mb-3 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-sm shadow-sm">
+            <p className="font-medium text-[var(--foreground)]">
               Вы остановились на странице {resumePageIndex + 1}.
             </p>
             <div className="flex flex-wrap gap-2">
@@ -125,7 +125,7 @@ export function BookReader({ book }: { book: Book }) {
               <button
                 type="button"
                 onClick={restartBook}
-                className="rounded-full border border-[#d8d0c5] bg-white px-4 py-2 font-semibold"
+                className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-4 py-2 font-semibold text-[var(--foreground)]"
               >
                 Начать сначала
               </button>

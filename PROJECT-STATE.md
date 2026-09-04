@@ -47,6 +47,7 @@ Current local content:
 - The branch implements the 14 proposed UX experiments documented in `docs/UX_REVIEW_14.md`.
 - Major experimental changes include: parent book progress/continue CTA, previous/next page workflow, page filters, ordered prompt→generate→upload flow, drag/drop previews, visual Parent book cards, agent-first new-book entry, conversational Helper presentation, simplified character prompt presentation, simplified child shelf, long-book reader progress, local reading resume, and a dedicated end-of-book state.
 - The end-of-book state reuses the normal navigation row (`Ещё раз · Конец ❤️ · На полку`) instead of adding a taller extra panel, preventing the final-page illustration from shrinking.
+- During review, the child-shelf `Для родителей` entry was moved from the page footer into the top header. Reader page progress and the resume-reading banner now use theme tokens instead of translucent light-only backgrounds, so both render correctly in dark mode.
 - The built-in Helper accepts simple natural-language list requests locally. Creative free-text authoring still requires a configured text provider; when absent, the UI now explains that limitation and points to the external agent-first workflow instead of returning a technical error.
 - Full review instructions are in `docs/UX_REVIEW_14.md`.
 
