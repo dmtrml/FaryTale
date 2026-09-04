@@ -27,6 +27,12 @@ const roots: string[] = [];
 const png = new Uint8Array([
   137, 80, 78, 71, 13, 10, 26, 10,
   0, 0, 0, 13, 73, 72, 68, 82,
+  0, 0, 0, 16, 0, 0, 0, 9,
+]);
+
+const portraitPng = new Uint8Array([
+  137, 80, 78, 71, 13, 10, 26, 10,
+  0, 0, 0, 13, 73, 72, 68, 82,
   0, 0, 0, 2, 0, 0, 0, 3,
 ]);
 
@@ -204,13 +210,13 @@ describe("complete book authoring", () => {
     const result = await replaceBookCover({
       contentRoot: root,
       bookId: "sample-book",
-      bytes: png,
+      bytes: portraitPng,
       mimeType: "image/png",
       today: "2026-08-29",
     });
     expect(result.book.cover).toMatch(/^covers\//);
     expect(result.inspection).toMatchObject({ width: 2, height: 3, mimeType: "image/png" });
-    expect(await fs.readFile(path.join(root, "books", "sample-book", ...result.relativePath.split("/")))).toEqual(Buffer.from(png));
+    expect(await fs.readFile(path.join(root, "books", "sample-book", ...result.relativePath.split("/")))).toEqual(Buffer.from(portraitPng));
   });
 
   it("stores exactly one canonical environment reference for the book", async () => {
@@ -236,6 +242,18 @@ describe("complete book authoring", () => {
     expect(second.book.references).toHaveLength(1);
     expect(second.relativePath).not.toBe(first.relativePath);
     await expect(fs.access(path.join(root, "books", "sample-book", ...first.relativePath.split("/")))).rejects.toThrow();
+  });
+
+  it("rejects a non-16:9 environment reference", async () => {
+    const root = await makeRoot();
+    await expect(
+      replaceBookEnvironmentReference({
+        contentRoot: root,
+        bookId: "sample-book",
+        bytes: portraitPng,
+        mimeType: "image/png",
+      }),
+    ).rejects.toThrow("16:9");
   });
 });
 

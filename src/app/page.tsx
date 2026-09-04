@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { connection } from "next/server";
 import Link from "next/link";
+import Image from "next/image";
 import { loadLibrary } from "@/lib/content/loader";
 
 function LibraryLoading() {
@@ -44,17 +45,30 @@ async function LibraryShelf() {
           className="group overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] shadow-[0_18px_60px_rgba(77,62,43,0.08)] transition-transform focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#6f675d] active:scale-[0.99]"
           aria-label={`Открыть книгу «${book.title}»`}
         >
-          <div
-            className={`flex min-h-56 items-end p-7 ${
-              index % 2 === 0
-                ? "bg-[linear-gradient(145deg,#dcebdd,#f7e8c8)]"
-                : "bg-[linear-gradient(145deg,#dbe7f3,#f4dfd3)]"
-            }`}
-          >
-            <div className="grid size-20 place-items-center rounded-[1.6rem] bg-white/75 text-4xl shadow-sm backdrop-blur-sm">
-              {index % 2 === 0 ? "🐾" : "🧸"}
+          {book.cover ? (
+            <div className="relative aspect-[4/3] overflow-hidden bg-[#f4f0e9]">
+              <Image
+                unoptimized
+                fill
+                sizes="(min-width: 640px) 50vw, 100vw"
+                src={`/api/content/books/${book.id}/asset?path=${encodeURIComponent(book.cover)}`}
+                alt={`Обложка книги «${book.title}»`}
+                className="object-cover"
+              />
             </div>
-          </div>
+          ) : (
+            <div
+              className={`flex min-h-56 items-end p-7 ${
+                index % 2 === 0
+                  ? "bg-[linear-gradient(145deg,#dcebdd,#f7e8c8)]"
+                  : "bg-[linear-gradient(145deg,#dbe7f3,#f4dfd3)]"
+              }`}
+            >
+              <div className="grid size-20 place-items-center rounded-[1.6rem] bg-white/75 text-4xl shadow-sm backdrop-blur-sm">
+                {index % 2 === 0 ? "🐾" : "🧸"}
+              </div>
+            </div>
+          )}
 
           <div className="p-7">
             <div className="flex flex-wrap gap-2 text-sm font-medium text-[var(--muted)]">

@@ -79,6 +79,7 @@ Parent mode also provides browser Print/Save-as-PDF and a self-contained ZIP exp
 
 For manual illustration generation, a book can keep one canonical environment/props
 reference in addition to reusable character identity references. Parent mode exposes
+one dedicated prompt for generating that environment/props reference,
 one flattened ready-to-copy prompt for the selected page and one whole-book ChatGPT
 Image prompt that asks for separate images for every page; structured Markdown prompt
 sections remain available only as technical/provenance details.

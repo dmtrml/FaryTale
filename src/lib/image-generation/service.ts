@@ -178,7 +178,7 @@ export async function generateBookPageImage(options: GeneratePageOptions) {
     const result = await options.provider.generate({
       prompt,
       references,
-      size: { width: 1024, height: 1024 },
+      size: { width: 1920, height: 1080 },
     });
 
     if (result.kind === "deferred") {

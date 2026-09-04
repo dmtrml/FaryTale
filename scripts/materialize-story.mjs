@@ -3,7 +3,7 @@ import process from "node:process";
 
 function usage() {
   console.error(
-    "Usage: node scripts/materialize-story.mjs <approved-story.json> [--base-url http://127.0.0.1:3000]",
+    "Usage: node scripts/materialize-story.mjs <approved-story.json> [--base-url http://localhost:3000]",
   );
 }
 
@@ -17,7 +17,7 @@ const baseUrlIndex = args.indexOf("--base-url");
 const baseUrl =
   (baseUrlIndex >= 0 ? args[baseUrlIndex + 1] : undefined) ??
   process.env.FARYTALE_AGENT_BASE_URL ??
-  "http://127.0.0.1:3000";
+  "http://localhost:3000";
 
 const payload = await readFile(inputPath, "utf8");
 let parsed;

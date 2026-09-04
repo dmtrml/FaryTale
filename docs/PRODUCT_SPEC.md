@@ -106,12 +106,13 @@ authentication/authorization before treating the parent routes as secure.
 
 Contains:
 - book metadata;
-- page list;
+- compact page list where every page is visible as a lightweight row with thumbnail, page number, short text and status; detailed editing opens for one selected page only;
 - edit text;
 - add, duplicate, delete and reorder pages;
 - support long books (at least 100 pages) without artificial short-story limits;
 - inspect/copy prompt;
 - store one canonical book-level environment/props visual reference for manual image consistency;
+- copy one ready-to-use prompt for generating that canonical environment/props reference before uploading it;
 - copy a flattened ready-to-use prompt for the selected page while keeping technical prompt sections as provenance;
 - copy one whole-book manual-generation prompt that asks for separate page images and describes the attached canonical references once;
 - replace image;
@@ -119,6 +120,10 @@ Contains:
 - character library with create/edit/delete and reference-image management;
 - AI Studio;
 - export.
+
+The Parent book editor should keep secondary/technical controls collapsed by default. Book metadata/cover, illustration references and rare prompt-rebuild tools must not force the parent to scroll through long technical forms during ordinary page/image work.
+
+All canonical **page illustrations** and the book-level **environment/props reference** use a horizontal **16:9** aspect ratio. Manual ChatGPT Image prompts must state this explicitly, and Parent-mode uploads for those assets must reject other aspect ratios. Book covers and character identity references are separate asset types and are not constrained to 16:9.
 
 For the MVP, canonical book and character content must be maintainable from Parent mode without hand-editing JSON files. A parent must be able to take an existing long book (for example, an 80-page book), add or remove pages, change metadata, reorder pages, maintain recurring characters and their visual references, and move the book through its lifecycle from draft to ready.
 

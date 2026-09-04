@@ -13,7 +13,7 @@ function generatedPng() {
   return new Uint8Array([
     137, 80, 78, 71, 13, 10, 26, 10,
     0, 0, 0, 13, 73, 72, 68, 82,
-    0, 0, 4, 0, 0, 0, 4, 0,
+    0, 0, 0, 16, 0, 0, 0, 9,
   ]);
 }
 
@@ -99,6 +99,7 @@ describe("generateBookPageImage", () => {
 
     expect(result.referencePaths).toEqual(["characters/miau/refs/canonical.png"]);
     expect(captured?.references).toHaveLength(1);
+    expect(captured?.size).toEqual({ width: 1920, height: 1080 });
     expect(Array.from(captured?.references?.[0]?.bytes ?? [])).toEqual([7, 8, 9]);
     const book = await getCanonicalBook("image-book", root);
     expect(book?.pages[0]?.imageStatus).toBe("ready");

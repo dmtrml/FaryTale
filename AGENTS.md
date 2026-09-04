@@ -45,6 +45,8 @@ Do not write vague statements such as "continue development". The next action mu
 
 Do not mark work as completed unless it was actually implemented and verified. Do not delete useful historical decisions; condense older entries when needed.
 
+Keep `PROJECT-STATE.md` compact enough for a new agent to understand the current project quickly. Move verbose completed-phase/session chronology to `docs/PROJECT_HISTORY.md` instead of letting the handoff file grow indefinitely.
+
 Before starting new work, reconcile `PROJECT-STATE.md` with `docs/IMPLEMENTATION_PLAN.md`. If they disagree, inspect the repository and correct both documents to reflect reality.
 
 ## Autonomous working rule
@@ -198,6 +200,7 @@ Required behavior:
 1. Read the children's-story skill before materializing child-facing content.
 2. Treat the user's approved page text/story as source-of-truth. Do not silently rewrite approved text during saving.
 3. Infer implementation metadata such as canonical id, language, age band, story pattern, goal slug, lifecycle state and page-character membership when safely derivable.
+   For clearly recognizable everyday routines, set the matching story pattern explicitly in the approved package rather than relying on ambiguous wording in automatic inference.
 4. Reuse existing canonical recurring characters. Do not recreate or redesign an existing character such as `miau`.
 5. Create complete textual canonical definitions for genuinely new characters when enough information is available; if no binary reference image exists, save the character anyway and report that reference art is pending.
 6. Create the full page set in one approved-story materialization workflow rather than asking the user to add pages or tick checkboxes manually.

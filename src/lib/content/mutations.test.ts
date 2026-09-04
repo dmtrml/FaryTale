@@ -78,7 +78,7 @@ describe("parent canonical mutations", () => {
     const bytes = new Uint8Array([
       137, 80, 78, 71, 13, 10, 26, 10,
       0, 0, 0, 13, 73, 72, 68, 82,
-      0, 0, 0, 2, 0, 0, 0, 3,
+      0, 0, 0, 16, 0, 0, 0, 9,
     ]);
     const result = await replaceBookPageImage({
       contentRoot: root,
@@ -91,7 +91,7 @@ describe("parent canonical mutations", () => {
 
     expect(result.book.pages[0]?.image).toBe("pages/001.png");
     expect(result.book.pages[0]?.imageStatus).toBe("ready");
-    expect(result.inspection).toMatchObject({ width: 2, height: 3, mimeType: "image/png" });
+    expect(result.inspection).toMatchObject({ width: 16, height: 9, mimeType: "image/png" });
     expect(await fs.readFile(result.imagePath)).toEqual(Buffer.from(bytes));
   });
 
@@ -106,6 +106,24 @@ describe("parent canonical mutations", () => {
         mimeType: "image/png",
       }),
     ).rejects.toThrow("does not match");
+  });
+
+  it("rejects a page illustration that is not 16:9", async () => {
+    const root = await makeRoot();
+    const square = new Uint8Array([
+      137, 80, 78, 71, 13, 10, 26, 10,
+      0, 0, 0, 13, 73, 72, 68, 82,
+      0, 0, 0, 16, 0, 0, 0, 16,
+    ]);
+    await expect(
+      replaceBookPageImage({
+        contentRoot: root,
+        bookId: "sample-book",
+        pageNumber: 1,
+        bytes: square,
+        mimeType: "image/png",
+      }),
+    ).rejects.toThrow("16:9");
   });
 
   it("reads only the prompt declared by the canonical page", async () => {

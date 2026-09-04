@@ -93,6 +93,11 @@ room/location, recurring props and overall visual context of the book. Character
 identity references remain canonical under `content/characters/<id>/refs/` and
 are not duplicated into each book.
 
+Page illustration assets and the canonical `environment` reference are standardized
+on a horizontal **16:9** aspect ratio. Parent-mode replacement/upload validates this
+ratio before accepting the asset. Covers and character identity references are not
+subject to this rule.
+
 Allowed `ageBand` values in v1:
 - `12-18m`
 - `18-24m`
@@ -138,7 +143,8 @@ Recommended Markdown structure:
 - miau
 
 ## Composition
-...
+- Required aspect ratio: horizontal 16:9 for every page illustration.
+- ...
 
 ## Continuity
 ...
@@ -155,7 +161,8 @@ Recommended Markdown structure:
   - ../../../characters/miau/refs/canonical.webp
 
 ## Notes
-...
+- aspect_ratio: 16:9 landscape
+- ...
 ```
 
 Prompt files are authoring/provenance assets and are not shown in child mode.

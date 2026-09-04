@@ -56,6 +56,7 @@ Parent mode can:
 - upload/replace one page image;
 - inspect/copy illustration prompts and provenance;
 - keep one canonical book-level environment/props reference alongside character identity references;
+- copy one dedicated ChatGPT Image prompt for first generating that canonical environment/props reference;
 - copy one flattened ChatGPT Image prompt for the selected page without manually assembling Scene/Characters/Environment/Composition sections;
 - copy one whole-book ChatGPT Image request that asks for one separate image per page and explains the attached canonical references once for the full series;
 - select story pattern, character and visual-style lock;

@@ -4,6 +4,7 @@ import { randomUUID } from "node:crypto";
 import { bookSchema, imageStatusSchema, type Book } from "./schemas";
 import { isSafeContentPath, loadLibrary } from "./loader";
 import { inspectImage } from "../images/inspect";
+import { assertBookIllustrationAspectRatio } from "../images/aspect-ratio";
 import { MAX_BOOK_PAGES } from "./authoring";
 
 const bookIdPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
@@ -139,6 +140,11 @@ export async function replaceBookPageImage({
     throw new Error("Image must be between 1 byte and 5 MB.");
   }
   const inspection = inspectImage(bytes, mimeType);
+  assertBookIllustrationAspectRatio(
+    inspection.width,
+    inspection.height,
+    "Page illustration",
+  );
 
   const contentRoot = resolveContentRoot(options.contentRoot);
   const { book, filePath } = await readCanonicalBook(contentRoot, bookId);

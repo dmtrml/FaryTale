@@ -43,6 +43,7 @@ ${consistency.characterIdentity}
 ${environment?.trim() || "Show only the room/location/props needed to make the main action immediately understandable. Avoid decorative clutter."}
 
 ## Composition
+- Required aspect ratio: horizontal 16:9 for every page illustration.
 - One dominant event and one clear action direction.
 - ${ageRule.visualGuidance}
 - Keep the hero and key object/action large and easy to find.
@@ -74,5 +75,6 @@ ${consistency.referencePaths.length ? consistency.referencePaths.map((reference)
 ## Notes
 - age_band: ${ageRule.id}
 - text_guidance: ${ageRule.textGuidance}
+- aspect_ratio: 16:9 landscape
 `;
 }

@@ -71,6 +71,8 @@ The parent does not need to specify these directly:
 - lifecycle/image status — materialization sets the book/pages to `prompt_ready`;
 - page character membership — the agent should fill `characterIds` from the approved scene.
 
+Deterministic inference is a fallback, not a reason to discard an obvious creative classification. When the approved story clearly describes a concrete everyday routine (for example potty use, tooth brushing, washing, dressing or hair care), the agent should prefer an explicit `habit-routine` value rather than rely on incidental words such as “feels” or “calm” in the goal description.
+
 ## Characters
 
 ### Existing recurring character
@@ -167,7 +169,7 @@ npm run agent:materialize -- .scratch/farytale-agent/<book-id>.json
 If the server uses another port:
 
 ```bash
-npm run agent:materialize -- .scratch/farytale-agent/<book-id>.json --base-url http://127.0.0.1:3010
+npm run agent:materialize -- .scratch/farytale-agent/<book-id>.json --base-url http://localhost:3010
 ```
 
 The CLI calls the parent-gated local endpoint and prints the validation report.

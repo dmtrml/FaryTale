@@ -64,6 +64,24 @@ describe("story skill rules", () => {
     expect(selectAgeBand(18, 24).id).toBe("18-24m");
     expect(recommendStoryPattern("habit", "Мыть лапки перед едой")).toBe("habit-routine");
   });
+
+  it("does not mistake routine body-awareness wording for emotion regulation", () => {
+    expect(
+      recommendStoryPattern(
+        "custom",
+        "Показать спокойную последовательность: ребёнок чувствует, что хочет пи-пи, идёт к горшку и возвращается к игре.",
+      ),
+    ).toBe("habit-routine");
+  });
+
+  it("recognizes a predictable hair-care ritual as a routine", () => {
+    expect(
+      recommendStoryPattern(
+        "custom",
+        "Показать короткий предсказуемый ритуал, когда взрослый мягко собирает волосы в хвостик.",
+      ),
+    ).toBe("habit-routine");
+  });
 });
 
 describe("prepareManualStoryDraft", () => {

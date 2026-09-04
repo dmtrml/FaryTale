@@ -193,6 +193,7 @@ Acceptance:
 - [x] Delete characters only when that cannot leave existing books with broken character references.
 - [x] Manage a book's referenced character IDs from Parent mode.
 - [x] Store and replace one canonical book-level environment/props visual reference.
+- [x] Derive a ready-to-copy prompt for generating the canonical environment/props reference before upload.
 - [x] Derive a flattened ready-to-copy manual image prompt for one page while keeping the structured Markdown prompt available as technical provenance.
 - [x] Derive one whole-book ChatGPT Image prompt that requests separate images for all pages and reuses canonical character/environment references.
 - [x] Extend AI Studio typed tools where needed so authoring capabilities are not UI-only.

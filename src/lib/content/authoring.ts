@@ -11,6 +11,7 @@ import {
 } from "./schemas";
 import { isSafeContentPath, loadLibrary } from "./loader";
 import { inspectImage } from "../images/inspect";
+import { assertBookIllustrationAspectRatio } from "../images/aspect-ratio";
 
 const contentIdPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const imageTypes = {
@@ -228,6 +229,11 @@ export async function replaceBookEnvironmentReference({
     throw new Error("Book reference image must be between 1 byte and 5 MB.");
   }
   const inspection = inspectImage(bytes, mimeType);
+  assertBookIllustrationAspectRatio(
+    inspection.width,
+    inspection.height,
+    "Environment reference",
+  );
   const contentRoot = resolveContentRoot(options.contentRoot);
   const { book, filePath, bookRoot } = await readBook(contentRoot, bookId);
   const previous = book.references.find((reference) => reference.role === "environment");
