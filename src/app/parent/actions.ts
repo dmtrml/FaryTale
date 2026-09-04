@@ -95,6 +95,18 @@ export async function replacePageImageAction(
   });
   revalidatePath(`/parent/books/${bookId}`);
   revalidatePath(`/books/${bookId}`);
+
+  if (formData.get("continue") === "yes") {
+    const nextPage = z.coerce.number().int().min(1).max(MAX_BOOK_PAGES).safeParse(formData.get("nextPage"));
+    if (nextPage.success) {
+      const filterValue = formData.get("filter");
+      const filter = filterValue === "missing" || filterValue === "ready" ? filterValue : null;
+      const search = new URLSearchParams();
+      if (filter) search.set("filter", filter);
+      search.set("page", String(nextPage.data));
+      redirect(`/parent/books/${bookId}?${search.toString()}#page-${nextPage.data}`);
+    }
+  }
 }
 
 const draftSchema = z.object({
