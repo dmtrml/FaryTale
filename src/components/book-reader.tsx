@@ -33,10 +33,13 @@ export function BookReader({ book }: { book: Book }) {
   useEffect(() => {
     const raw = window.localStorage.getItem(progressKey(book.id));
     const saved = raw === null ? Number.NaN : Number.parseInt(raw, 10);
-    if (Number.isFinite(saved) && saved > 0 && saved < pageCount) {
-      setResumePageIndex(saved);
-    }
-    setProgressReady(true);
+    const frame = window.requestAnimationFrame(() => {
+      if (Number.isFinite(saved) && saved > 0 && saved < pageCount) {
+        setResumePageIndex(saved);
+      }
+      setProgressReady(true);
+    });
+    return () => window.cancelAnimationFrame(frame);
   }, [book.id, pageCount]);
 
   useEffect(() => {
