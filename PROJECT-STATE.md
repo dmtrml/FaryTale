@@ -6,7 +6,7 @@
 
 ## Current status
 
-**Current phase:** local/private MVP complete — Phases 0–15 finished.
+**Current phase:** local/private MVP complete — experimental 14-point UX review branch in progress.
 
 **Overall state:** FaryTale is a working reader-first family storybook app with parent-only authoring. The primary creation workflow is agent-first: an approved story can be materialized into canonical book/character files plus one prompt per page without manual technical form entry. Existing books remain readable without AI, credentials, a database or internet access.
 
@@ -40,6 +40,14 @@ Current local content:
 - A whole-book manual image prompt requests separate 16:9 images per page; sensitive workflows may opt into page-by-page-only prompt mode.
 - Parent uploads validate actual page/environment aspect ratio before accepting assets.
 - Network image generation, when explicitly configured, requests a 16:9 output and remains per-page.
+
+### Experimental UX review branch — 2026-09-04
+
+- Current branch: `ux/14-experience-improvements`; do not treat these UX choices as accepted until the parent reviews them.
+- The branch implements the 14 proposed UX experiments documented in `docs/UX_REVIEW_14.md`.
+- Major experimental changes include: parent book progress/continue CTA, previous/next page workflow, page filters, ordered prompt→generate→upload flow, drag/drop previews, visual Parent book cards, agent-first new-book entry, conversational Helper presentation, simplified character prompt presentation, simplified child shelf, long-book reader progress, local reading resume, and a dedicated end-of-book state.
+- The built-in Helper accepts simple natural-language list requests locally. Creative free-text authoring still requires a configured text provider; when absent, the UI now explains that limitation and points to the external agent-first workflow instead of returning a technical error.
+- Full review instructions are in `docs/UX_REVIEW_14.md`.
 
 ## Important architecture decisions
 
@@ -81,14 +89,23 @@ Final verification for the 2026-09-04 consolidation:
 - `git diff --check` passed.
 - Local private JSON was parsed after metadata correction; the corrected hair-care routine remains 6 pages and now uses canonical `habit` / `habit-routine` metadata.
 
+UX review branch verification on 2026-09-04:
+- `npm run typecheck` passed.
+- `npm run lint` passed.
+- `npm test` passed: 21 files / 86 tests.
+- `npm run build` passed with Next.js 16.3.3.
+- `git diff --check` passed.
+- Production runtime smoke on port 3010 returned HTTP 200 for the child library, Parent book list, selected Parent book page, Characters, New Book, Helper and reader. Parent screens rendered their new UX markers with the parent cookie.
+
 ## Git / working state
 
-- Branch: `main`.
+- Branch: `ux/14-experience-improvements`, created from local `main` after commits `1e6a71a` and `b201dc3`.
 - Remote: `origin` → `https://github.com/dmtrml/FaryTale.git`.
 - The substantial post-`89d473a` working set has been consolidated: compact book-editor UX, global 16:9 handling, prompt refinements, reusable-character cleanup, routine-pattern inference tests and documentation/state cleanup.
 - The verified consolidation is committed locally on `main`.
 - `AGENTS.md` now requires Git checkpoints for each coherent verified change and requires push when the configured remote is writable; failures must be recorded here rather than left implicit in chat.
 - Push to `origin/main` is currently blocked by GitHub authentication: the active GitHub CLI/credential-manager account is `melkamsar`, which receives HTTP 403 for `dmtrml/FaryTale`; SSH also has no usable GitHub key on this machine. Do not rewrite repository history to work around this. Authenticate an account with push access and retry the normal push.
+- UX branch implementation checkpoints include `e117d0c`, `d4babef`, `860fb80`, `d6675ec`, and `5662f89`; review documentation/state are committed as a separate final checkpoint.
 
 ## Files that define the project
 
@@ -104,7 +121,7 @@ Read in this order:
 
 ## Exact next action
 
-1. Authenticate GitHub on this computer with an account that has push access to `dmtrml/FaryTale`, then run `git push origin main`.
-2. After the push succeeds, return to product use rather than infrastructure work: continue making/illustrating real books with the compact editor.
-3. Change the editor only when real usage reveals a concrete UX problem.
-4. When the next substantial Parent book-detail UI change is required, consider splitting the large page into focused subcomponents at that time rather than doing a standalone refactor now.
+1. Parent reviews all 14 items in `docs/UX_REVIEW_14.md` and marks each as keep / change / remove.
+2. Revise or drop rejected UX experiments on this branch; do not merge the whole branch automatically.
+3. After the accepted subset is settled, run the full verification suite again and merge/cherry-pick only the approved result into `main`.
+4. GitHub push remains separately blocked until an account with write access to `dmtrml/FaryTale` is authenticated on this computer.
