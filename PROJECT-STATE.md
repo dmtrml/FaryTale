@@ -46,6 +46,7 @@ Current local content:
 - Current branch: `ux/14-experience-improvements`; do not treat these UX choices as accepted until the parent reviews them.
 - The branch implements the 14 proposed UX experiments documented in `docs/UX_REVIEW_14.md`.
 - Major experimental changes include: parent book progress/continue CTA, previous/next page workflow, page filters, ordered prompt→generate→upload flow, drag/drop previews, visual Parent book cards, agent-first new-book entry, conversational Helper presentation, simplified character prompt presentation, simplified child shelf, long-book reader progress, local reading resume, and a dedicated end-of-book state.
+- The end-of-book state reuses the normal navigation row (`Ещё раз · Конец ❤️ · На полку`) instead of adding a taller extra panel, preventing the final-page illustration from shrinking.
 - The built-in Helper accepts simple natural-language list requests locally. Creative free-text authoring still requires a configured text provider; when absent, the UI now explains that limitation and points to the external agent-first workflow instead of returning a technical error.
 - Full review instructions are in `docs/UX_REVIEW_14.md`.
 
@@ -96,6 +97,7 @@ UX review branch verification on 2026-09-04:
 - `npm run build` passed with Next.js 16.3.3.
 - `git diff --check` passed.
 - Production runtime smoke on port 3010 returned HTTP 200 for the child library, Parent book list, selected Parent book page, Characters, New Book, Helper and reader. Parent screens rendered their new UX markers with the parent cookie.
+- After parent review, the final-page reader controls were revised so they reuse the normal navigation row and no longer add vertical height that can shrink the illustration.
 
 ## Git / working state
 

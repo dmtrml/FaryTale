@@ -211,67 +211,66 @@ export function BookReader({ book }: { book: Book }) {
               {page.text}
             </p>
 
-            {isLastPage ? (
-              <div className="mx-auto mt-6 max-w-xl rounded-2xl bg-[#f4f0e9] px-5 py-5">
-                <p className="text-lg font-semibold">Конец ❤️</p>
-                <div className="mt-4 flex flex-wrap justify-center gap-3">
+            <div className="mx-auto mt-6 flex max-w-md items-center justify-between gap-4">
+              {isLastPage ? (
+                <>
                   <button
                     type="button"
                     onClick={restartBook}
-                    className="min-h-12 rounded-full bg-[#40382f] px-5 font-semibold text-white"
+                    className="min-h-12 min-w-28 rounded-full bg-[#40382f] px-5 font-semibold text-white"
                   >
-                    Прочитать ещё раз
+                    Ещё раз
                   </button>
+                  <p className="shrink-0 text-sm font-semibold text-[#756d64]">Конец ❤️</p>
                   <Link
                     href="/"
-                    className="inline-flex min-h-12 items-center rounded-full border border-[var(--border)] bg-white px-5 font-semibold"
+                    className="inline-flex min-h-12 min-w-28 items-center justify-center rounded-full border border-[var(--border)] bg-white px-5 font-semibold"
                   >
-                    Выбрать другую сказку
+                    На полку
                   </Link>
-                </div>
-              </div>
-            ) : null}
-
-            <div className="mx-auto mt-6 flex max-w-md items-center justify-between gap-4">
-              <button
-                type="button"
-                onClick={goPrevious}
-                disabled={pageIndex === 0}
-                className="min-h-12 min-w-28 rounded-full border border-[var(--border)] bg-white px-5 font-semibold disabled:cursor-default disabled:opacity-30"
-                aria-label="Предыдущая страница"
-              >
-                Назад
-              </button>
-              {pageCount <= 10 ? (
-                <div className="flex gap-1.5" aria-hidden="true">
-                  {book.pages.map((item, index) => (
-                    <span
-                      key={item.number}
-                      className={`size-2 rounded-full ${
-                        index === pageIndex ? "bg-[#5c5349]" : "bg-[#d8d0c5]"
-                      }`}
-                    />
-                  ))}
-                </div>
+                </>
               ) : (
-                <div className="min-w-24 flex-1" aria-hidden="true">
-                  <div className="h-2 overflow-hidden rounded-full bg-[#d8d0c5]">
-                    <div
-                      className="h-full rounded-full bg-[#5c5349] transition-[width]"
-                      style={{ width: `${((pageIndex + 1) / pageCount) * 100}%` }}
-                    />
-                  </div>
-                </div>
+                <>
+                  <button
+                    type="button"
+                    onClick={goPrevious}
+                    disabled={pageIndex === 0}
+                    className="min-h-12 min-w-28 rounded-full border border-[var(--border)] bg-white px-5 font-semibold disabled:cursor-default disabled:opacity-30"
+                    aria-label="Предыдущая страница"
+                  >
+                    Назад
+                  </button>
+                  {pageCount <= 10 ? (
+                    <div className="flex gap-1.5" aria-hidden="true">
+                      {book.pages.map((item, index) => (
+                        <span
+                          key={item.number}
+                          className={`size-2 rounded-full ${
+                            index === pageIndex ? "bg-[#5c5349]" : "bg-[#d8d0c5]"
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="min-w-24 flex-1" aria-hidden="true">
+                      <div className="h-2 overflow-hidden rounded-full bg-[#d8d0c5]">
+                        <div
+                          className="h-full rounded-full bg-[#5c5349] transition-[width]"
+                          style={{ width: `${((pageIndex + 1) / pageCount) * 100}%` }}
+                        />
+                      </div>
+                    </div>
+                  )}
+                  <button
+                    type="button"
+                    onClick={goNext}
+                    className="min-h-12 min-w-28 rounded-full bg-[#40382f] px-5 font-semibold text-white"
+                    aria-label="Следующая страница"
+                  >
+                    Дальше
+                  </button>
+                </>
               )}
-              <button
-                type="button"
-                onClick={goNext}
-                disabled={isLastPage}
-                className="min-h-12 min-w-28 rounded-full bg-[#40382f] px-5 font-semibold text-white disabled:cursor-default disabled:opacity-30"
-                aria-label="Следующая страница"
-              >
-                Дальше
-              </button>
             </div>
           </div>
         </article>

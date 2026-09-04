@@ -129,10 +129,10 @@ Check:
 Go to the last page of a book.
 
 Check:
-- a `Конец ❤️` block appears;
-- `Прочитать ещё раз` resets to page 1;
-- `Выбрать другую сказку` returns to the shelf;
-- the normal `Дальше` button is disabled on the last page.
+- the normal navigation row turns into `Ещё раз · Конец ❤️ · На полку`;
+- the final page illustration remains the same size as on the preceding page;
+- `Ещё раз` resets to page 1;
+- `На полку` returns to the shelf.
 
 ## Review rule
 
