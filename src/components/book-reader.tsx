@@ -18,6 +18,7 @@ export function BookReader({ book }: { book: Book }) {
   const [resumePageIndex, setResumePageIndex] = useState<number | null>(null);
   const [progressReady, setProgressReady] = useState(false);
   const [autoAdvanceSeconds, setAutoAdvanceSeconds] = useState<number | null>(null);
+  const [autoTransitionId, setAutoTransitionId] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const pointerStartX = useRef<number | null>(null);
   const readerRootRef = useRef<HTMLElement | null>(null);
@@ -86,6 +87,7 @@ export function BookReader({ book }: { book: Book }) {
     const timeout = window.setTimeout(() => {
       const nextIndex = nextPageIndex(pageIndex, pageCount);
       setPageIndex(nextIndex);
+      setAutoTransitionId((current) => current + 1);
       if (nextIndex >= pageCount - 1) {
         setAutoAdvanceSeconds(null);
       }
@@ -157,7 +159,7 @@ export function BookReader({ book }: { book: Book }) {
                   const value = event.target.value;
                   setAutoAdvanceSeconds(value ? Number(value) : null);
                 }}
-                className="bg-transparent text-sm font-semibold text-[var(--foreground)] outline-none"
+                className="reader-slideshow-select text-sm font-semibold outline-none"
               >
                 <option value="">Выкл</option>
                 <option value="5">5 сек</option>
@@ -211,7 +213,8 @@ export function BookReader({ book }: { book: Book }) {
         ) : null}
 
         <article
-          className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-[1.75rem] border border-[var(--border)] bg-[var(--surface)] shadow-[0_20px_70px_rgba(77,62,43,0.1)] sm:rounded-[2.5rem]"
+          key={autoTransitionId}
+          className={`flex min-h-0 flex-1 flex-col overflow-hidden rounded-[1.75rem] border border-[var(--border)] bg-[var(--surface)] shadow-[0_20px_70px_rgba(77,62,43,0.1)] sm:rounded-[2.5rem] ${autoTransitionId > 0 ? "reader-auto-page-enter" : ""}`}
           aria-label={`Страница ${pageIndex + 1} из ${pageCount}`}
         >
           <div

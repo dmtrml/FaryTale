@@ -48,7 +48,7 @@ Current local content:
 - Major experimental changes include: parent book progress/continue CTA, previous/next page workflow, page filters, ordered prompt→generate→upload flow, drag/drop previews, visual Parent book cards, agent-first new-book entry, conversational Helper presentation, simplified character prompt presentation, simplified child shelf, long-book reader progress, local reading resume, a dedicated end-of-book state, fullscreen reading and configurable automatic page advance.
 - The end-of-book state reuses the normal navigation row (`Ещё раз · Конец ❤️ · На полку`) instead of adding a taller extra panel, preventing the final-page illustration from shrinking.
 - During review, the child-shelf `Для родителей` entry was moved from the page footer into the top header. Reader page progress and the resume-reading banner now use theme tokens instead of translucent light-only backgrounds, so both render correctly in dark mode.
-- The reader now has optional fullscreen mode and a slideshow selector with 5/10/15/20-second intervals. Automatic advance resets after each page change, pauses behind the resume-reading decision, and stops on the last page.
+- The reader now has optional fullscreen mode and a slideshow selector with 5/10/15/20-second intervals. Automatic advance resets after each page change, pauses behind the resume-reading decision, stops on the last page, and uses a short fade/slide transition. The slideshow selector/options use theme tokens so the opened menu also follows dark mode.
 - The built-in Helper accepts simple natural-language list requests locally. Creative free-text authoring still requires a configured text provider; when absent, the UI now explains that limitation and points to the external agent-first workflow instead of returning a technical error.
 - Full review instructions are in `docs/UX_REVIEW_14.md`.
 
@@ -101,6 +101,7 @@ UX review branch verification on 2026-09-04:
 - Production runtime smoke on port 3010 returned HTTP 200 for the child library, Parent book list, selected Parent book page, Characters, New Book, Helper and reader. Parent screens rendered their new UX markers with the parent cookie.
 - After parent review, the final-page reader controls were revised so they reuse the normal navigation row and no longer add vertical height that can shrink the illustration.
 - Fullscreen/slideshow reader additions passed `npm run typecheck`, `npm run lint`, reader navigation tests, `npm run build`, and `git diff --check`. Actual fullscreen entry remains a manual browser check because the Fullscreen API requires a user gesture.
+- Slideshow dark-menu styling and automatic fade/slide page transition also passed `npm run typecheck`, `npm run lint`, reader navigation tests, `npm run build`, and `git diff --check`.
 
 ## Git / working state
 

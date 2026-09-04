@@ -152,7 +152,9 @@ Open any child book and use the `Слайды` selector in the top reader bar.
 
 Check:
 - available intervals are 5, 10, 15 and 20 seconds;
+- the opened interval menu uses the active light/dark theme rather than a light-only native-looking list;
 - after choosing an interval, the reader advances without pressing `Дальше`;
+- each automatic page change has a short fade/slide transition, while manual page changes remain immediate;
 - manually changing the page restarts the countdown for the newly shown page;
 - slideshow pauses while the `Вы остановились...` resume choice is visible;
 - slideshow stops automatically on the last page rather than looping back to page 1.
