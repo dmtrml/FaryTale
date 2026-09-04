@@ -10,6 +10,7 @@ import {
   updateCharacterReferenceRoleAction,
 } from "@/app/parent/actions";
 import { CopyPromptButton } from "@/components/copy-prompt-button";
+import { ImageUploadField } from "@/components/image-upload-field";
 import { composeCharacterGenerationPrompt } from "@/lib/characters/prompt";
 import { loadLibrary } from "@/lib/content/loader";
 
@@ -51,7 +52,7 @@ export default async function ParentCharactersPage() {
           return (
             <article id={`character-${character.id}`} key={character.id} className="scroll-mt-6 rounded-3xl border border-[#d8d0c5] bg-[#fffdf8] p-6 sm:p-7">
               <div className="flex flex-wrap items-start justify-between gap-3">
-                <div><p className="text-sm font-semibold text-[#756d64]">{character.id}</p><h2 className="mt-1 text-2xl font-semibold">{character.name}</h2></div>
+                <div><h2 className="text-2xl font-semibold">{character.name}</h2></div>
                 <span className="rounded-full bg-[#eee8dd] px-3 py-1 text-xs font-semibold">Используется в книгах: {usedBy.length}</span>
               </div>
 
@@ -79,16 +80,10 @@ export default async function ParentCharactersPage() {
                   <form action={addReference} className="mt-4 border-t border-[#e4ddd3] pt-4">
                     <input type="hidden" name="role" value="reference" />
                     <input type="hidden" name="makeIdentity" value="yes" />
-                    <label className="block text-sm font-semibold">
-                      {identityReference ? "Загрузить новый главный референс" : "Загрузить главный референс"}
-                      <input
-                        name="image"
-                        type="file"
-                        required
-                        accept="image/png,image/jpeg,image/webp,image/avif,image/gif"
-                        className="mt-2 block max-w-full text-xs"
-                      />
-                    </label>
+                    <ImageUploadField
+                      label={identityReference ? "Загрузить новый главный референс" : "Загрузить главный референс"}
+                      aspect="square"
+                    />
                     <button className="mt-3 rounded-full border border-[#d8d0c5] bg-white px-4 py-2 text-xs font-semibold">
                       {identityReference ? "Сделать новым основным" : "Загрузить как основной"}
                     </button>
@@ -103,8 +98,11 @@ export default async function ParentCharactersPage() {
                     </div>
                     <CopyPromptButton text={generationPrompt} />
                   </div>
-                  <pre className="mt-4 max-h-80 overflow-auto whitespace-pre-wrap rounded-2xl bg-[#f4f0e9] p-4 text-sm leading-6">{generationPrompt}</pre>
                   <p className="mt-3 text-xs leading-5 text-[#756d64]">Ничего собирать вручную не нужно: палитра, неизменные признаки и запреты уже включены в этот текст.</p>
+                  <details className="mt-4 rounded-xl bg-[#f4f0e9] p-3">
+                    <summary className="cursor-pointer text-sm font-semibold">Посмотреть промпт</summary>
+                    <pre className="mt-3 max-h-80 overflow-auto whitespace-pre-wrap rounded-xl bg-white p-4 text-sm leading-6">{generationPrompt}</pre>
+                  </details>
                 </section>
               </div>
 
@@ -112,6 +110,7 @@ export default async function ParentCharactersPage() {
                 <summary className="cursor-pointer text-sm font-semibold">Расширенные настройки персонажа</summary>
                 <p className="mt-2 text-xs leading-5 text-[#756d64]">Эти поля нужны в основном агенту. Из них автоматически собирается готовый промпт выше.</p>
                 <form action={update} className="mt-4 grid gap-4 sm:grid-cols-2">
+                  <p className="sm:col-span-2 text-xs text-[#756d64]">Внутренний ID: <code>{character.id}</code></p>
                   <label><span className="text-sm font-semibold">Имя</span><input name="name" required maxLength={160} defaultValue={character.name} className="mt-2 min-h-12 w-full rounded-xl border border-[#d8d0c5] bg-white px-4" /></label>
                   <label><span className="text-sm font-semibold">Тип</span><input name="type" required maxLength={80} defaultValue={character.type} className="mt-2 min-h-12 w-full rounded-xl border border-[#d8d0c5] bg-white px-4" /></label>
                   <label className="sm:col-span-2"><span className="text-sm font-semibold">Вид / species</span><input name="species" maxLength={120} defaultValue={character.species ?? ""} className="mt-2 min-h-12 w-full rounded-xl border border-[#d8d0c5] bg-white px-4" /></label>
