@@ -44,6 +44,7 @@ Current local content:
 - Network image generation, when explicitly configured, requests a 16:9 output and remains per-page.
 - Parent library filters can be combined across character, meaning, situation, collection, tag and any custom classification dimension. Custom dimensions appear automatically from canonical data rather than requiring UI code changes.
 - Child library keeps only character, meaning and situation filters when there are multiple useful choices; both libraries can sort by recent update, creation date or title.
+- Reader resume treats the final page as completed reading: reaching the last page clears saved resume progress, so reopening the book starts from page 1 without the “Вы остановились…” prompt. Only unfinished interior pages are resumable.
 
 ### Accepted UX improvements — 2026-09-04
 
@@ -111,6 +112,8 @@ UX review branch verification on 2026-09-04:
 - Slideshow dark-menu styling and automatic fade/slide page transition also passed `npm run typecheck`, `npm run lint`, reader navigation tests, `npm run build`, and `git diff --check`.
 - Agent-assigned library classification was added to canonical Book v1 / `ApprovedStoryPackage` with backward-compatible empty defaults for existing books. Verification passed: `npm run typecheck`, `npm run lint`, targeted classification/materializer/loader/prompt tests (26/26), full `npm test` (21 files / 87 tests), `npm run build`, and `git diff --check`.
 - Library filtering/sorting now consumes canonical classification directly. Parent mode supports character, meaning, situation, collection, tag and dynamic custom facets; child mode keeps compact character/meaning/situation filters. Verification passed: `npm run typecheck`, `npm run lint`, full `npm test` (22 files / 90 tests), `npm run build`, and `git diff --check`. The three current ignored private books were backfilled with classification metadata only; their approved story text and illustrations were not changed.
+- Reader completion/resume behavior was tightened so the final page never becomes a resume target; reaching it clears local saved progress. Reader navigation regression coverage now includes unfinished-vs-completed resume eligibility.
+- Verification for the resume-completion fix passed: `npm run typecheck`, `npm run lint`, targeted reader navigation tests (4/4), full `npm test` (22 files / 91 tests), `npm run build`, and `git diff --check`.
 
 ## Git / working state
 

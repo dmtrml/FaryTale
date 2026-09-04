@@ -8,6 +8,7 @@ import {
   nextPageIndex,
   pageIndexAfterHorizontalGesture,
   previousPageIndex,
+  resumablePageIndex,
 } from "@/lib/reader/navigation";
 
 const progressKey = (bookId: string) => `farytale-reader-progress:${bookId}`;
@@ -38,8 +39,11 @@ export function BookReader({ book }: { book: Book }) {
     const raw = window.localStorage.getItem(progressKey(book.id));
     const saved = raw === null ? Number.NaN : Number.parseInt(raw, 10);
     const frame = window.requestAnimationFrame(() => {
-      if (Number.isFinite(saved) && saved > 0 && saved < pageCount) {
-        setResumePageIndex(saved);
+      const resumeIndex = resumablePageIndex(saved, pageCount);
+      if (resumeIndex !== null) {
+        setResumePageIndex(resumeIndex);
+      } else if (saved >= pageCount - 1) {
+        window.localStorage.removeItem(progressKey(book.id));
       }
       setProgressReady(true);
     });
@@ -48,8 +52,12 @@ export function BookReader({ book }: { book: Book }) {
 
   useEffect(() => {
     if (!progressReady || resumePageIndex !== null) return;
+    if (pageIndex >= pageCount - 1) {
+      window.localStorage.removeItem(progressKey(book.id));
+      return;
+    }
     window.localStorage.setItem(progressKey(book.id), String(pageIndex));
-  }, [book.id, pageIndex, progressReady, resumePageIndex]);
+  }, [book.id, pageCount, pageIndex, progressReady, resumePageIndex]);
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {

@@ -6,6 +6,13 @@ export function nextPageIndex(current: number, pageCount: number) {
   return Math.min(Math.max(0, pageCount - 1), current + 1);
 }
 
+export function resumablePageIndex(savedPageIndex: number, pageCount: number) {
+  if (!Number.isFinite(savedPageIndex)) return null;
+  if (savedPageIndex <= 0) return null;
+  if (savedPageIndex >= pageCount - 1) return null;
+  return savedPageIndex;
+}
+
 export function pageIndexAfterHorizontalGesture({
   current,
   pageCount,
