@@ -124,7 +124,7 @@ UX review branch verification on 2026-09-04:
 - The substantial post-`89d473a` working set has been consolidated: compact book-editor UX, global 16:9 handling, prompt refinements, reusable-character cleanup, routine-pattern inference tests and documentation/state cleanup.
 - The verified consolidation is committed locally on `main`.
 - `AGENTS.md` now requires Git checkpoints for each coherent verified change and requires push when the configured remote is writable; failures must be recorded here rather than left implicit in chat.
-- Push to `origin/main` is currently blocked by GitHub authentication: the active GitHub CLI/credential-manager account is `melkamsar`, which receives HTTP 403 for `dmtrml/FaryTale`; SSH also has no usable GitHub key on this machine. Do not rewrite repository history to work around this. Authenticate an account with push access and retry the normal push.
+- Push to `origin/main` is working with the current credentials. On 2026-09-05 commit `c5ef08e` was pushed successfully to `https://github.com/dmtrml/FaryTale.git`, so the earlier 403 authentication blocker is resolved.
 - The accepted UX work was merged from `ux/14-experience-improvements` into `main` by fast-forward through commit `7b85103`.
 
 ## Files that define the project
@@ -145,4 +145,3 @@ Read in this order:
 2. For `emi-trims-her-nails`, create/upload the canonical scissors reference from the parent's real scissors photo plus the usual environment reference, then generate/upload the six 16:9 page illustrations and cover.
 3. Keep new user-defined classification dimensions in `classification.custom`; Parent filters will discover them automatically.
 4. Keep future UX work checkpointed as separate coherent commits.
-5. GitHub push remains separately blocked until an account with write access to `dmtrml/FaryTale` is authenticated on this computer.
