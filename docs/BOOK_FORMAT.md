@@ -72,6 +72,13 @@ Suggested v1 shape:
     "skill": "childrens-story-creator-v1",
     "ageBand": "18-24m",
     "storyPattern": "habit-routine",
+    "externalReferences": [
+      {
+        "id": "favorite-cup",
+        "label": "фотография любимой чашки ребёнка",
+        "instruction": "Точно сохраняй форму и рисунок чашки по приложенному фото."
+      }
+    ],
     "outline": [
       {
         "pageNumber": 1,
@@ -95,6 +102,14 @@ Suggested v1 shape:
 `authoring` is optional parent-side metadata. It records the deterministic
 story-skill interpretation used to prepare a draft. It is not shown in child
 mode and does not make the skill Markdown files a runtime dependency.
+
+`authoring.externalReferences` declares visual references that the parent will
+attach manually to ChatGPT/Image generation but that are not canonical character
+identity files or the stored environment image. Use this for a specific recurring
+real-world prop such as scissors, a cup, shoes or another object whose exact design
+must remain stable. The flattened whole-book/page prompts enumerate these external
+references after the canonical character and stored book references and include the
+saved instruction for how each reference must be used.
 
 `classification` is canonical library/filter metadata. It is safe for older v1
 books to omit it; the schema supplies empty lists. New agent-first books should
@@ -185,8 +200,8 @@ Prompt files are authoring/provenance assets and are not shown in child mode.
 The Parent UI may derive a flattened ready-to-copy ChatGPT Image prompt from
 these structured sections. The Markdown remains the technical source for scene,
 environment, composition, style and continuity details, while the parent-facing
-copy prompt describes which attached character/environment image references to
-use without exposing filesystem paths or generation metadata.
+copy prompt describes which attached character/environment/external object image
+references to use without exposing filesystem paths or generation metadata.
 
 ## 5. `character.json`
 

@@ -46,20 +46,35 @@ function referencePlan(book: Book, characters: Character[]) {
     .map((character) => ({ character, reference: selectCanonicalIdentityReference(character) }))
     .filter((item): item is { character: Character; reference: NonNullable<typeof item.reference> } => Boolean(item.reference));
   const environmentReference = book.references.find((reference) => reference.role === "environment") ?? null;
+  const otherBookReferences = book.references.filter((reference) => reference.role !== "environment");
+  const externalReferences = book.authoring?.externalReferences ?? [];
 
   const items: string[] = [];
+  const extraInstructions: string[] = [];
   characterReferences.forEach(({ character }, index) => {
     items.push(`референс ${index + 1} — каноническая внешность персонажа ${character.name}`);
   });
   if (environmentReference) {
     items.push(`референс ${items.length + 1} — каноническое окружение, художественный стиль и постоянные предметы книги`);
   }
+  otherBookReferences.forEach((reference) => {
+    items.push(`референс ${items.length + 1} — дополнительный канонический референс книги «${reference.id}»`);
+  });
+  externalReferences.forEach((reference) => {
+    const number = items.length + 1;
+    items.push(`референс ${number} — ${reference.label}`);
+    if (reference.instruction) {
+      extraInstructions.push(`Для референса ${number}: ${reference.instruction}`);
+    }
+  });
 
   return {
     characterReferences,
     environmentReference,
+    otherBookReferences,
+    externalReferences,
     instruction: items.length
-      ? `Я прикладываю ${items.length} ${referenceWord(items.length)}: ${items.join("; ")}. Используй их как канонические и не переосмысливай внешность персонажей, окружение и постоянные предметы от страницы к странице.`
+      ? `Я прикладываю ${items.length} ${referenceWord(items.length)}: ${items.join("; ")}. Используй их как канонические и не переосмысливай внешность персонажей, окружение и постоянные предметы от страницы к странице.${extraInstructions.length ? ` ${extraInstructions.join(" ")}` : ""}`
       : "Визуальные референсы пока не приложены, поэтому строго следуй текстовым описаниям и сохраняй одни и те же внешность, стиль и постоянные предметы на всех страницах.",
   };
 }

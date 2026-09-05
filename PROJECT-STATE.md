@@ -39,6 +39,7 @@ Current local content:
 - Secondary controls are collapsed by default under `Книга и обложка`, `Иллюстрации и референсы` and `Дополнительные инструменты`.
 - Each page can expose a flattened ready-to-copy ChatGPT Image prompt while structured Markdown remains provenance/technical detail.
 - Each book can keep one canonical environment/props reference and a generated environment-reference prompt.
+- Books can also declare parent-supplied external object references for exact recurring real-world props. Ready-to-copy ChatGPT prompts enumerate canonical character refs, the stored environment ref and these external refs in order, with per-reference usage instructions.
 - A whole-book manual image prompt requests separate 16:9 images per page; sensitive workflows may opt into page-by-page-only prompt mode.
 - Parent uploads validate actual page/environment aspect ratio before accepting assets.
 - Network image generation, when explicitly configured, requests a 16:9 output and remains per-page.
@@ -72,6 +73,7 @@ Current local content:
 10. **Do not add speculative SaaS infrastructure.** Accounts, payments, public sharing, marketplace, native wrappers and complex analytics remain deferred until a concrete need appears.
 11. **Agent-created books are classified automatically.** When a story is materialized, the agent should infer obvious meanings and situations, keep character filtering on canonical character IDs, use collections only when established, and preserve any parent-defined custom classification dimensions rather than asking for routine manual metadata entry.
 12. **Library filters are schema-driven.** Filter options must be derived from canonical `characters` / `classification`, including dynamic custom facets, rather than maintained as a separate hardcoded taxonomy in UI code.
+13. **Exact real-world props can be separate external references.** When the parent says they will attach a photo of a recurring object (for example nail scissors), record it as `authoring.externalReferences` instead of hiding it only in page prose. The whole-book/page ChatGPT prompt must enumerate it alongside the normal character/environment references.
 
 ## Safety / privacy boundaries
 
@@ -116,6 +118,7 @@ UX review branch verification on 2026-09-04:
 - Reader completion/resume behavior was tightened so the final page never becomes a resume target; reaching it clears local saved progress. Reader navigation regression coverage now includes unfinished-vs-completed resume eligibility.
 - Verification for the resume-completion fix passed: `npm run typecheck`, `npm run lint`, targeted reader navigation tests (4/4), full `npm test` (22 files / 91 tests), `npm run build`, and `git diff --check`.
 - On 2026-09-05 the approved 6-page story `Эми стрижёт ноготки` was materialized as `emi-trims-her-nails` using the canonical agent-first workflow. It reuses `emi`, is classified as `habit-routine`, and every page prompt explicitly requires a separate photo/reference of the real child nail scissors in addition to the usual character/environment references, preserving the scissors' shape, color, size, construction and rounded tips. The scissors are always adult-controlled in the scenes. Materialization reported 6/6 prompts and no warnings; binary scissors/environment/cover/page assets remain intentionally pending. Post-materialization verification passed: `npm run typecheck`, `npm run lint`, full `npm test` (22 files / 91 tests), and `git diff --check`.
+- Follow-up correction on 2026-09-05: external object references are now first-class optional authoring metadata instead of only continuity prose. `emi-trims-her-nails` declares the parent's nail-scissors photo as `authoring.externalReferences`. The prompt builder enumerates character refs first, the stored environment reference next, then external object refs; therefore once this book's environment reference is uploaded its whole-book prompt explicitly says reference 1 = Emi, reference 2 = canonical environment, reference 3 = the exact nail-scissors photo. Parent UI also lists external refs under `Иллюстрации и референсы`. This remains backward-compatible with older books that have no external refs. Verification passed: `npm run typecheck`, `npm run lint`, full `npm test` (22 files / 91 tests), `npm run build`, and `git diff --check`.
 
 ## Git / working state
 
@@ -142,6 +145,6 @@ Read in this order:
 ## Exact next action
 
 1. Review the denser child-shelf layout in real use across desktop/tablet widths and adjust only concrete sizing issues that appear.
-2. For `emi-trims-her-nails`, create/upload the canonical scissors reference from the parent's real scissors photo plus the usual environment reference, then generate/upload the six 16:9 page illustrations and cover.
+2. For `emi-trims-her-nails`, create/upload the usual canonical environment reference; when generating the whole series in ChatGPT, attach Emi + that environment reference + the parent's nail-scissors photo as the three references enumerated by the prompt, then generate/upload the six 16:9 page illustrations and cover.
 3. Keep new user-defined classification dimensions in `classification.custom`; Parent filters will discover them automatically.
 4. Keep future UX work checkpointed as separate coherent commits.

@@ -30,6 +30,22 @@ const book: Book = {
   status: "prompt_ready",
   createdAt: "2026-09-01",
   updatedAt: "2026-09-03",
+  authoring: {
+    skill: "childrens-story-creator-v1",
+    ageBand: "18-24m",
+    storyPattern: "habit-routine",
+    externalReferences: [
+      {
+        id: "nail-scissors",
+        label: "фотография детских ножниц для ногтей",
+        instruction: "Точно сохраняй форму и цвет ножниц по фотографии.",
+      },
+    ],
+    outline: [
+      { pageNumber: 1, beat: "Эми играет." },
+      { pageNumber: 2, beat: "Эми идёт к горшку." },
+    ],
+  },
   pages: [
     { number: 1, text: "Эми играет.", characters: ["emi"], imageStatus: "prompt_ready" },
     { number: 2, text: "Эми идёт к горшку.", characters: ["emi"], imageStatus: "prompt_ready" },
@@ -75,6 +91,8 @@ describe("manual ChatGPT Image prompts", () => {
     const result = composeChatPagePrompt({ book, page: book.pages[0]!, rawPrompt: prompt, characters: [character] });
     expect(result).toContain("референс 1 — каноническая внешность персонажа Эми");
     expect(result).toContain("референс 2 — каноническое окружение");
+    expect(result).toContain("референс 3 — фотография детских ножниц для ногтей");
+    expect(result).toContain("Для референса 3: Точно сохраняй форму и цвет ножниц по фотографии.");
     expect(result).toContain("Сцена: Эми играет с крупными кубиками.");
     expect(result).toContain("горизонтальный 16:9");
     expect(result).toContain("Композиция: Эми и кубики крупные");
@@ -95,6 +113,7 @@ describe("manual ChatGPT Image prompts", () => {
     expect(result).toContain("2 отдельных иллюстраций");
     expect(result).toContain("Не объединяй сцены в коллаж");
     expect(result).toContain("Каждое из 2 изображений должно быть строго в горизонтальном формате 16:9");
+    expect(result).toContain("референс 3 — фотография детских ножниц для ногтей");
     expect(result).toContain("СТРАНИЦА 1.");
     expect(result).toContain("СТРАНИЦА 2.");
   });

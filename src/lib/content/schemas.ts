@@ -116,6 +116,16 @@ export const bookSchema = z.object({
       ageBand: ageBandSchema,
       storyPattern: storyPatternSchema,
       visualStyle: z.string().optional(),
+      externalReferences: z
+        .array(
+          z.object({
+            id: contentIdSchema,
+            label: z.string().trim().min(1).max(160),
+            instruction: z.string().trim().min(1).max(1000).optional(),
+          }),
+        )
+        .max(20)
+        .optional(),
       outline: z.array(
         z.object({
           pageNumber: z.number().int().positive(),

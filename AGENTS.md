@@ -205,7 +205,7 @@ Required behavior:
 5. Reuse existing canonical recurring characters. Do not recreate or redesign an existing character such as `miau`.
 6. Create complete textual canonical definitions for genuinely new characters when enough information is available; if no binary reference image exists, save the character anyway and report that reference art is pending.
 7. Create the full page set in one approved-story materialization workflow rather than asking the user to add pages or tick checkboxes manually.
-8. Save one final illustration prompt for **every page/scene**, using canonical identity, continuity and any available character reference paths.
+8. Save one final illustration prompt for **every page/scene**, using canonical identity, continuity, any available character reference paths, the canonical environment reference when applicable, and any parent-supplied external object references explicitly requested for visual consistency.
 9. In the current workflow, **do not generate images automatically**. Leave pages `prompt_ready` and let the user generate images in chat and upload them manually.
 10. Validate the resulting canonical book and prompts and report a concise result: book id/title, page count, prompt count, characters, classification, status and unresolved warnings.
 11. Ask the user only for genuinely non-inferable creative decisions or missing source material, not for internal technical fields.

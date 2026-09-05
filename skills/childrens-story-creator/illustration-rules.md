@@ -81,6 +81,11 @@ For recurring characters:
 - optional book-specific outfit reference second;
 - avoid unrelated references.
 
+For recurring real-world props whose exact appearance matters:
+- keep them as a separate book/external object reference rather than folding them into the character identity;
+- when a parent says they will attach a photo/reference of that object, explicitly enumerate it in the ready-to-copy prompt alongside the usual character and environment references;
+- preserve the object's relevant stable traits from the supplied reference across every page where it appears.
+
 ## Generation metadata
 
 Record, when available:

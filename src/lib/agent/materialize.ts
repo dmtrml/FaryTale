@@ -181,6 +181,7 @@ export async function materializeApprovedStory(
       ageBand: ageRule.id,
       storyPattern,
       ...(story.visualStyle ? { visualStyle: story.visualStyle } : {}),
+      externalReferences: story.externalReferences,
       outline: story.pages.map((page, index) => ({
         pageNumber: index + 1,
         beat: page.scene ?? (page.text || `Страница ${index + 1}`),

@@ -69,6 +69,7 @@ export default async function ParentBookPage({
   const pagePrompts = await readBookPagePrompts({ bookId });
   const bookCharacters = characters.filter((character) => book.characters.includes(character.id));
   const environmentReference = book.references.find((reference) => reference.role === "environment") ?? null;
+  const externalReferences = book.authoring?.externalReferences ?? [];
   const wholeBookPrompt = composeChatBookPrompt({ book, characters: bookCharacters, pagePrompts });
   const environmentPrompt = composeChatEnvironmentPrompt({ book, pagePrompts });
   const pageByPageOnly = usesPageByPageManualImageMode(book);
@@ -231,7 +232,7 @@ export default async function ParentBookPage({
           <div className="grid size-12 shrink-0 place-items-center rounded-xl bg-[#f4f0e9] text-2xl">🎨</div>
           <div className="min-w-0 flex-1">
             <h2 className="font-semibold">Иллюстрации и референсы</h2>
-            <p className="mt-1 text-sm text-[#756d64]">{readyImageCount}/{book.pages.length} иллюстраций готово · формат 16:9 · {environmentReference ? "окружение загружено" : "окружение не загружено"}</p>
+            <p className="mt-1 text-sm text-[#756d64]">{readyImageCount}/{book.pages.length} иллюстраций готово · формат 16:9 · {environmentReference ? "окружение загружено" : "окружение не загружено"}{externalReferences.length ? ` · доп. референсов: ${externalReferences.length}` : ""}</p>
           </div>
           <span className="text-sm font-semibold text-[#756d64]">Открыть ↓</span>
         </summary>
@@ -285,6 +286,21 @@ export default async function ParentBookPage({
                 </form>
               </div>
             </div>
+
+            {externalReferences.length ? (
+              <div className="rounded-xl bg-[#f4f0e9] p-4 lg:col-span-2">
+                <h3 className="text-sm font-semibold">Дополнительные референсы для ChatGPT</h3>
+                <p className="mt-1 text-xs leading-5 text-[#756d64]">Эти изображения прикладываются вручную вместе с референсом персонажа и окружения.</p>
+                <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                  {externalReferences.map((reference) => (
+                    <div key={reference.id} className="rounded-xl bg-white p-3">
+                      <p className="text-sm font-semibold">{reference.label}</p>
+                      {reference.instruction ? <p className="mt-1 text-xs leading-5 text-[#756d64]">{reference.instruction}</p> : null}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : null}
           </div>
 
           {pageByPageOnly ? null : (
@@ -419,7 +435,7 @@ export default async function ParentBookPage({
 
                           <div className="rounded-xl bg-[#f4f0e9] p-4">
                             <p className="text-xs font-semibold text-[#786f65]">2 · Создать изображение</p>
-                            <p className="mt-2 text-sm leading-6 text-[#70685e]">Откройте ChatGPT Image, приложите главный референс персонажа и референс окружения из блока «Иллюстрации и референсы», затем вставьте скопированный промпт.</p>
+                            <p className="mt-2 text-sm leading-6 text-[#70685e]">Откройте ChatGPT Image, приложите главный референс персонажа, референс окружения и все дополнительные референсы из блока «Иллюстрации и референсы», затем вставьте скопированный промпт.</p>
                             {!environmentReference ? <p className="mt-2 text-xs font-semibold text-[#8a493b]">Референс окружения пока не загружен.</p> : null}
                             {networkImageProvider && chatPagePrompt ? (
                               <form action={generateImage} className="mt-3">

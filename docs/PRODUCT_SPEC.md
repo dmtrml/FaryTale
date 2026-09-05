@@ -121,6 +121,7 @@ Contains:
 - support long books (at least 100 pages) without artificial short-story limits;
 - inspect/copy prompt;
 - store one canonical book-level environment/props visual reference for manual image consistency;
+- declare additional parent-supplied external object references when a specific real-world prop must keep its exact appearance across pages;
 - copy one ready-to-use prompt for generating that canonical environment/props reference before uploading it;
 - copy a flattened ready-to-use prompt for the selected page while keeping technical prompt sections as provenance;
 - copy one whole-book manual-generation prompt that asks for separate page images and describes the attached canonical references once;
@@ -159,7 +160,7 @@ Default authoring flow:
 5. The agent resolves existing canonical characters and creates complete textual canonical definitions for genuinely new characters.
 6. The agent creates/updates the canonical book, all pages and per-page character membership in one high-level workflow.
 7. The agent assigns library classification for future filtering: canonical characters, story meanings, concrete situations/skills, established collections, useful tags and any parent-defined custom dimensions that apply.
-8. The agent creates one final illustration prompt for every scene/page, including canonical identity/continuity constraints and any available reference-image paths.
+8. The agent creates one final illustration prompt for every scene/page, including canonical identity/continuity constraints, available reference-image paths and any explicitly declared parent-supplied external object references.
 9. In the current default workflow, images are **not generated automatically**. Every page is left in `prompt_ready` state for manual image generation/upload by the parent.
 10. The workflow validates the saved book, page count, prompts, classification and character references and returns a concise completion report with warnings such as a missing character reference image.
 11. Manual Parent-mode forms remain available for inspection, recovery and occasional corrections.
@@ -197,9 +198,12 @@ A book references character IDs rather than copying the whole character definiti
 
 Book-specific visual overrides are allowed when explicitly stored.
 Books may also store book-level visual references for recurring environments/props. The
-current manual workflow uses one canonical `environment` reference alongside character
-identity references so a parent can attach the same visual anchors when generating one
-page or an entire series in ChatGPT Image.
+manual workflow uses one canonical `environment` reference alongside character identity
+references. When a parent wants the exact appearance of another real-world prop to come
+from a photo they will attach manually, the book may additionally declare an external
+object reference. Ready-to-copy ChatGPT prompts enumerate character, environment and
+external object references explicitly so the same visual anchors are used for one page
+or an entire series.
 
 ## 9. AI Studio
 

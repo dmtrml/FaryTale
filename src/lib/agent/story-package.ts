@@ -56,6 +56,16 @@ export const approvedStoryPackageSchema = z
     classification: bookClassificationSchema.default(createEmptyBookClassification),
     storyPattern: storyPatternSchema.optional(),
     visualStyle: z.string().trim().min(1).max(1200).optional(),
+    externalReferences: z
+      .array(
+        z.object({
+          id: contentIdSchema,
+          label: z.string().trim().min(1).max(160),
+          instruction: z.string().trim().min(1).max(1000).optional(),
+        }),
+      )
+      .max(20)
+      .default([]),
     characters: z.array(approvedStoryCharacterSchema).max(50).default([]),
     pages: z.array(approvedStoryPageSchema).min(1).max(MAX_BOOK_PAGES),
   })

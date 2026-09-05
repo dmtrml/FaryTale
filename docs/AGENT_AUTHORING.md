@@ -50,6 +50,13 @@ Minimum practical shape:
     }
   },
   "visualStyle": "Тёплая простая иллюстрация для ребёнка 1–3 лет, крупные формы, минимум деталей.",
+  "externalReferences": [
+    {
+      "id": "nail-scissors",
+      "label": "фотография детских ножниц для ногтей",
+      "instruction": "Сохранять форму, цвет и конструкцию ножниц по фотографии."
+    }
+  ],
   "characters": [
     { "id": "miau" }
   ],
@@ -80,6 +87,7 @@ The parent does not need to specify these directly:
 - lifecycle/image status — materialization sets the book/pages to `prompt_ready`;
 - page character membership — the agent should fill `characterIds` from the approved scene.
 - classification tags/facets — the agent should infer `meanings` and `situations`, keep characters in the canonical `characters` field, use `collections` only when established, and preserve parent-defined dimensions in `custom`.
+- `externalReferences` — declare a parent-supplied recurring object/photo when the user explicitly says that it will be attached during image generation and must be followed as a visual reference.
 
 Deterministic inference is a fallback, not a reason to discard an obvious creative classification. When the approved story clearly describes a concrete everyday routine (for example potty use, tooth brushing, washing, dressing or hair care), the agent should prefer an explicit `habit-routine` value rather than rely on incidental words such as “feels” or “calm” in the goal description.
 
@@ -149,6 +157,11 @@ Every prompt contains:
 - continuity constraints;
 - negative constraints (no text, watermarks, accidental characters, etc.);
 - manual generation metadata.
+
+When `externalReferences` are declared, the ready-to-copy ChatGPT prompts enumerate
+them together with the usual canonical character reference and stored environment
+reference. For example, a book may explicitly say: reference 1 = Emi, reference 2 =
+environment, reference 3 = the parent's photo of the exact nail scissors.
 
 The Parent page editor already displays/copies these prompt files.
 
