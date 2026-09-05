@@ -29,7 +29,7 @@
 Private family story content is intentionally ignored by Git.
 
 Current local content:
-- 3 active private illustrated books; each currently has 6 pages, ready illustrations, a cover and an environment reference.
+- 4 active private books total: 3 illustrated/ready books plus the new 6-page `Эми стрижёт ноготки` book in `prompt_ready` state awaiting its environment reference, scissors photo/reference, cover and page illustrations.
 - One reusable private child character has a canonical visual identity + uploaded identity reference. Its narrative description is intentionally generic across books rather than tied to one story goal.
 - One additional private routine book was removed from the active library after repeated manual image-moderation failures and is preserved under ignored `content/archive/user-removed-books/`.
 
@@ -115,6 +115,7 @@ UX review branch verification on 2026-09-04:
 - Library filtering/sorting now consumes canonical classification directly. Parent mode supports character, meaning, situation, collection, tag and dynamic custom facets; child mode keeps compact character/meaning/situation filters. Verification passed: `npm run typecheck`, `npm run lint`, full `npm test` (22 files / 90 tests), `npm run build`, and `git diff --check`. The three current ignored private books were backfilled with classification metadata only; their approved story text and illustrations were not changed.
 - Reader completion/resume behavior was tightened so the final page never becomes a resume target; reaching it clears local saved progress. Reader navigation regression coverage now includes unfinished-vs-completed resume eligibility.
 - Verification for the resume-completion fix passed: `npm run typecheck`, `npm run lint`, targeted reader navigation tests (4/4), full `npm test` (22 files / 91 tests), `npm run build`, and `git diff --check`.
+- On 2026-09-05 the approved 6-page story `Эми стрижёт ноготки` was materialized as `emi-trims-her-nails` using the canonical agent-first workflow. It reuses `emi`, is classified as `habit-routine`, and every page prompt explicitly requires a separate photo/reference of the real child nail scissors in addition to the usual character/environment references, preserving the scissors' shape, color, size, construction and rounded tips. The scissors are always adult-controlled in the scenes. Materialization reported 6/6 prompts and no warnings; binary scissors/environment/cover/page assets remain intentionally pending. Post-materialization verification passed: `npm run typecheck`, `npm run lint`, full `npm test` (22 files / 91 tests), and `git diff --check`.
 
 ## Git / working state
 
@@ -141,6 +142,7 @@ Read in this order:
 ## Exact next action
 
 1. Review the denser child-shelf layout in real use across desktop/tablet widths and adjust only concrete sizing issues that appear.
-2. Keep new user-defined classification dimensions in `classification.custom`; Parent filters will discover them automatically.
-3. Keep future UX work checkpointed as separate coherent commits.
-4. GitHub push remains separately blocked until an account with write access to `dmtrml/FaryTale` is authenticated on this computer.
+2. For `emi-trims-her-nails`, create/upload the canonical scissors reference from the parent's real scissors photo plus the usual environment reference, then generate/upload the six 16:9 page illustrations and cover.
+3. Keep new user-defined classification dimensions in `classification.custom`; Parent filters will discover them automatically.
+4. Keep future UX work checkpointed as separate coherent commits.
+5. GitHub push remains separately blocked until an account with write access to `dmtrml/FaryTale` is authenticated on this computer.
