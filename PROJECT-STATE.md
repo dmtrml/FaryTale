@@ -29,7 +29,9 @@
 Private family story content is intentionally ignored by Git.
 
 Current local content:
-- 4 active private books total: 3 illustrated/ready books plus the new 6-page `Эми стрижёт ноготки` book in `prompt_ready` state awaiting its environment reference, scissors photo/reference, cover and page illustrations.
+- 5 active private books total: 3 illustrated/ready books plus two 6-page books in `prompt_ready` state — `Эми стрижёт ноготки` and `Эми кушает ложкой`.
+- `Эми стрижёт ноготки` awaits its environment reference, scissors photo/reference, cover and page illustrations.
+- `Эми кушает ложкой` awaits its environment reference plus the parent's exact plate, spoon and child high-chair photos/references, cover and page illustrations.
 - One reusable private child character has a canonical visual identity + uploaded identity reference. Its narrative description is intentionally generic across books rather than tied to one story goal.
 - One additional private routine book was removed from the active library after repeated manual image-moderation failures and is preserved under ignored `content/archive/user-removed-books/`.
 
@@ -121,6 +123,7 @@ UX review branch verification on 2026-09-04:
 - On 2026-09-05 the approved 6-page story `Эми стрижёт ноготки` was materialized as `emi-trims-her-nails` using the canonical agent-first workflow. It reuses `emi`, is classified as `habit-routine`, and every page prompt explicitly requires a separate photo/reference of the real child nail scissors in addition to the usual character/environment references, preserving the scissors' shape, color, size, construction and rounded tips. The scissors are always adult-controlled in the scenes. Materialization reported 6/6 prompts and no warnings; binary scissors/environment/cover/page assets remain intentionally pending. Post-materialization verification passed: `npm run typecheck`, `npm run lint`, full `npm test` (22 files / 91 tests), and `git diff --check`.
 - On 2026-09-05 FaryTale briefly rendered broken after a production rebuild was run while the existing `next start -p 3010` process stayed alive. The root HTML still returned 200 but its referenced CSS returned 500. Restarting the production server on 3010 against the completed build restored all sampled CSS/JS assets to HTTP 200; the Parent page for `emi-trims-her-nails` then rendered successfully with its external scissors-reference metadata.
 - Follow-up correction on 2026-09-05: external object references are now first-class optional authoring metadata instead of only continuity prose. `emi-trims-her-nails` declares the parent's nail-scissors photo as `authoring.externalReferences`. The prompt builder enumerates character refs first, the stored environment reference next, then external object refs; therefore once this book's environment reference is uploaded its whole-book prompt explicitly says reference 1 = Emi, reference 2 = canonical environment, reference 3 = the exact nail-scissors photo. Parent UI also lists external refs under `Иллюстрации и референсы`. This remains backward-compatible with older books that have no external refs. Verification passed: `npm run typecheck`, `npm run lint`, full `npm test` (22 files / 91 tests), `npm run build`, and `git diff --check`.
+- On 2026-09-07 the approved 6-page story `Эми кушает ложкой` was materialized as `emi-eats-with-spoon` through the canonical agent-first workflow. The approved page text was preserved exactly, the book reuses `emi`, uses `habit-routine`, and declares three external object references: the parent's exact plate, spoon and child high-chair photos. Materialization produced 6/6 prompts with no warnings. Parent runtime verification on port 3010 confirmed the book page, all three external references and the whole-book prompt render correctly. Before an environment reference is uploaded the prompt enumerates Emi + plate + spoon + high chair; after the normal environment reference is uploaded it will be inserted second, yielding Emi + environment + plate + spoon + high chair.
 
 ## Git / working state
 
@@ -148,5 +151,6 @@ Read in this order:
 
 1. Review the denser child-shelf layout in real use across desktop/tablet widths and adjust only concrete sizing issues that appear.
 2. For `emi-trims-her-nails`, create/upload the usual canonical environment reference; when generating the whole series in ChatGPT, attach Emi + that environment reference + the parent's nail-scissors photo as the three references enumerated by the prompt, then generate/upload the six 16:9 page illustrations and cover.
-3. Keep new user-defined classification dimensions in `classification.custom`; Parent filters will discover them automatically.
-4. Keep future UX work checkpointed as separate coherent commits.
+3. For `emi-eats-with-spoon`, create/upload the usual canonical environment reference; when generating the whole series in ChatGPT, attach Emi + environment + the parent's plate + spoon + child high-chair photos as the five references enumerated by the prompt, then generate/upload the six 16:9 page illustrations and cover.
+4. Keep new user-defined classification dimensions in `classification.custom`; Parent filters will discover them automatically.
+5. Keep future UX work checkpointed as separate coherent commits.
