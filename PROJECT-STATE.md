@@ -6,7 +6,7 @@
 
 ## Current status
 
-**Current phase:** Phase 17 complete — local Qwen-Image-2.1 illustration studio through ComfyUI is implemented and verified.
+**Current phase:** Phase 18 in progress — generate canonical character/environment references inside FaryTale.
 
 **Overall state:** FaryTale is a working reader-first family storybook app with parent-only authoring. The primary creation workflow is agent-first: an approved story can be materialized into canonical book/character files plus one prompt per page without manual technical form entry. Existing books remain readable without AI, credentials, a database or internet access.
 
@@ -160,7 +160,7 @@ Read in this order:
 
 ## Exact next action
 
-1. Do a parent-facing acceptance pass in the actual book editor with the private family content: upload any missing character/environment/external object references and exercise Generate → Regenerate → Restore → text Edit on one page.
-2. Use the first real family-book results to tune prompt wording/reference selection only when a concrete consistency problem appears; do not add speculative complexity.
-3. Keep mask/brush annotation editing, automatic continuity-anchor selection and whole-book queued generation as post-MVP enhancements.
-4. Continue checkpointing each coherent future enhancement as a separate verified commit before pushing to `origin/main`.
+1. Implement Phase 18.1: provider-backed character identity and book-environment reference generation using the existing canonical prompts and save mutations.
+2. Add mocked tests and checkpoint the backend before changing Parent UI.
+3. Implement Phase 18.2 buttons beside the existing manual upload controls, then verify against the local test book `emi-learns-to-drink-from-cup`.
+4. Keep external exact-object references (for example the real cup) upload-first for now; they represent parent-supplied real-world objects rather than synthetic canonical design.

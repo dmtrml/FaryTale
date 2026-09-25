@@ -335,3 +335,34 @@ Acceptance:
 - a parent can submit a text instruction to edit the current illustration while keeping canonical references attached;
 - the reader remains fully usable with ComfyUI stopped, and `manual` remains the zero-credential default;
 - no private family reference image is sent anywhere except the explicitly configured image provider during a parent-triggered action.
+
+## Phase 18 — Generate canonical references inside FaryTale
+
+Goal: remove the remaining manual handoff for canonical character and environment references so a parent can prepare a new book entirely inside FaryTale before generating page illustrations.
+
+### 18.1 — Reference-generation service
+
+- [ ] Add one server-side service for provider-backed canonical-reference generation.
+- [ ] Generate a character identity reference from the existing canonical character prompt and save the result as the new `identity` reference.
+- [ ] Generate a 16:9 book environment reference from the existing environment prompt and save it through the canonical environment-reference mutation.
+- [ ] Keep `manual` mode unchanged; generation controls are shown only when a real image provider is configured.
+- [ ] Reuse the existing provider abstraction so ComfyUI/Qwen and OpenAI-backed generation remain interchangeable.
+- [ ] Add mocked regression tests; no live ComfyUI instance is required for automated verification.
+
+### 18.2 — Parent UI
+
+- [ ] Add “Сгенерировать главный референс” to the character editor next to manual upload.
+- [ ] Add “Сгенерировать окружение” to the book reference section next to manual upload.
+- [ ] Regeneration/replacement of either reference must remain explicit and keep the manual upload fallback.
+- [ ] Revalidate affected Parent/book pages so newly generated references appear immediately.
+
+### 18.3 — Verification
+
+- [ ] Run typecheck, lint, focused tests, full tests, production build and `git diff --check`.
+- [ ] Verify the new test book `Эми учится пить из чашки` can proceed from generated references to normal page Generate without leaving FaryTale.
+
+Acceptance:
+- from Parent mode a user can create/replace the canonical character identity image without copying its prompt to another app;
+- from a book page a user can create/replace the canonical 16:9 environment reference without copying its prompt to another app;
+- generated references become ordinary canonical assets and automatically participate in the existing page Reference Pack;
+- manual uploads remain available and the reader remains independent of all AI providers.
