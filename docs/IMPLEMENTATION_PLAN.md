@@ -278,3 +278,60 @@ Acceptance:
 - adding a new custom classification dimension makes that dimension appear automatically in Parent filters;
 - filters can be combined and reset without changing canonical content;
 - child mode remains calm and does not expose technical classification structure.
+
+## Phase 17 — Local Qwen illustration studio through ComfyUI
+
+Goal: replace the current mostly-manual illustration handoff with a local/private generation workflow while preserving the existing provider abstraction, file-based canonical content, manual fallback and child/parent separation.
+
+Architecture:
+
+`Parent book UI -> existing image-generation service -> ImageProvider -> ComfyUIImageProvider -> local ComfyUI -> Qwen-Image-2.1`
+
+The application runtime must talk to ComfyUI over its local HTTP API. MCP/connectors may be used by development agents to inspect or configure the project, but they are not a runtime dependency of FaryTale.
+
+### 17.1 — ComfyUI provider foundation
+
+- [ ] Extend server-only image-provider configuration with a `comfyui` provider and local base URL.
+- [ ] Add a `ComfyUIImageProvider` behind the existing `ImageProvider` interface rather than adding a parallel generation subsystem.
+- [ ] Keep workflow JSON outside canonical book data and make workflow paths configurable.
+- [ ] Upload only the references selected for the current page/action.
+- [ ] Submit a ComfyUI prompt, poll its history, fetch the resulting image and return ordinary `GeneratedImageResult` bytes to the existing service.
+- [ ] Add mocked provider tests; automated tests must not require a running ComfyUI instance.
+
+### 17.2 — Real external object references and reference packs
+
+- [ ] Let declared `authoring.externalReferences` have actual private image assets stored under the canonical book folder.
+- [ ] Keep the semantic declaration (id/label/instruction) separate from the binary reference entry so existing books remain backward-compatible.
+- [ ] Add Parent upload/replace controls for each declared external reference.
+- [ ] Build one deterministic page reference pack in this order: page characters, canonical environment, matching external object references, then later continuity anchors.
+- [ ] Enforce the Qwen-Image-2.1 maximum of 10 submitted reference images and fail clearly rather than silently dropping important references.
+- [ ] Reuse the same reference-pack builder for provider execution and prompt/debug presentation so numbering cannot drift.
+
+### 17.3 — Generate, regenerate and visible variants
+
+- [ ] Keep the existing explicit one-page Generate/Regenerate action and current page-status lifecycle.
+- [ ] Preserve the existing archive-before-regenerate behavior under `pages/history/`.
+- [ ] Surface previous generated variants in Parent mode and allow restoring one as the current page illustration.
+- [ ] Keep manual upload/copy-prompt paths available as fallback even when ComfyUI is configured.
+
+### 17.4 — Text-guided image edit
+
+- [ ] Extend the provider request contract with an explicit generation/edit mode, optional source image, user edit instruction and seed where useful.
+- [ ] Add a page-level “Изменить изображение” flow that sends the current illustration as the edit target plus the canonical page reference pack.
+- [ ] Use a separate configurable ComfyUI/Qwen edit workflow; edits must create a new variant/archive the previous current image instead of destructively losing it.
+- [ ] Do not add mask painting/annotation UI in this first MVP, but keep the contract extensible for a later mask/annotation phase.
+
+### 17.5 — Verification and operational documentation
+
+- [ ] Update `docs/MVP.md`, `README.md` and `PROJECT-STATE.md` with the local ComfyUI configuration and the final supported workflow.
+- [ ] Add regression coverage for provider configuration, ComfyUI request/result mapping, external-reference upload, reference ordering/limit, regeneration history, restore and edit.
+- [ ] Run typecheck, lint, full tests, build and `git diff --check`.
+- [ ] Perform one real local smoke test against the parent's installed ComfyUI/Qwen workflow when ComfyUI is running.
+
+Acceptance:
+- a parent can generate one page from the existing FaryTale page editor without copying prompts to another application;
+- the generation automatically uses available canonical character, environment and declared external-object reference images;
+- regeneration preserves prior versions and a previous version can be restored;
+- a parent can submit a text instruction to edit the current illustration while keeping canonical references attached;
+- the reader remains fully usable with ComfyUI stopped, and `manual` remains the zero-credential default;
+- no private family reference image is sent anywhere except the explicitly configured image provider during a parent-triggered action.

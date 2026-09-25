@@ -6,7 +6,7 @@
 
 ## Current status
 
-**Current phase:** local/private MVP complete — canonical library classification plus filtering/sorting implemented.
+**Current phase:** Phase 17 in progress — local Qwen-Image-2.1 illustration studio through ComfyUI.
 
 **Overall state:** FaryTale is a working reader-first family storybook app with parent-only authoring. The primary creation workflow is agent-first: an approved story can be materialized into canonical book/character files plus one prompt per page without manual technical form entry. Existing books remain readable without AI, credentials, a database or internet access.
 
@@ -149,8 +149,7 @@ Read in this order:
 
 ## Exact next action
 
-1. Review the denser child-shelf layout in real use across desktop/tablet widths and adjust only concrete sizing issues that appear.
-2. For `emi-trims-her-nails`, create/upload the usual canonical environment reference; when generating the whole series in ChatGPT, attach Emi + that environment reference + the parent's nail-scissors photo as the three references enumerated by the prompt, then generate/upload the six 16:9 page illustrations and cover.
-3. For `emi-eats-with-spoon`, create/upload the usual canonical environment reference; when generating the whole series in ChatGPT, attach Emi + environment + the parent's plate + spoon + child high-chair photos as the five references enumerated by the prompt, then generate/upload the six 16:9 page illustrations and cover.
-4. Keep new user-defined classification dimensions in `classification.custom`; Parent filters will discover them automatically.
-5. Keep future UX work checkpointed as separate coherent commits.
+1. Implement Phase 17.1 from `docs/IMPLEMENTATION_PLAN.md`: server-side `comfyui` provider configuration plus a mocked/tested `ComfyUIImageProvider` behind the existing `ImageProvider` contract.
+2. Checkpoint each coherent Phase 17 milestone as its own verified Git commit before moving to the next milestone.
+3. Continue with real external-reference assets/reference-pack assembly, then generation history/restore, then text-guided editing.
+4. Perform the final real ComfyUI/Qwen smoke test only when the local ComfyUI server is running; automated verification must remain independent of it.
