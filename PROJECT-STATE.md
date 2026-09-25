@@ -28,12 +28,11 @@
 
 Private family story content is intentionally ignored by Git.
 
-Current local content:
-- 5 active private books total: 3 illustrated/ready books plus two 6-page books in `prompt_ready` state — `Эми стрижёт ноготки` and `Эми кушает ложкой`.
-- `Эми стрижёт ноготки` awaits its environment reference, scissors photo/reference, cover and page illustrations.
-- `Эми кушает ложкой` awaits its environment reference plus the parent's exact plate, spoon and child high-chair photos/references, cover and page illustrations.
-- One reusable private child character has a canonical visual identity + uploaded identity reference. Its narrative description is intentionally generic across books rather than tied to one story goal.
-- One additional private routine book was removed from the active library after repeated manual image-moderation failures and is preserved under ignored `content/archive/user-removed-books/`.
+Current local content in this checkout:
+- 3 private books are physically present: `emi-and-her-potty`, `miau-tidies-ball` and `miau-washes-paws`.
+- 2 reusable character definitions are physically present: `emi` and `miau`. Their current local canonical JSON does not declare binary identity-reference files yet.
+- The previously materialized `emi-trims-her-nails` / “Эми стрижёт ноготки” and `emi-eats-with-spoon` / “Эми кушает ложкой” remain documented in project history but are not present in this checkout. This is expected because private `content/books/*` and `content/characters/*` are intentionally ignored by Git and therefore may differ between machines.
+- Do not copy private family content into Git merely to make checkouts match. Restore/upload the desired private books and reference assets locally when using them on this computer.
 
 ## Current authoring/UX behavior
 
@@ -80,6 +79,7 @@ Current local content:
 11. **Agent-created books are classified automatically.** When a story is materialized, the agent should infer obvious meanings and situations, keep character filtering on canonical character IDs, use collections only when established, and preserve any parent-defined custom classification dimensions rather than asking for routine manual metadata entry.
 12. **Library filters are schema-driven.** Filter options must be derived from canonical `characters` / `classification`, including dynamic custom facets, rather than maintained as a separate hardcoded taxonomy in UI code.
 13. **Exact real-world props can be separate external references.** When the parent says they will attach a photo of a recurring object (for example nail scissors), record it as `authoring.externalReferences` instead of hiding it only in page prose. The whole-book/page ChatGPT prompt must enumerate it alongside the normal character/environment references.
+14. **Local image runtime uses direct ComfyUI HTTP, not MCP.** FaryTale talks to the configured local ComfyUI upload/prompt/history/view endpoints through `ComfyUIImageProvider`. MCP/connectors remain development tooling and are not required by the application at runtime.
 
 ## Safety / privacy boundaries
 
@@ -98,6 +98,7 @@ Current local content:
 - Local networking note: use `localhost` rather than assuming `127.0.0.1` on this machine because another local project has previously occupied IPv4 port 3000 while FaryTale listened on IPv6.
 - Operational note: do not leave `next start` running while executing `next build` against the same `.next` directory. Rebuilding under a live production server can leave the running process with stale manifests while static assets are replaced, causing CSS/JS requests to fail. After a production rebuild, restart the FaryTale server on port 3010 before judging the UI.
 - Do not refactor the large Parent book-detail page merely for aesthetics; split it into subcomponents when the next substantial UI change makes that useful.
+- Phase 17 intentionally remains explicit one-page-at-a-time generation. Whole-book queued generation, automatic continuity-anchor selection and brush/mask annotation editing are post-MVP enhancements to evaluate from real family-book use.
 
 ## Verification baseline
 
