@@ -1,5 +1,6 @@
 import type { Book, BookPage, Character } from "../content/schemas";
 import { selectCanonicalIdentityReference } from "../characters/identity";
+import { buildReferencePackPlan } from "../image-generation/reference-pack";
 
 function escapeRegExp(value: string) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -42,37 +43,19 @@ function referenceWord(count: number) {
 }
 
 function referencePlan(book: Book, characters: Character[]) {
-  const characterReferences = characters
-    .map((character) => ({ character, reference: selectCanonicalIdentityReference(character) }))
-    .filter((item): item is { character: Character; reference: NonNullable<typeof item.reference> } => Boolean(item.reference));
-  const environmentReference = book.references.find((reference) => reference.role === "environment") ?? null;
-  const otherBookReferences = book.references.filter((reference) => reference.role !== "environment");
-  const externalReferences = book.authoring?.externalReferences ?? [];
-
+  const plan = buildReferencePackPlan({ book, characters });
   const items: string[] = [];
   const extraInstructions: string[] = [];
-  characterReferences.forEach(({ character }, index) => {
-    items.push(`референс ${index + 1} — каноническая внешность персонажа ${character.name}`);
-  });
-  if (environmentReference) {
-    items.push(`референс ${items.length + 1} — каноническое окружение, художественный стиль и постоянные предметы книги`);
-  }
-  otherBookReferences.forEach((reference) => {
-    items.push(`референс ${items.length + 1} — дополнительный канонический референс книги «${reference.id}»`);
-  });
-  externalReferences.forEach((reference) => {
-    const number = items.length + 1;
-    items.push(`референс ${number} — ${reference.label}`);
-    if (reference.instruction) {
-      extraInstructions.push(`Для референса ${number}: ${reference.instruction}`);
+  plan.forEach((item, index) => {
+    const number = index + 1;
+    items.push(`референс ${number} — ${item.label}`);
+    if (item.instruction) {
+      extraInstructions.push(`Для референса ${number}: ${item.instruction}`);
     }
   });
 
   return {
-    characterReferences,
-    environmentReference,
-    otherBookReferences,
-    externalReferences,
+    plan,
     instruction: items.length
       ? `Я прикладываю ${items.length} ${referenceWord(items.length)}: ${items.join("; ")}. Используй их как канонические и не переосмысливай внешность персонажей, окружение и постоянные предметы от страницы к странице.${extraInstructions.length ? ` ${extraInstructions.join(" ")}` : ""}`
       : "Визуальные референсы пока не приложены, поэтому строго следуй текстовым описаниям и сохраняй одни и те же внешность, стиль и постоянные предметы на всех страницах.",
@@ -94,7 +77,8 @@ function pageDetails(rawPrompt?: string | null) {
 function commonVisualInstruction(book: Book, characters: Character[]) {
   const plan = referencePlan(book, characters);
   const withoutReference = characters.filter(
-    (character) => !plan.characterReferences.some((item) => item.character.id === character.id),
+    (character) =>
+      !plan.plan.some((item) => item.kind === "character" && item.id === character.id),
   );
   const fallback = withoutReference.length
     ? ` Для персонажей без изображения-референса используй это каноническое описание: ${withoutReference.map(characterFallback).join(" ")}`

@@ -174,6 +174,73 @@ describe("generateBookPageImage", () => {
     expect(captured?.references?.map((item) => item.role)).toEqual(["identity", "environment"]);
   });
 
+  it("adds stored external object references after character and environment in declared order", async () => {
+    const root = await fixture();
+    await fs.mkdir(path.join(root, "books", "image-book", "refs", "external"), { recursive: true });
+    await fs.mkdir(path.join(root, "books", "image-book", "refs"), { recursive: true });
+    await fs.writeFile(path.join(root, "books", "image-book", "refs", "room.png"), Buffer.from([4, 5, 6]));
+    await fs.writeFile(path.join(root, "books", "image-book", "refs", "external", "spoon.png"), Buffer.from([1, 4, 7]));
+    await fs.writeFile(path.join(root, "books", "image-book", "refs", "external", "plate.png"), Buffer.from([2, 5, 8]));
+    const bookPath = path.join(root, "books", "image-book", "book.json");
+    const raw = JSON.parse(await fs.readFile(bookPath, "utf8"));
+    raw.references = [
+      { id: "environment", path: "refs/room.png", role: "environment" },
+      { id: "plate", path: "refs/external/plate.png", role: "external" },
+      { id: "spoon", path: "refs/external/spoon.png", role: "external" },
+    ];
+    raw.authoring = {
+      skill: "childrens-story-creator-v1",
+      ageBand: "18-24m",
+      storyPattern: "habit-routine",
+      externalReferences: [
+        { id: "spoon", label: "Spoon" },
+        { id: "plate", label: "Plate" },
+      ],
+      outline: [
+        { pageNumber: 1, beat: "One" },
+        { pageNumber: 2, beat: "Two" },
+      ],
+    };
+    await fs.writeFile(bookPath, JSON.stringify(raw));
+    let captured: ImageGenerationRequest | undefined;
+    const provider: ImageProvider = {
+      id: "reference-check",
+      async generate(request) {
+        captured = request;
+        return {
+          kind: "deferred",
+          imageStatus: "prompt_ready",
+          prompt: request.prompt,
+          metadata: { provider: "reference-check" },
+        };
+      },
+    };
+
+    const result = await generateBookPageImage({
+      bookId: "image-book",
+      pageNumber: 1,
+      provider,
+      contentRoot: root,
+    });
+
+    expect(result.referencePaths).toEqual([
+      "characters/miau/refs/canonical.png",
+      "books/image-book/refs/room.png",
+      "books/image-book/refs/external/spoon.png",
+      "books/image-book/refs/external/plate.png",
+    ]);
+    expect(captured?.references?.map((item) => item.role)).toEqual([
+      "identity",
+      "environment",
+      "external:spoon",
+      "external:plate",
+    ]);
+    expect(captured?.prompt).toContain("референс 1 — каноническая внешность персонажа Мяу");
+    expect(captured?.prompt).toContain("референс 2 — каноническое окружение");
+    expect(captured?.prompt).toContain("референс 3 — Spoon");
+    expect(captured?.prompt).toContain("референс 4 — Plate");
+  });
+
   it("archives the previous ready image before a successful regeneration", async () => {
     const root = await fixture();
     await replaceBookPageImage({

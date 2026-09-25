@@ -300,12 +300,12 @@ The application runtime must talk to ComfyUI over its local HTTP API. MCP/connec
 
 ### 17.2 — Real external object references and reference packs
 
-- [ ] Let declared `authoring.externalReferences` have actual private image assets stored under the canonical book folder.
-- [ ] Keep the semantic declaration (id/label/instruction) separate from the binary reference entry so existing books remain backward-compatible.
-- [ ] Add Parent upload/replace controls for each declared external reference.
-- [ ] Build one deterministic page reference pack in this order: page characters, canonical environment, matching external object references, then later continuity anchors.
-- [ ] Enforce the Qwen-Image-2.1 maximum of 10 submitted reference images and fail clearly rather than silently dropping important references.
-- [ ] Reuse the same reference-pack builder for provider execution and prompt/debug presentation so numbering cannot drift.
+- [x] Let declared `authoring.externalReferences` have actual private image assets stored under the canonical book folder.
+- [x] Keep the semantic declaration (id/label/instruction) separate from the binary reference entry so existing books remain backward-compatible.
+- [x] Add Parent upload/replace controls for each declared external reference.
+- [x] Build one deterministic page reference pack in this order: page characters, canonical environment, matching external object references, then later continuity anchors.
+- [x] Enforce the Qwen-Image-2.1 maximum of 10 submitted reference images and fail clearly rather than silently dropping important references.
+- [x] Reuse the same reference-pack builder for provider execution and prompt/debug presentation so numbering cannot drift.
 
 ### 17.3 — Generate, regenerate and visible variants
 

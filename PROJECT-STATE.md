@@ -46,6 +46,7 @@ Current local content:
 - Parent uploads validate actual page/environment aspect ratio before accepting assets.
 - Network image generation, when explicitly configured, requests a 16:9 output and remains per-page.
 - Phase 17.1 adds a server-only `comfyui` image provider behind the existing `ImageProvider` contract. It loads a configurable API-format workflow, replaces FaryTale prompt/size/reference sentinels, uploads only the request's reference bytes, submits `/prompt`, polls `/history/<prompt_id>` and downloads the final `/view` image. The real Qwen workflow is intentionally machine-configured rather than embedded in canonical books.
+- Phase 17.2 makes declared external object references usable by internal generation: each declaration keeps its semantic id/label/instruction while its optional binary file is stored as a normal book reference with role `external`. Parent mode can upload/replace those files. A shared reference-pack planner now defines character → environment → other book refs → declared external refs order for both flattened prompts and provider execution, with a hard 10-available-image Qwen limit.
 - Parent library filters can be combined across character, meaning, situation, collection, tag and any custom classification dimension. Custom dimensions appear automatically from canonical data rather than requiring UI code changes.
 - Child library keeps only character, meaning and situation filters when there are multiple useful choices; both libraries can sort by recent update, creation date or title.
 - Child shelf is intentionally compact and library-like: the large `Наши сказки` heading/subtitle are removed, the shelf can use up to a 1600px-wide content area, and book cards flow through an auto-fill grid with a ~220px minimum width instead of being locked to two large columns.
@@ -126,6 +127,7 @@ UX review branch verification on 2026-09-04:
 - Follow-up correction on 2026-09-05: external object references are now first-class optional authoring metadata instead of only continuity prose. `emi-trims-her-nails` declares the parent's nail-scissors photo as `authoring.externalReferences`. The prompt builder enumerates character refs first, the stored environment reference next, then external object refs; therefore once this book's environment reference is uploaded its whole-book prompt explicitly says reference 1 = Emi, reference 2 = canonical environment, reference 3 = the exact nail-scissors photo. Parent UI also lists external refs under `Иллюстрации и референсы`. This remains backward-compatible with older books that have no external refs. Verification passed: `npm run typecheck`, `npm run lint`, full `npm test` (22 files / 91 tests), `npm run build`, and `git diff --check`.
 - On 2026-09-07 the approved 6-page story `Эми кушает ложкой` was materialized as `emi-eats-with-spoon` through the canonical agent-first workflow. The approved page text was preserved exactly, the book reuses `emi`, uses `habit-routine`, and declares three external object references: the parent's exact plate, spoon and child high-chair photos. Materialization produced 6/6 prompts with no warnings. Parent runtime verification on port 3010 confirmed the book page, all three external references and the whole-book prompt render correctly. Before an environment reference is uploaded the prompt enumerates Emi + plate + spoon + high chair; after the normal environment reference is uploaded it will be inserted second, yielding Emi + environment + plate + spoon + high chair.
 - Phase 17.1 ComfyUI provider foundation verification: `npm run typecheck` passed; provider-focused Vitest suite passed 4 files / 13 tests; `npm run lint` passed; `git diff --check` passed. The local ComfyUI service was not running on ports 8188/8189 during this checkpoint, so real Qwen generation remains a later smoke test rather than an automated requirement.
+- Phase 17.2 verification: `npm run typecheck` passed; focused reference-pack/image-service/authoring/manual-prompt suite passed 4 files / 26 tests; full `npm test` passed 24 files / 100 tests; `npm run lint` and `npm run build` passed; `git diff --check` passed.
 
 ## Git / working state
 
@@ -151,7 +153,7 @@ Read in this order:
 
 ## Exact next action
 
-1. Implement Phase 17.2: persist real binary assets for declared external object references, add Parent upload/replace controls and build one deterministic reference pack shared by generation and prompt/debug presentation.
-2. Enforce the Qwen-Image-2.1 10-reference limit with a clear error rather than silently omitting canonical references.
-3. Checkpoint the complete Phase 17.2 change after focused tests/typecheck/lint, then proceed to visible variant restore and text-guided editing.
+1. Implement Phase 17.3: expose archived page-image variants in Parent mode and add a safe restore action while retaining the existing archive-before-regenerate behavior.
+2. Checkpoint Phase 17.3, then extend the provider contract/service/UI for Phase 17.4 text-guided editing.
+3. Keep manual upload/copy-prompt fallback visible even with ComfyUI configured.
 4. Perform the final real ComfyUI/Qwen smoke test only when the local ComfyUI server is running; automated verification must remain independent of it.

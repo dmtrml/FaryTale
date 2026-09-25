@@ -15,6 +15,7 @@ import {
   moveBookPage,
   replaceBookCover,
   replaceBookEnvironmentReference,
+  replaceBookExternalReference,
   removeCharacterReference,
   setCharacterIdentityReference,
   updateBookMetadata,
@@ -254,6 +255,66 @@ describe("complete book authoring", () => {
         mimeType: "image/png",
       }),
     ).rejects.toThrow("16:9");
+  });
+
+  it("stores and replaces a declared external object reference without forcing 16:9", async () => {
+    const root = await makeRoot();
+    const bookPath = path.join(root, "books", "sample-book", "book.json");
+    const raw = JSON.parse(await fs.readFile(bookPath, "utf8"));
+    raw.authoring.externalReferences = [
+      {
+        id: "spoon",
+        label: "Точная детская ложка",
+        instruction: "Сохранять форму и цвет.",
+      },
+    ];
+    await fs.writeFile(bookPath, JSON.stringify(raw, null, 2));
+
+    const first = await replaceBookExternalReference({
+      contentRoot: root,
+      bookId: "sample-book",
+      referenceId: "spoon",
+      bytes: portraitPng,
+      mimeType: "image/png",
+      today: "2026-09-25",
+    });
+    expect(first.relativePath).toMatch(/^refs\/external\/spoon-/);
+    expect(first.book.references).toContainEqual({
+      id: "spoon",
+      path: first.relativePath,
+      role: "external",
+    });
+    expect(first.inspection).toMatchObject({ width: 2, height: 3 });
+
+    const second = await replaceBookExternalReference({
+      contentRoot: root,
+      bookId: "sample-book",
+      referenceId: "spoon",
+      bytes: portraitPng,
+      mimeType: "image/png",
+    });
+    expect(second.relativePath).not.toBe(first.relativePath);
+    expect(
+      second.book.references.filter(
+        (reference) => reference.role === "external" && reference.id === "spoon",
+      ),
+    ).toHaveLength(1);
+    await expect(
+      fs.access(path.join(root, "books", "sample-book", ...first.relativePath.split("/"))),
+    ).rejects.toThrow();
+  });
+
+  it("rejects an external reference image that is not declared by the book", async () => {
+    const root = await makeRoot();
+    await expect(
+      replaceBookExternalReference({
+        contentRoot: root,
+        bookId: "sample-book",
+        referenceId: "spoon",
+        bytes: portraitPng,
+        mimeType: "image/png",
+      }),
+    ).rejects.toThrow("not declared");
   });
 });
 

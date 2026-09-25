@@ -11,6 +11,7 @@ import {
   prepareStoryDraftAction,
   replaceBookCoverAction,
   replaceBookEnvironmentReferenceAction,
+  replaceBookExternalReferenceAction,
   replacePageImageAction,
   updateBookMetadataAction,
   updatePageCharactersAction,
@@ -289,15 +290,52 @@ export default async function ParentBookPage({
 
             {externalReferences.length ? (
               <div className="rounded-xl bg-[#f4f0e9] p-4 lg:col-span-2">
-                <h3 className="text-sm font-semibold">Дополнительные референсы для ChatGPT</h3>
-                <p className="mt-1 text-xs leading-5 text-[#756d64]">Эти изображения прикладываются вручную вместе с референсом персонажа и окружения.</p>
-                <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                  {externalReferences.map((reference) => (
-                    <div key={reference.id} className="rounded-xl bg-white p-3">
-                      <p className="text-sm font-semibold">{reference.label}</p>
-                      {reference.instruction ? <p className="mt-1 text-xs leading-5 text-[#756d64]">{reference.instruction}</p> : null}
-                    </div>
-                  ))}
+                <h3 className="text-sm font-semibold">Дополнительные референсы предметов</h3>
+                <p className="mt-1 text-xs leading-5 text-[#756d64]">Загрузите реальные фотографии один раз. При внутренней генерации FaryTale автоматически добавит доступные референсы после персонажей и окружения.</p>
+                <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                  {externalReferences.map((reference) => {
+                    const storedReference = book.references.find(
+                      (item) => item.role === "external" && item.id === reference.id,
+                    );
+                    const replaceExternalReference = replaceBookExternalReferenceAction.bind(
+                      null,
+                      book.id,
+                      reference.id,
+                    );
+                    return (
+                      <div key={reference.id} className="rounded-xl bg-white p-3">
+                        <div className="flex items-start gap-3">
+                          {storedReference ? (
+                            <Image
+                              unoptimized
+                              width={80}
+                              height={80}
+                              src={`/api/parent/books/${book.id}/asset?path=${encodeURIComponent(storedReference.path)}`}
+                              alt={`Референс: ${reference.label}`}
+                              className="size-20 shrink-0 rounded-lg bg-[#f4f0e9] object-contain"
+                            />
+                          ) : (
+                            <div className="grid size-20 shrink-0 place-items-center rounded-lg border border-dashed border-[#cfc5b8] bg-[#f4f0e9] text-xs text-[#756d64]">Нет фото</div>
+                          )}
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm font-semibold">{reference.label}</p>
+                            <p className="mt-1 text-xs font-semibold text-[#756d64]">{storedReference ? "Референс загружен ✓" : "Нужно загрузить фото"}</p>
+                            {reference.instruction ? <p className="mt-1 text-xs leading-5 text-[#756d64]">{reference.instruction}</p> : null}
+                          </div>
+                        </div>
+                        <form action={replaceExternalReference} className="mt-3">
+                          <ImageUploadField
+                            label={storedReference ? "Выбрать замену" : "Выбрать фотографию"}
+                            aspect="square"
+                            hint="Можно использовать фото любого соотношения сторон; оно служит визуальным референсом, а не страницей книги."
+                          />
+                          <button className="mt-2 rounded-xl border border-[#d8d0c5] bg-white px-4 py-2 text-sm font-semibold">
+                            {storedReference ? "Заменить референс" : "Загрузить референс"}
+                          </button>
+                        </form>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             ) : null}

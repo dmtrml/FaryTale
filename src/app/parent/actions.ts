@@ -24,6 +24,7 @@ import {
   moveBookPage,
   replaceBookCover,
   replaceBookEnvironmentReference,
+  replaceBookExternalReference,
   removeCharacterReference,
   setCharacterIdentityReference,
   updateBookMetadata,
@@ -216,6 +217,26 @@ export async function replaceBookEnvironmentReferenceAction(bookId: string, form
   }
   await replaceBookEnvironmentReference({
     bookId,
+    bytes: new Uint8Array(await image.arrayBuffer()),
+    mimeType: image.type,
+  });
+  revalidatePath(`/parent/books/${bookId}`);
+}
+
+export async function replaceBookExternalReferenceAction(
+  bookId: string,
+  referenceId: string,
+  formData: FormData,
+) {
+  await requireParentMode();
+  const image = formData.get("image");
+  if (!(image instanceof File)) throw new Error("External reference image is required.");
+  if (image.size === 0 || image.size > MAX_BOOK_REFERENCE_BYTES) {
+    throw new Error("External reference image must be between 1 byte and 5 MB.");
+  }
+  await replaceBookExternalReference({
+    bookId,
+    referenceId,
     bytes: new Uint8Array(await image.arrayBuffer()),
     mimeType: image.type,
   });

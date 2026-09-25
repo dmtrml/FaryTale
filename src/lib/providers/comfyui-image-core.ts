@@ -47,7 +47,7 @@ function defaultSleep(milliseconds: number) {
 async function defaultWorkflowLoader(workflowPath: string): Promise<Workflow> {
   const absolute = path.isAbsolute(workflowPath)
     ? workflowPath
-    : path.join(process.cwd(), workflowPath);
+    : path.join(/* turbopackIgnore: true */ process.cwd(), workflowPath);
   return JSON.parse(await fs.readFile(absolute, "utf8")) as Workflow;
 }
 

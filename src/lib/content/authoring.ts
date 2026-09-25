@@ -254,6 +254,54 @@ export async function replaceBookEnvironmentReference({
   return { book, relativePath, inspection };
 }
 
+export async function replaceBookExternalReference({
+  bookId,
+  referenceId,
+  bytes,
+  mimeType,
+  ...options
+}: AuthoringOptions & {
+  bookId: string;
+  referenceId: string;
+  bytes: Uint8Array;
+  mimeType: string;
+}) {
+  assertContentId(referenceId, "external reference");
+  if (!(mimeType in imageTypes)) throw new Error("Unsupported image type.");
+  if (bytes.byteLength === 0 || bytes.byteLength > MAX_BOOK_REFERENCE_BYTES) {
+    throw new Error("Book reference image must be between 1 byte and 5 MB.");
+  }
+  const inspection = inspectImage(bytes, mimeType);
+  const contentRoot = resolveContentRoot(options.contentRoot);
+  const { book, filePath, bookRoot } = await readBook(contentRoot, bookId);
+  const declaration = book.authoring?.externalReferences?.find(
+    (reference) => reference.id === referenceId,
+  );
+  if (!declaration) {
+    throw new Error(`External reference "${referenceId}" is not declared by this book.`);
+  }
+  const previous = book.references.find(
+    (reference) => reference.role === "external" && reference.id === referenceId,
+  );
+  const extension = imageTypes[mimeType as ImageMimeType];
+  const relativePath = `refs/external/${referenceId}-${randomUUID()}.${extension}`;
+  const target = path.join(bookRoot, ...relativePath.split("/"));
+  await fs.mkdir(path.dirname(target), { recursive: true });
+  await fs.writeFile(target, bytes);
+  book.references = [
+    ...book.references.filter(
+      (reference) => !(reference.role === "external" && reference.id === referenceId),
+    ),
+    { id: referenceId, path: relativePath, role: "external" },
+  ];
+  book.updatedAt = todayValue(options.today);
+  await writeBook(filePath, book);
+  if (previous && previous.path !== relativePath && isSafeContentPath(previous.path)) {
+    await fs.rm(path.join(bookRoot, ...previous.path.split("/")), { force: true });
+  }
+  return { book, relativePath, inspection, declaration };
+}
+
 export async function updateBookPageCharacters({
   bookId,
   pageNumber,
