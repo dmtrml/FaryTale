@@ -18,7 +18,8 @@ content/
   books/<book-id>/
     book.json
     cover.*                 # optional
-    refs/*                  # optional book-level room/environment references
+    refs/*                  # optional environment and other book references
+    refs/external/*         # exact parent-supplied object references when declared
     pages/*                 # page illustrations
     prompts/*.md            # illustration prompt + provenance
     pages/history/*         # previous generated versions when available
@@ -56,6 +57,7 @@ Parent mode can:
 - upload/replace one page image;
 - inspect/copy illustration prompts and provenance;
 - keep one canonical book-level environment/props reference alongside character identity references;
+- upload/replace real private image files for declared external object references such as a spoon, plate, chair or scissors;
 - copy one dedicated ChatGPT Image prompt for first generating that canonical environment/props reference;
 - copy one flattened ChatGPT Image prompt for the selected page without manually assembling Scene/Characters/Environment/Composition sections;
 - copy one whole-book ChatGPT Image request that asks for one separate image per page and explains the attached canonical references once for the full series;
@@ -69,13 +71,15 @@ Parent mode can:
 - create a draft book;
 - use the tool-driven Studio;
 - optionally generate/regenerate one illustration through a configured image provider;
-- compare the current generated page with the most recently archived previous version;
+- automatically attach the available page character, environment and exact object references to the provider request;
+- inspect multiple archived generated variants and restore any previous version without losing the current one;
+- submit a text-guided edit of the current illustration when the configured provider supports editing;
 - print/save a book as PDF through the browser;
 - export and restore a portable FaryTale ZIP package.
 
 The intended everyday creation flow is now **agent-first**, not form-first. After a story is approved in chat, the agent can materialize the full approved story in one structured operation: technical metadata, complete page set, canonical character reuse/creation and one illustration prompt per scene. Parent forms remain useful for inspection/recovery and occasional manual corrections.
 
-Approved-story materialization never generates images. It leaves every unillustrated page `prompt_ready` so illustrations can be generated separately in chat and uploaded manually. See `docs/AGENT_AUTHORING.md`.
+Approved-story materialization never generates images. It leaves every unillustrated page `prompt_ready`; the parent then explicitly chooses Generate/Edit in FaryTale or uses the manual copy-prompt/upload fallback. See `docs/AGENT_AUTHORING.md`.
 - switch between light and dark appearance; the choice is stored only in the local browser and is reused by reader mode.
 
 When no appearance has been chosen yet, FaryTale follows the operating-system light/dark preference. Print/PDF output intentionally remains white regardless of the on-screen theme.
@@ -99,8 +103,45 @@ references from technical prompt structure. Character identity references come f
 the character library; the book may additionally store one `environment` reference
 for the room/location, recurring props and visual context. The UI derives one
 ready-to-copy prompt for a selected page and one whole-book prompt for batch creation
-of separate page images. The structured Markdown prompt remains available only under
+of separate page images. Declared external object references can now also have actual
+book-local image assets. The structured Markdown prompt remains available only under
 technical details for inspection/provenance.
+
+### Local ComfyUI / Qwen-Image-2.1
+
+The local/private image path is:
+
+`Parent book UI -> image-generation service -> ComfyUIImageProvider -> local ComfyUI -> Qwen-Image-2.1`
+
+FaryTale does not use MCP or a coding connector as an application runtime dependency.
+The provider uses ComfyUI's ordinary local HTTP API: upload current request references,
+submit `/prompt`, poll `/history/<prompt_id>`, then fetch the final `/view` image.
+
+For a Generate request FaryTale assembles a deterministic reference pack:
+
+1. canonical identity reference for each character on the page;
+2. canonical book environment reference;
+3. other stored book references;
+4. declared external object references that currently have uploaded files.
+
+The same reference-pack plan drives both prompt numbering and provider execution. Qwen
+requests are limited to 10 images and fail clearly if the available pack is too large;
+FaryTale never silently drops an important canonical reference.
+
+The checked-in Qwen generation workflow uses those images as Qwen vision/VAE reference
+conditioning while sampling onto a fresh 16:9 latent. This lets a character portrait or
+object photo act as a visual anchor without forcing that source image to become the page
+composition.
+
+For Edit, the current page illustration becomes image 1 and the canonical pack follows
+as images 2…10. The parent types a requested change such as “make the spoon smaller”;
+successful edits archive the previous current image before replacement. A failed edit
+leaves the existing page illustration usable. Mask/brush annotation editing is intentionally
+deferred beyond this first MVP.
+
+Regeneration and edit history remain ordinary files under `pages/history/`. Parent mode
+can restore an archived version; restore first archives the current image, so switching
+versions is non-destructive.
 
 When `openai-image` is explicitly configured, one parent-triggered page request:
 
@@ -165,6 +206,20 @@ FARYTALE_IMAGE_API_KEY=<secret>
 
 `OPENAI_API_KEY` may be used as a server-only fallback key.
 
+Local Qwen-Image-2.1 / ComfyUI:
+
+```text
+FARYTALE_IMAGE_PROVIDER=comfyui
+FARYTALE_COMFYUI_BASE_URL=http://127.0.0.1:8188
+FARYTALE_COMFYUI_GENERATE_WORKFLOW=config/comfyui/qwen-image-2.1-generate.api.json
+FARYTALE_COMFYUI_EDIT_WORKFLOW=config/comfyui/qwen-image-2.1-edit.api.json
+FARYTALE_COMFYUI_OUTPUT_NODE_ID=9
+FARYTALE_COMFYUI_MODEL=qwen-image-2.1
+FARYTALE_COMFYUI_TIMEOUT_MS=300000
+```
+
+See `config/comfyui/README.md` for workflow sentinels and the tested local Qwen weight filenames.
+
 ## Privacy and security boundaries
 
 - Do not commit API keys.
@@ -201,3 +256,4 @@ The test suite uses temporary content roots and mocked providers; it does not re
 - Browser print quality depends on browser/OS PDF print support.
 - The Parent editor intentionally caps a single book at 200 pages to keep local authoring operations bounded; this is not a short-story-only 12-page limit.
 - The included Miau content is a structural sample; canonical family-approved character reference images can be added later without changing the format.
+- Local ComfyUI must be running for provider-backed generation/editing. The first MVP deliberately keeps generation parent-triggered one page at a time; automatic whole-book queueing and brush/mask annotation editing are later enhancements.

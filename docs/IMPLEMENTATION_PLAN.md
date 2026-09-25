@@ -323,9 +323,9 @@ The application runtime must talk to ComfyUI over its local HTTP API. MCP/connec
 
 ### 17.5 — Verification and operational documentation
 
-- [ ] Update `docs/MVP.md`, `README.md` and `PROJECT-STATE.md` with the local ComfyUI configuration and the final supported workflow.
-- [ ] Add regression coverage for provider configuration, ComfyUI request/result mapping, external-reference upload, reference ordering/limit, regeneration history, restore and edit.
-- [ ] Run typecheck, lint, full tests, build and `git diff --check`.
+- [x] Update `docs/MVP.md`, `README.md` and `PROJECT-STATE.md` with the local ComfyUI configuration and the final supported workflow.
+- [x] Add regression coverage for provider configuration, ComfyUI request/result mapping, external-reference upload, reference ordering/limit, regeneration history, restore and edit.
+- [x] Run typecheck, lint, full tests, build and `git diff --check`.
 - [x] Perform one real local smoke test against the parent's installed ComfyUI/Qwen workflow when ComfyUI is running.
 
 Acceptance:

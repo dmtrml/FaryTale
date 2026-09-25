@@ -6,7 +6,7 @@
 
 ## Current status
 
-**Current phase:** Phase 17 in progress — local Qwen-Image-2.1 illustration studio through ComfyUI.
+**Current phase:** Phase 17 complete — local Qwen-Image-2.1 illustration studio through ComfyUI is implemented and verified.
 
 **Overall state:** FaryTale is a working reader-first family storybook app with parent-only authoring. The primary creation workflow is agent-first: an approved story can be materialized into canonical book/character files plus one prompt per page without manual technical form entry. Existing books remain readable without AI, credentials, a database or internet access.
 
@@ -20,7 +20,7 @@
 - Authoring: versioned `ApprovedStoryPackage` + high-level materializer, exact approved-text preservation, character reuse, per-page prompts, 1–200 pages.
 - Agent-first materialization also persists canonical library classification: meanings, situations, collections, free tags and arbitrary parent-defined custom facets; character filtering continues to use canonical character IDs.
 - Library browsing uses that canonical classification directly: Parent mode has full filters including dynamic custom facets, while the child shelf exposes only compact character/meaning/situation filters plus simple ordering.
-- AI providers: optional and replaceable. Manual image mode remains the default; agent-first materialization does not generate images.
+- AI providers: optional and replaceable. Manual image mode remains the default; agent-first materialization does not generate images. Parent mode can additionally use local ComfyUI/Qwen-Image-2.1 for explicit one-page Generate/Regenerate/Edit actions with canonical references.
 - Theme: persistent light/dark UI; print remains light.
 - Illustration format: page images and book environment/props references are horizontal 16:9; covers and character identity references are unconstrained.
 
@@ -133,6 +133,7 @@ UX review branch verification on 2026-09-04:
 - Phase 17.3 verification: `npm run typecheck` passed; image-generation service suite passed 8/8 including restore/security regression tests; `npm run lint`, `npm run build` and `git diff --check` passed.
 - Phase 17.4 focused verification: `npm run typecheck` passed; ComfyUI/OpenAI/reference-pack/image-service/manual-prompt suite passed 5 files / 27 tests; `npm run lint`, `npm run build` and `git diff --check` passed.
 - Phase 17.5 local Qwen smoke on 2026-09-25 used the parent's actual ComfyUI 0.37.1 standalone installation at `D:\Comfy\ComfyUI` with RTX 3060 12 GB, `qwen_image_2.1_int8_convrot.safetensors`, `qwen3vl_8b_w4a8.safetensors` and `qwen_image_2.1_vae_bf16.safetensors`. The checked-in API workflows completed three real calls through `ComfyUIImageProvider`: prompt-only generate, fresh-canvas generation conditioned on the first result as a reference, and text-guided edit using the second result as image 1. The 1024×576 smoke outputs were ~490 KB, ~610 KB and ~1.15 MB respectively, so the existing 5 MB page-image guard did not need weakening. Temporary smoke assets live under ignored `.scratch/`.
+- Phase 17 final repository verification on 2026-09-25 passed: `npm run typecheck`, `npm run lint`, full `npm test` (24 files / 108 tests), `npm run build`, and `git diff --check`. Operational setup is documented in `README.md`, `docs/MVP.md`, `config/comfyui/README.md` and the committed `.env.example`.
 
 ## Git / working state
 
@@ -158,7 +159,7 @@ Read in this order:
 
 ## Exact next action
 
-1. Perform Phase 17.5: update MVP/README operational documentation and run full verification across the complete repository.
-2. Locate/export the parent's actual working Qwen-Image-2.1 ComfyUI workflows in API format, add FaryTale sentinel inputs without committing private machine data, and configure local environment paths.
-3. Start the parent's local ComfyUI service and perform one real generate → regenerate → text-edit smoke cycle from FaryTale.
-4. If real Qwen output exceeds the current 5 MB page-image guard or exposes workflow-specific input differences, make that concrete compatibility adjustment as a separate checkpoint rather than weakening validation pre-emptively.
+1. Do a parent-facing acceptance pass in the actual book editor with the private family content: upload any missing character/environment/external object references and exercise Generate → Regenerate → Restore → text Edit on one page.
+2. Use the first real family-book results to tune prompt wording/reference selection only when a concrete consistency problem appears; do not add speculative complexity.
+3. Keep mask/brush annotation editing, automatic continuity-anchor selection and whole-book queued generation as post-MVP enhancements.
+4. Continue checkpointing each coherent future enhancement as a separate verified commit before pushing to `origin/main`.

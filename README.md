@@ -57,7 +57,46 @@ FARYTALE_TEXT_API_KEY=<secret>
 
 `OPENROUTER_API_KEY` is also accepted as a server-only fallback for `FARYTALE_TEXT_API_KEY`. Never expose these values through `NEXT_PUBLIC_*` variables.
 
-To enable one-page image generation through the OpenAI Image API:
+## Local Qwen-Image-2.1 through ComfyUI
+
+The preferred local/private illustration provider is ComfyUI. FaryTale talks directly to
+ComfyUI's local HTTP API; MCP/connectors are development tools and are not a runtime
+dependency.
+
+The repository includes tested Qwen-Image-2.1 API workflows:
+
+- `config/comfyui/qwen-image-2.1-generate.api.json` — fresh 16:9 generation with 0–10 optional canonical reference images;
+- `config/comfyui/qwen-image-2.1-edit.api.json` — text-guided editing where image 1 is the current page and the remaining slots are canonical references.
+
+Configure `.env.local`:
+
+```text
+FARYTALE_IMAGE_PROVIDER=comfyui
+FARYTALE_COMFYUI_BASE_URL=http://127.0.0.1:8188
+FARYTALE_COMFYUI_GENERATE_WORKFLOW=config/comfyui/qwen-image-2.1-generate.api.json
+FARYTALE_COMFYUI_EDIT_WORKFLOW=config/comfyui/qwen-image-2.1-edit.api.json
+FARYTALE_COMFYUI_OUTPUT_NODE_ID=9
+FARYTALE_COMFYUI_MODEL=qwen-image-2.1
+FARYTALE_COMFYUI_TIMEOUT_MS=300000
+```
+
+Start the local ComfyUI server before using Generate/Edit. The reader and all manual
+authoring remain usable when ComfyUI is stopped.
+
+The checked-in workflows currently target these tested local weight filenames:
+
+```text
+diffusion_models/qwen_image_2.1_int8_convrot.safetensors
+text_encoders/qwen3vl_8b_w4a8.safetensors
+vae/qwen_image_2.1_vae_bf16.safetensors
+```
+
+Parent generation automatically assembles available references in stable order:
+page characters → book environment → additional book references → declared external
+objects. Qwen requests are capped at 10 images. For Edit, the current page consumes
+image slot 1, leaving up to nine canonical reference slots.
+
+To enable one-page image generation through the OpenAI Image API instead:
 
 ```text
 FARYTALE_IMAGE_PROVIDER=openai-image
@@ -83,6 +122,12 @@ one dedicated prompt for generating that environment/props reference,
 one flattened ready-to-copy prompt for the selected page and one whole-book ChatGPT
 Image prompt that asks for separate images for every page; structured Markdown prompt
 sections remain available only as technical/provenance details.
+
+Declared exact object references such as a spoon, plate, chair or nail scissors can also
+store their real private image files in the book. When a provider is configured, those
+assets are attached automatically to the current page request. Regeneration archives the
+previous image, Parent mode exposes archived variants for restore, and an edit-capable
+provider adds a text field for targeted revision of the current illustration.
 
 ## Agent-first approved story
 

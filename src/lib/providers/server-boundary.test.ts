@@ -22,6 +22,11 @@ describe("provider server boundary", () => {
     );
     expect(source).toContain('import "server-only"');
     expect(source).toContain("process.env.FARYTALE_IMAGE_PROVIDER");
+    expect(source).toContain("process.env.FARYTALE_COMFYUI_BASE_URL");
+    expect(source).toContain("process.env.FARYTALE_COMFYUI_GENERATE_WORKFLOW");
+    expect(source).toContain("process.env.FARYTALE_COMFYUI_EDIT_WORKFLOW");
+    expect(source).toContain('config.FARYTALE_IMAGE_PROVIDER === "comfyui"');
+    expect(source).toContain("new ComfyUIImageProvider");
     expect(source).toContain("process.env.FARYTALE_TEXT_API_KEY");
   });
 
