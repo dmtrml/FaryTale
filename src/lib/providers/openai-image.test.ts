@@ -75,6 +75,40 @@ describe("OpenAIImageProvider", () => {
     expect(Array.from(new Uint8Array(await (images[0] as File).arrayBuffer()))).toEqual([8, 9]);
   });
 
+  it("puts the edit source before canonical references for explicit edit requests", async () => {
+    let capturedForm: FormData | undefined;
+    const provider = new OpenAIImageProvider({
+      apiKey: "test-secret",
+      baseUrl: "https://api.example.test/v1",
+      fetchImpl: (async (_url, init) => {
+        capturedForm = init?.body as FormData;
+        return imageResponse();
+      }) as typeof fetch,
+    });
+
+    await provider.generate({
+      mode: "edit",
+      prompt: "Make the spoon smaller.",
+      sourceImage: {
+        path: "books/sample/pages/001.png",
+        mimeType: "image/png",
+        bytes: new Uint8Array([1, 2]),
+      },
+      references: [
+        {
+          path: "characters/emi/refs/canonical.png",
+          mimeType: "image/png",
+          bytes: new Uint8Array([3, 4]),
+        },
+      ],
+    });
+
+    const images = capturedForm?.getAll("image[]") ?? [];
+    expect(images).toHaveLength(2);
+    expect(Array.from(new Uint8Array(await (images[0] as File).arrayBuffer()))).toEqual([1, 2]);
+    expect(Array.from(new Uint8Array(await (images[1] as File).arrayBuffer()))).toEqual([3, 4]);
+  });
+
   it("returns a safe status-only provider error", async () => {
     const provider = new OpenAIImageProvider({
       apiKey: "test-secret",

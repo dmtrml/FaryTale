@@ -48,6 +48,7 @@ Current local content:
 - Phase 17.1 adds a server-only `comfyui` image provider behind the existing `ImageProvider` contract. It loads a configurable API-format workflow, replaces FaryTale prompt/size/reference sentinels, uploads only the request's reference bytes, submits `/prompt`, polls `/history/<prompt_id>` and downloads the final `/view` image. The real Qwen workflow is intentionally machine-configured rather than embedded in canonical books.
 - Phase 17.2 makes declared external object references usable by internal generation: each declaration keeps its semantic id/label/instruction while its optional binary file is stored as a normal book reference with role `external`. Parent mode can upload/replace those files. A shared reference-pack planner now defines character → environment → other book refs → declared external refs order for both flattened prompts and provider execution, with a hard 10-available-image Qwen limit.
 - Phase 17.3 exposes the existing `pages/history/` regeneration archive in the selected-page Parent UI. A parent can restore any archived variant; restore first archives the current image, validates that the chosen history asset belongs to the same page, then records a `history-restore` provenance entry. Manual upload and prompt-copy fallback remain unchanged.
+- Phase 17.4 adds first-class text-guided image editing. The provider request contract now distinguishes generate/edit, can carry a source image, edit instruction and seed, and preserves the seed in provenance. ComfyUI can use a separate edit API workflow: the current page image is uploaded first, then up to nine available canonical references. Parent mode shows a text edit form only when the configured provider actually has an edit path. Successful edits archive the prior current image; failed edits leave the current illustration/status usable.
 - Parent library filters can be combined across character, meaning, situation, collection, tag and any custom classification dimension. Custom dimensions appear automatically from canonical data rather than requiring UI code changes.
 - Child library keeps only character, meaning and situation filters when there are multiple useful choices; both libraries can sort by recent update, creation date or title.
 - Child shelf is intentionally compact and library-like: the large `Наши сказки` heading/subtitle are removed, the shelf can use up to a 1600px-wide content area, and book cards flow through an auto-fill grid with a ~220px minimum width instead of being locked to two large columns.
@@ -130,6 +131,7 @@ UX review branch verification on 2026-09-04:
 - Phase 17.1 ComfyUI provider foundation verification: `npm run typecheck` passed; provider-focused Vitest suite passed 4 files / 13 tests; `npm run lint` passed; `git diff --check` passed. The local ComfyUI service was not running on ports 8188/8189 during this checkpoint, so real Qwen generation remains a later smoke test rather than an automated requirement.
 - Phase 17.2 verification: `npm run typecheck` passed; focused reference-pack/image-service/authoring/manual-prompt suite passed 4 files / 26 tests; full `npm test` passed 24 files / 100 tests; `npm run lint` and `npm run build` passed; `git diff --check` passed.
 - Phase 17.3 verification: `npm run typecheck` passed; image-generation service suite passed 8/8 including restore/security regression tests; `npm run lint`, `npm run build` and `git diff --check` passed.
+- Phase 17.4 focused verification: `npm run typecheck` passed; ComfyUI/OpenAI/reference-pack/image-service/manual-prompt suite passed 5 files / 27 tests; `npm run lint`, `npm run build` and `git diff --check` passed.
 
 ## Git / working state
 
@@ -155,7 +157,7 @@ Read in this order:
 
 ## Exact next action
 
-1. Implement Phase 17.4: extend the stable image-provider request contract for edit mode/source image/instruction/seed without breaking existing providers.
-2. Add a configurable ComfyUI Qwen edit workflow and a page-level text edit action that uses the current illustration as image 1 plus the canonical reference pack.
-3. Archive the current page before every successful edit and keep variant restore available.
-4. Perform Phase 17.5 documentation/full verification and the real ComfyUI/Qwen smoke test when the local ComfyUI server is running.
+1. Perform Phase 17.5: update MVP/README operational documentation and run full verification across the complete repository.
+2. Locate/export the parent's actual working Qwen-Image-2.1 ComfyUI workflows in API format, add FaryTale sentinel inputs without committing private machine data, and configure local environment paths.
+3. Start the parent's local ComfyUI service and perform one real generate → regenerate → text-edit smoke cycle from FaryTale.
+4. If real Qwen output exceeds the current 5 MB page-image guard or exposes workflow-specific input differences, make that concrete compatibility adjustment as a separate checkpoint rather than weakening validation pre-emptively.

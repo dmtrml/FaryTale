@@ -12,6 +12,7 @@ const providerEnvironmentSchema = z.object({
   FARYTALE_IMAGE_API_KEY: z.string().trim().optional(),
   FARYTALE_COMFYUI_BASE_URL: z.string().url().default("http://localhost:8188"),
   FARYTALE_COMFYUI_GENERATE_WORKFLOW: z.string().trim().min(1).optional(),
+  FARYTALE_COMFYUI_EDIT_WORKFLOW: z.string().trim().min(1).optional(),
   FARYTALE_COMFYUI_OUTPUT_NODE_ID: z.string().trim().min(1).optional(),
   FARYTALE_COMFYUI_MODEL: z.string().trim().default("qwen-image-2.1"),
   FARYTALE_COMFYUI_POLL_INTERVAL_MS: z.coerce.number().int().min(50).max(10000).default(750),
@@ -34,6 +35,7 @@ export function getServerProviderConfig(): ServerProviderConfig {
     FARYTALE_IMAGE_API_KEY: process.env.FARYTALE_IMAGE_API_KEY,
     FARYTALE_COMFYUI_BASE_URL: process.env.FARYTALE_COMFYUI_BASE_URL,
     FARYTALE_COMFYUI_GENERATE_WORKFLOW: process.env.FARYTALE_COMFYUI_GENERATE_WORKFLOW,
+    FARYTALE_COMFYUI_EDIT_WORKFLOW: process.env.FARYTALE_COMFYUI_EDIT_WORKFLOW,
     FARYTALE_COMFYUI_OUTPUT_NODE_ID: process.env.FARYTALE_COMFYUI_OUTPUT_NODE_ID,
     FARYTALE_COMFYUI_MODEL: process.env.FARYTALE_COMFYUI_MODEL,
     FARYTALE_COMFYUI_POLL_INTERVAL_MS: process.env.FARYTALE_COMFYUI_POLL_INTERVAL_MS,
@@ -59,6 +61,7 @@ export function getConfiguredImageProvider() {
     return new ComfyUIImageProvider({
       baseUrl: config.FARYTALE_COMFYUI_BASE_URL,
       workflowPath: config.FARYTALE_COMFYUI_GENERATE_WORKFLOW,
+      editWorkflowPath: config.FARYTALE_COMFYUI_EDIT_WORKFLOW,
       outputNodeId: config.FARYTALE_COMFYUI_OUTPUT_NODE_ID,
       model: config.FARYTALE_COMFYUI_MODEL,
       pollIntervalMs: config.FARYTALE_COMFYUI_POLL_INTERVAL_MS,

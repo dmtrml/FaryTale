@@ -43,7 +43,13 @@ export class OpenAIImageProvider implements ImageProvider {
   async generate(request: ImageGenerationRequest): Promise<GeneratedImageResult> {
     const prompt = request.prompt.trim();
     if (!prompt) throw new Error("Image generation requires a non-empty prompt.");
-    const references = request.references ?? [];
+    if (request.mode === "edit" && !request.sourceImage) {
+      throw new Error("Image edit requires a source image.");
+    }
+    const references = [
+      ...(request.sourceImage ? [request.sourceImage] : []),
+      ...(request.references ?? []),
+    ];
     const response = references.length
       ? await this.editWithReferences(prompt, references, imageSize(request))
       : await this.generateFromPrompt(prompt, imageSize(request));
@@ -67,6 +73,7 @@ export class OpenAIImageProvider implements ImageProvider {
         ...(response.headers.get("x-request-id")
           ? { requestId: response.headers.get("x-request-id") ?? undefined }
           : {}),
+        ...(request.seed !== undefined ? { seed: request.seed } : {}),
       },
     };
   }

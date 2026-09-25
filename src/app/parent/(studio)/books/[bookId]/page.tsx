@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import {
   deletePageAction,
   duplicatePageAction,
+  editPageImageAction,
   generatePageImageAction,
   insertPageAction,
   movePageAction,
@@ -79,6 +80,10 @@ export default async function ParentBookPage({
   const recommendedPattern = recommendStoryPattern(book.goal.type, book.goal.description);
   const providerConfig = getServerProviderConfig();
   const networkImageProvider = providerConfig.FARYTALE_IMAGE_PROVIDER !== "manual";
+  const imageEditAvailable =
+    providerConfig.FARYTALE_IMAGE_PROVIDER === "openai-image" ||
+    (providerConfig.FARYTALE_IMAGE_PROVIDER === "comfyui" &&
+      Boolean(providerConfig.FARYTALE_COMFYUI_EDIT_WORKFLOW));
   const illustrationProgress = bookIllustrationProgress(book);
   const readyImageCount = illustrationProgress.ready;
   const filteredPages = book.pages.filter((page) => {
@@ -398,6 +403,7 @@ export default async function ParentBookPage({
             const updatePageCharacters = updatePageCharactersAction.bind(null, book.id, page.number);
             const replaceImage = replacePageImageAction.bind(null, book.id, page.number);
             const generateImage = generatePageImageAction.bind(null, book.id, page.number);
+            const editImage = editPageImageAction.bind(null, book.id, page.number);
             const restoreImageVersion = restorePageImageVersionAction.bind(
               null,
               book.id,
@@ -492,8 +498,38 @@ export default async function ParentBookPage({
                             ) : null}
                           </div>
 
+                          {imageEditAvailable && page.image && chatPagePrompt ? (
+                            <form action={editImage} className="rounded-xl bg-[#f4f0e9] p-4">
+                              <p className="text-xs font-semibold text-[#786f65]">3 · Изменить готовое изображение</p>
+                              <label
+                                htmlFor={`page-${page.number}-edit-instruction`}
+                                className="mt-2 block text-sm font-semibold"
+                              >
+                                Что изменить?
+                              </label>
+                              <textarea
+                                id={`page-${page.number}-edit-instruction`}
+                                name="instruction"
+                                required
+                                maxLength={2000}
+                                rows={3}
+                                placeholder="Например: сделай ложку немного меньше, всё остальное сохрани без изменений."
+                                className="mt-2 w-full rounded-xl border border-[#d8d0c5] bg-white p-3 text-sm leading-6"
+                              />
+                              <p className="mt-2 text-xs leading-5 text-[#756d64]">
+                                Текущая иллюстрация будет отправлена как редактируемая основа, а канонические референсы персонажей, окружения и предметов добавятся автоматически.
+                              </p>
+                              <button
+                                type="submit"
+                                className="mt-3 rounded-full border border-[#d8d0c5] bg-white px-4 py-2 text-sm font-semibold"
+                              >
+                                Изменить изображение
+                              </button>
+                            </form>
+                          ) : null}
+
                           <form action={replaceImage} className="rounded-xl border border-[#d8d0c5] p-4">
-                            <p className="text-xs font-semibold text-[#786f65]">3 · Загрузить готовую иллюстрацию</p>
+                            <p className="text-xs font-semibold text-[#786f65]">{imageEditAvailable ? "4" : "3"} · Загрузить готовую иллюстрацию</p>
                             <div className="mt-2">
                               <ImageUploadField
                                 label={page.image ? "Выбрать замену" : "Выбрать изображение"}

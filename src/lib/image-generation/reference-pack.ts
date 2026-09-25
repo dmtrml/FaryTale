@@ -19,6 +19,10 @@ export type ReferencePackItem = {
   };
 };
 
+export type AvailableReferencePackItem = ReferencePackItem & {
+  storage: NonNullable<ReferencePackItem["storage"]>;
+};
+
 export function buildReferencePackPlan({
   book,
   characters,
@@ -105,16 +109,25 @@ export function buildReferencePackPlan({
 
 export function availableReferencePackItems(items: ReferencePackItem[]) {
   return items.filter(
-    (item): item is ReferencePackItem & { storage: NonNullable<ReferencePackItem["storage"]> } =>
-      Boolean(item.storage),
+    (item): item is AvailableReferencePackItem => Boolean(item.storage),
   );
 }
 
-export function assertQwenReferenceLimit(items: ReferencePackItem[]) {
+export function assertQwenReferenceLimit(
+  items: ReferencePackItem[],
+  reservedImageSlots = 0,
+): AvailableReferencePackItem[] {
   const available = availableReferencePackItems(items);
-  if (available.length > MAX_QWEN_REFERENCE_IMAGES) {
+  if (
+    reservedImageSlots < 0 ||
+    !Number.isInteger(reservedImageSlots) ||
+    reservedImageSlots > MAX_QWEN_REFERENCE_IMAGES
+  ) {
+    throw new Error("Invalid reserved image-slot count.");
+  }
+  if (available.length + reservedImageSlots > MAX_QWEN_REFERENCE_IMAGES) {
     throw new Error(
-      `This page has ${available.length} available reference images; Qwen-Image-2.1 supports at most ${MAX_QWEN_REFERENCE_IMAGES}. Remove or consolidate references before generating.`,
+      `This request would submit ${available.length + reservedImageSlots} images; Qwen-Image-2.1 supports at most ${MAX_QWEN_REFERENCE_IMAGES}. Remove or consolidate references before generating.`,
     );
   }
   return available;

@@ -74,4 +74,16 @@ describe("reference pack", () => {
       "at most 10",
     );
   });
+
+  it("reserves one of the ten image slots for an edit source", () => {
+    const sample = book();
+    sample.references = [];
+    const characters = Array.from({ length: 10 }, (_, index) => character(`c${index + 1}`));
+    expect(() =>
+      assertQwenReferenceLimit(
+        buildReferencePackPlan({ book: sample, characters }),
+        1,
+      ),
+    ).toThrow("would submit 11 images");
+  });
 });

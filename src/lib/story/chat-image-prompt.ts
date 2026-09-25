@@ -1,6 +1,9 @@
 import type { Book, BookPage, Character } from "../content/schemas";
 import { selectCanonicalIdentityReference } from "../characters/identity";
-import { buildReferencePackPlan } from "../image-generation/reference-pack";
+import {
+  buildReferencePackPlan,
+  type ReferencePackItem,
+} from "../image-generation/reference-pack";
 
 function escapeRegExp(value: string) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -42,12 +45,26 @@ function referenceWord(count: number) {
   return "референсов";
 }
 
-function referencePlan(book: Book, characters: Character[]) {
-  const plan = buildReferencePackPlan({ book, characters });
+function referencePlan(
+  book: Book,
+  characters: Character[],
+  options?: {
+    items?: ReferencePackItem[];
+    prefix?: Array<{ label: string; instruction?: string }>;
+  },
+) {
+  const plan = options?.items ?? buildReferencePackPlan({ book, characters });
   const items: string[] = [];
   const extraInstructions: string[] = [];
+  for (const item of options?.prefix ?? []) {
+    const number = items.length + 1;
+    items.push(`референс ${number} — ${item.label}`);
+    if (item.instruction) {
+      extraInstructions.push(`Для референса ${number}: ${item.instruction}`);
+    }
+  }
   plan.forEach((item, index) => {
-    const number = index + 1;
+    const number = (options?.prefix?.length ?? 0) + index + 1;
     items.push(`референс ${number} — ${item.label}`);
     if (item.instruction) {
       extraInstructions.push(`Для референса ${number}: ${item.instruction}`);
@@ -74,8 +91,15 @@ function pageDetails(rawPrompt?: string | null) {
   return { environment, composition, continuity, style };
 }
 
-function commonVisualInstruction(book: Book, characters: Character[]) {
-  const plan = referencePlan(book, characters);
+function commonVisualInstruction(
+  book: Book,
+  characters: Character[],
+  options?: {
+    items?: ReferencePackItem[];
+    prefix?: Array<{ label: string; instruction?: string }>;
+  },
+) {
+  const plan = referencePlan(book, characters, options);
   const withoutReference = characters.filter(
     (character) =>
       !plan.plan.some((item) => item.kind === "character" && item.id === character.id),
@@ -140,11 +164,15 @@ export function composeChatPagePrompt({
   page,
   rawPrompt,
   characters,
+  referenceItems,
+  referencePrefix,
 }: {
   book: Book;
   page: BookPage;
   rawPrompt?: string | null;
   characters: Character[];
+  referenceItems?: ReferencePackItem[];
+  referencePrefix?: Array<{ label: string; instruction?: string }>;
 }) {
   if (usesPageByPageManualImageMode(book)) {
     return composeMinimalPagePrompt({ page, rawPrompt, characters });
@@ -153,7 +181,10 @@ export function composeChatPagePrompt({
   const parts = [
     `Создай одну отдельную иллюстрацию для страницы ${page.number} детской книги «${book.title}».`,
     sixteenByNineInstruction(),
-    commonVisualInstruction(book, characters),
+    commonVisualInstruction(book, characters, {
+      items: referenceItems,
+      prefix: referencePrefix,
+    }),
     childSafeVisualInstruction(characters),
     `Сцена: ${pageScene(page, rawPrompt)}`,
     details.environment ? `Окружение: ${details.environment}` : "",

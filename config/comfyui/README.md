@@ -7,7 +7,11 @@ Export the working ComfyUI workflow in **API format**, keep that JSON outside ca
 - `__FARYTALE_PROMPT__` — page illustration prompt;
 - `__FARYTALE_WIDTH__` — requested output width;
 - `__FARYTALE_HEIGHT__` — requested output height;
+- `__FARYTALE_SEED__` — per-request seed;
+- `__FARYTALE_EDIT_INSTRUCTION__` — raw parent edit instruction for edit workflows when a node needs it separately;
 - `__FARYTALE_IMAGE_1__` … `__FARYTALE_IMAGE_10__` — uploaded reference-image filenames in deterministic FaryTale reference-pack order.
+
+For the edit workflow, image 1 is the current page illustration being edited. Canonical character/environment/object references follow as images 2…10.
 
 Example fragment:
 
@@ -34,6 +38,7 @@ Server-only configuration:
 FARYTALE_IMAGE_PROVIDER=comfyui
 FARYTALE_COMFYUI_BASE_URL=http://localhost:8188
 FARYTALE_COMFYUI_GENERATE_WORKFLOW=config/comfyui/qwen-image-2.1-generate.api.json
+FARYTALE_COMFYUI_EDIT_WORKFLOW=config/comfyui/qwen-image-2.1-edit.api.json
 FARYTALE_COMFYUI_OUTPUT_NODE_ID=<SaveImage node id, optional>
 FARYTALE_COMFYUI_MODEL=qwen-image-2.1
 ```

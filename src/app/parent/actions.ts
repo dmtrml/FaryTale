@@ -41,6 +41,7 @@ import { prepareManualStoryDraft } from "@/lib/story/generator";
 import { storyPatternSchema } from "@/lib/content/schemas";
 import { getConfiguredImageProvider } from "@/lib/providers/server-config";
 import {
+  editBookPageImage,
   generateBookPageImage,
   restoreBookPageImageVersion,
 } from "@/lib/image-generation/service";
@@ -159,6 +160,24 @@ export async function generatePageImageAction(bookId: string, pageNumber: number
   await requireParentMode();
   const provider = getConfiguredImageProvider();
   await generateBookPageImage({ bookId, pageNumber, provider });
+  revalidatePath(`/parent/books/${bookId}`);
+  revalidatePath(`/books/${bookId}`);
+}
+
+export async function editPageImageAction(
+  bookId: string,
+  pageNumber: number,
+  formData: FormData,
+) {
+  await requireParentMode();
+  const instruction = z
+    .string()
+    .trim()
+    .min(1, "Edit instruction is required.")
+    .max(2000)
+    .parse(formData.get("instruction"));
+  const provider = getConfiguredImageProvider();
+  await editBookPageImage({ bookId, pageNumber, instruction, provider });
   revalidatePath(`/parent/books/${bookId}`);
   revalidatePath(`/books/${bookId}`);
 }

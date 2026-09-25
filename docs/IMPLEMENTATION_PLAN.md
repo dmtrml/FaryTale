@@ -316,10 +316,10 @@ The application runtime must talk to ComfyUI over its local HTTP API. MCP/connec
 
 ### 17.4 — Text-guided image edit
 
-- [ ] Extend the provider request contract with an explicit generation/edit mode, optional source image, user edit instruction and seed where useful.
-- [ ] Add a page-level “Изменить изображение” flow that sends the current illustration as the edit target plus the canonical page reference pack.
-- [ ] Use a separate configurable ComfyUI/Qwen edit workflow; edits must create a new variant/archive the previous current image instead of destructively losing it.
-- [ ] Do not add mask painting/annotation UI in this first MVP, but keep the contract extensible for a later mask/annotation phase.
+- [x] Extend the provider request contract with an explicit generation/edit mode, optional source image, user edit instruction and seed where useful.
+- [x] Add a page-level “Изменить изображение” flow that sends the current illustration as the edit target plus the canonical page reference pack.
+- [x] Use a separate configurable ComfyUI/Qwen edit workflow; edits must create a new variant/archive the previous current image instead of destructively losing it.
+- [x] Do not add mask painting/annotation UI in this first MVP, but keep the contract extensible for a later mask/annotation phase.
 
 ### 17.5 — Verification and operational documentation
 

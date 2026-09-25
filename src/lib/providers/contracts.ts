@@ -2,6 +2,7 @@ export type ProviderMetadata = {
   provider: string;
   model?: string;
   requestId?: string;
+  seed?: number;
 };
 
 export type TextGenerationPurpose =
@@ -39,8 +40,12 @@ export type ImageReference = {
 };
 
 export type ImageGenerationRequest = {
+  mode?: "generate" | "edit";
   prompt: string;
   references?: ImageReference[];
+  sourceImage?: ImageReference;
+  editInstruction?: string;
+  seed?: number;
   size?: {
     width: number;
     height: number;

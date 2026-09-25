@@ -269,6 +269,7 @@ export async function appendBookPageGenerationProvenance({
   provider,
   model,
   requestId,
+  seed,
   referencePaths = [],
   previousImagePath,
   note,
@@ -281,6 +282,7 @@ export async function appendBookPageGenerationProvenance({
   provider: string;
   model?: string;
   requestId?: string;
+  seed?: number;
   referencePaths?: string[];
   previousImagePath?: string;
   note?: string;
@@ -302,6 +304,7 @@ export async function appendBookPageGenerationProvenance({
     `- model: ${model ?? ""}`,
     `- generated_at: ${generatedAt ?? new Date().toISOString()}`,
     `- request_id: ${requestId ?? ""}`,
+    `- seed: ${seed ?? ""}`,
     "- reference_images:",
     ...(referencePaths.length ? referencePaths.map((item) => `  - ${item}`) : ["  - none"]),
     ...(previousImagePath ? [`- previous_image: ${previousImagePath}`] : []),

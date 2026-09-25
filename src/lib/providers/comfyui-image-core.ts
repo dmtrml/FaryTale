@@ -14,6 +14,7 @@ type Workflow = Record<string, unknown>;
 export type ComfyUIImageProviderOptions = {
   baseUrl: string;
   workflowPath: string;
+  editWorkflowPath?: string;
   outputNodeId?: string;
   model?: string;
   pollIntervalMs?: number;
@@ -131,6 +132,8 @@ function replaceWorkflowTokens(
     prompt: string;
     width: number;
     height: number;
+    seed: number;
+    editInstruction?: string;
     uploadedImages: string[];
   },
 ): unknown {
@@ -149,6 +152,10 @@ function replaceWorkflowTokens(
   if (value === "__FARYTALE_PROMPT__") return replacements.prompt;
   if (value === "__FARYTALE_WIDTH__") return replacements.width;
   if (value === "__FARYTALE_HEIGHT__") return replacements.height;
+  if (value === "__FARYTALE_SEED__") return replacements.seed;
+  if (value === "__FARYTALE_EDIT_INSTRUCTION__") {
+    return replacements.editInstruction ?? "";
+  }
   const imageMatch = value.match(/^__FARYTALE_IMAGE_(\d+)__$/);
   if (imageMatch) {
     const index = Number.parseInt(imageMatch[1]!, 10) - 1;
@@ -182,6 +189,7 @@ export class ComfyUIImageProvider implements ImageProvider {
   readonly id = "comfyui";
   private readonly baseUrl: string;
   private readonly workflowPath: string;
+  private readonly editWorkflowPath?: string;
   private readonly outputNodeId?: string;
   private readonly model: string;
   private readonly pollIntervalMs: number;
@@ -196,6 +204,7 @@ export class ComfyUIImageProvider implements ImageProvider {
     if (!options.workflowPath.trim()) throw new Error("ComfyUI workflow path is required.");
     this.baseUrl = options.baseUrl.replace(/\/+$/, "");
     this.workflowPath = options.workflowPath;
+    this.editWorkflowPath = options.editWorkflowPath?.trim() || undefined;
     this.outputNodeId = options.outputNodeId?.trim() || undefined;
     this.model = options.model?.trim() || "qwen-image-2.1";
     this.pollIntervalMs = options.pollIntervalMs ?? 750;
@@ -209,26 +218,43 @@ export class ComfyUIImageProvider implements ImageProvider {
   async generate(request: ImageGenerationRequest): Promise<GeneratedImageResult> {
     const prompt = request.prompt.trim();
     if (!prompt) throw new Error("Image generation requires a non-empty prompt.");
-    const references = request.references ?? [];
-    const workflow = await this.workflowLoader(this.workflowPath);
+    const mode = request.mode ?? "generate";
+    if (mode === "edit" && !request.sourceImage) {
+      throw new Error("ComfyUI edit requires a source image.");
+    }
+    const workflowPath =
+      mode === "edit"
+        ? this.editWorkflowPath ?? ""
+        : this.workflowPath;
+    if (!workflowPath) {
+      throw new Error("ComfyUI edit workflow path is required for image editing.");
+    }
+    const inputImages = [
+      ...(request.sourceImage ? [request.sourceImage] : []),
+      ...(request.references ?? []),
+    ];
+    const workflow = await this.workflowLoader(workflowPath);
     const requiredSlots = requiredWorkflowImageSlots(workflow);
     for (const slot of requiredSlots) {
-      if (!references[slot - 1]) {
+      if (!inputImages[slot - 1]) {
         throw new Error(
           `ComfyUI workflow requires reference image ${slot}, but the request did not provide it.`,
         );
       }
     }
     const uploadedImages: string[] = [];
-    for (const reference of references) {
+    for (const reference of inputImages) {
       uploadedImages.push(await this.uploadReference(reference));
     }
 
     const size = request.size ?? { width: 1920, height: 1080 };
+    const seed = request.seed ?? Math.floor(Math.random() * 2_147_483_647);
     const patchedWorkflow = replaceWorkflowTokens(workflow, {
       prompt,
       width: size.width,
       height: size.height,
+      seed,
+      editInstruction: request.editInstruction?.trim() || undefined,
       uploadedImages,
     });
 
@@ -266,6 +292,7 @@ export class ComfyUIImageProvider implements ImageProvider {
         provider: this.id,
         model: this.model,
         requestId: promptId,
+        seed,
       },
     };
   }

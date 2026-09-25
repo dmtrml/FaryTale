@@ -9,11 +9,12 @@ import {
   setBookPageImageStatus,
 } from "../content/mutations";
 import type { ImageProvider, ImageReference } from "../providers/contracts";
-import type { Book, Character } from "../content/schemas";
+import type { Book, BookPage, Character } from "../content/schemas";
 import { composeChatPagePrompt } from "../story/chat-image-prompt";
 import {
   assertQwenReferenceLimit,
   buildReferencePackPlan,
+  type AvailableReferencePackItem,
 } from "./reference-pack";
 
 const mimeByExtension: Record<string, string> = {
@@ -31,6 +32,11 @@ type GeneratePageOptions = {
   provider: ImageProvider;
   contentRoot?: string;
   now?: string;
+};
+
+type EditPageOptions = GeneratePageOptions & {
+  instruction: string;
+  seed?: number;
 };
 
 function contentRootPath(customRoot?: string) {
@@ -171,13 +177,11 @@ export async function restoreBookPageImageVersion({
 
 async function loadPageReferences(
   contentRoot: string,
-  book: Book,
-  characters: Character[],
+  items: AvailableReferencePackItem[],
 ): Promise<ImageReference[]> {
   const references: ImageReference[] = [];
-  const plan = assertQwenReferenceLimit(buildReferencePackPlan({ book, characters }));
 
-  for (const item of plan) {
+  for (const item of items) {
     if (!isSafeContentPath(item.storage.relativePath)) continue;
     const mimeType = mimeByExtension[path.extname(item.storage.relativePath).toLowerCase()];
     if (!mimeType) continue;
@@ -210,6 +214,37 @@ async function loadPageReferences(
   return references;
 }
 
+async function loadCurrentPageImageReference(
+  contentRoot: string,
+  book: Book,
+  page: BookPage,
+): Promise<ImageReference> {
+  if (!page.image || !isSafeContentPath(page.image)) {
+    throw new Error("A current page illustration is required before editing.");
+  }
+  const mimeType = mimeByExtension[path.extname(page.image).toLowerCase()];
+  if (!mimeType) throw new Error("Unsupported current page image type.");
+  const absolutePath = path.join(
+    contentRoot,
+    "books",
+    book.id,
+    ...page.image.split("/"),
+  );
+  try {
+    return {
+      path: `books/${book.id}/${page.image}`,
+      role: "edit-source",
+      mimeType,
+      bytes: new Uint8Array(await fs.readFile(absolutePath)),
+    };
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+      throw new Error("Current page illustration file is missing.");
+    }
+    throw error;
+  }
+}
+
 export async function generateBookPageImage(options: GeneratePageOptions) {
   const contentRoot = contentRootPath(options.contentRoot);
   const book = await getCanonicalBook(options.bookId, contentRoot);
@@ -227,12 +262,16 @@ export async function generateBookPageImage(options: GeneratePageOptions) {
   const pageCharacters = page.characters
     .map((characterId) => library.characters.find((item) => item.id === characterId))
     .filter((character): character is Character => Boolean(character));
-  const references = await loadPageReferences(contentRoot, book, pageCharacters);
+  const referenceItems = assertQwenReferenceLimit(
+    buildReferencePackPlan({ book, characters: pageCharacters }),
+  );
+  const references = await loadPageReferences(contentRoot, referenceItems);
   const providerPrompt = composeChatPagePrompt({
     book,
     page,
     rawPrompt: prompt,
     characters: pageCharacters,
+    referenceItems,
   });
   await setBookPageImageStatus({
     bookId: options.bookId,
@@ -262,6 +301,7 @@ export async function generateBookPageImage(options: GeneratePageOptions) {
         provider: result.metadata.provider,
         model: result.metadata.model,
         requestId: result.metadata.requestId,
+        seed: result.metadata.seed,
         referencePaths: references.map((item) => item.path),
         generatedAt: options.now,
         contentRoot,
@@ -290,6 +330,7 @@ export async function generateBookPageImage(options: GeneratePageOptions) {
       provider: result.metadata.provider,
       model: result.metadata.model,
       requestId: result.metadata.requestId,
+      seed: result.metadata.seed,
       referencePaths: references.map((item) => item.path),
       previousImagePath: previousImagePath ?? undefined,
       generatedAt: options.now,
@@ -314,6 +355,139 @@ export async function generateBookPageImage(options: GeneratePageOptions) {
       provider: options.provider.id,
       referencePaths: references.map((item) => item.path),
       note: error instanceof Error ? error.message : "Image generation failed.",
+      generatedAt: options.now,
+      contentRoot,
+    });
+    throw error;
+  }
+}
+
+export async function editBookPageImage(options: EditPageOptions) {
+  const instruction = options.instruction.trim();
+  if (!instruction) throw new Error("Image edit instruction is required.");
+  if (instruction.length > 2000) throw new Error("Image edit instruction is too long.");
+
+  const contentRoot = contentRootPath(options.contentRoot);
+  const book = await getCanonicalBook(options.bookId, contentRoot);
+  if (!book) throw new Error("Book not found or invalid.");
+  const page = book.pages.find((item) => item.number === options.pageNumber);
+  if (!page) throw new Error("Page not found.");
+  const rawPrompt = await readBookPagePrompt({
+    bookId: options.bookId,
+    pageNumber: options.pageNumber,
+    contentRoot,
+  });
+  if (!rawPrompt?.trim()) throw new Error("Page prompt is required before image editing.");
+
+  const library = await loadLibrary({ contentRoot });
+  const pageCharacters = page.characters
+    .map((characterId) => library.characters.find((item) => item.id === characterId))
+    .filter((character): character is Character => Boolean(character));
+  const referenceItems = assertQwenReferenceLimit(
+    buildReferencePackPlan({ book, characters: pageCharacters }),
+    1,
+  );
+  const references = await loadPageReferences(contentRoot, referenceItems);
+  const sourceImage = await loadCurrentPageImageReference(contentRoot, book, page);
+  const continuityPrompt = composeChatPagePrompt({
+    book,
+    page,
+    rawPrompt,
+    characters: pageCharacters,
+    referenceItems,
+    referencePrefix: [
+      {
+        label: `текущая иллюстрация страницы ${page.number}, которую нужно редактировать`,
+        instruction:
+          "Это основа правки. Сохраняй всё, что пользователь прямо не просит изменить.",
+      },
+    ],
+  });
+  const providerPrompt = [
+    "Отредактируй референс 1, а не создавай произвольную новую сцену.",
+    `Требуемая правка: ${instruction}`,
+    "Сохрани композицию, персонажей, окружение, стиль и все детали, которые не относятся к запрошенной правке.",
+    continuityPrompt,
+  ].join(" ");
+
+  await setBookPageImageStatus({
+    bookId: options.bookId,
+    pageNumber: options.pageNumber,
+    imageStatus: "generating",
+    contentRoot,
+  });
+
+  try {
+    const result = await options.provider.generate({
+      mode: "edit",
+      prompt: providerPrompt,
+      sourceImage,
+      references,
+      editInstruction: instruction,
+      ...(options.seed !== undefined ? { seed: options.seed } : {}),
+      size: { width: 1920, height: 1080 },
+    });
+
+    if (result.kind === "deferred") {
+      await setBookPageImageStatus({
+        bookId: options.bookId,
+        pageNumber: options.pageNumber,
+        imageStatus: "ready",
+        contentRoot,
+      });
+      return {
+        result,
+        referencePaths: [sourceImage.path, ...references.map((item) => item.path)],
+      };
+    }
+
+    const previousImagePath = await archiveCurrentPageImage({
+      contentRoot,
+      bookId: options.bookId,
+      pageNumber: options.pageNumber,
+      currentImage: page.image,
+      now: options.now,
+    });
+    const saved = await replaceBookPageImage({
+      bookId: options.bookId,
+      pageNumber: options.pageNumber,
+      bytes: result.bytes,
+      mimeType: result.mimeType,
+      contentRoot,
+    });
+    await appendBookPageGenerationProvenance({
+      bookId: options.bookId,
+      pageNumber: options.pageNumber,
+      status: "ready",
+      provider: result.metadata.provider,
+      model: result.metadata.model,
+      requestId: result.metadata.requestId,
+      seed: result.metadata.seed,
+      referencePaths: [sourceImage.path, ...references.map((item) => item.path)],
+      previousImagePath: previousImagePath ?? undefined,
+      note: `edit_instruction: ${instruction}`,
+      generatedAt: options.now,
+      contentRoot,
+    });
+    return {
+      result,
+      relativePath: saved.relativePath,
+      referencePaths: [sourceImage.path, ...references.map((item) => item.path)],
+    };
+  } catch (error) {
+    await setBookPageImageStatus({
+      bookId: options.bookId,
+      pageNumber: options.pageNumber,
+      imageStatus: "ready",
+      contentRoot,
+    });
+    await appendBookPageGenerationProvenance({
+      bookId: options.bookId,
+      pageNumber: options.pageNumber,
+      status: "failed",
+      provider: options.provider.id,
+      referencePaths: [sourceImage.path, ...references.map((item) => item.path)],
+      note: `edit_failed: ${error instanceof Error ? error.message : "Image edit failed."}`,
       generatedAt: options.now,
       contentRoot,
     });

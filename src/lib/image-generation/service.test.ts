@@ -6,6 +6,7 @@ import { getCanonicalBook, readBookPagePrompt, replaceBookPageImage } from "../c
 import type { ImageGenerationRequest, ImageProvider } from "../providers/contracts";
 import { ManualImageProvider } from "../providers/manual-image";
 import {
+  editBookPageImage,
   generateBookPageImage,
   listBookPageImageHistory,
   restoreBookPageImageVersion,
@@ -335,5 +336,113 @@ describe("generateBookPageImage", () => {
         contentRoot: root,
       }),
     ).rejects.toThrow("Invalid page-image history path");
+  });
+
+  it("edits the current image as reference 1 and archives it only after a successful edit", async () => {
+    const root = await fixture();
+    const current = new Uint8Array([...generatedPng(), 11]);
+    const edited = new Uint8Array([...generatedPng(), 22]);
+    await replaceBookPageImage({
+      bookId: "image-book",
+      pageNumber: 1,
+      bytes: current,
+      mimeType: "image/png",
+      contentRoot: root,
+    });
+    let captured: ImageGenerationRequest | undefined;
+    const provider: ImageProvider = {
+      id: "edit-provider",
+      async generate(request) {
+        captured = request;
+        return {
+          kind: "generated",
+          imageStatus: "ready",
+          bytes: edited,
+          mimeType: "image/png",
+          metadata: { provider: "edit-provider", model: "edit-v1", seed: 42 },
+        };
+      },
+    };
+
+    const result = await editBookPageImage({
+      bookId: "image-book",
+      pageNumber: 1,
+      instruction: "Сделай мяч немного меньше.",
+      provider,
+      contentRoot: root,
+      now: "2026-09-25T15:00:00.000Z",
+    });
+
+    expect(captured?.mode).toBe("edit");
+    expect(captured?.editInstruction).toBe("Сделай мяч немного меньше.");
+    expect(captured?.sourceImage?.role).toBe("edit-source");
+    expect(Array.from(captured?.sourceImage?.bytes ?? [])).toEqual(Array.from(current));
+    expect(captured?.references?.map((item) => item.role)).toEqual(["identity"]);
+    expect(captured?.prompt).toContain(
+      "референс 1 — текущая иллюстрация страницы 1, которую нужно редактировать",
+    );
+    expect(captured?.prompt).toContain(
+      "референс 2 — каноническая внешность персонажа Мяу",
+    );
+    expect(captured?.prompt).toContain("Требуемая правка: Сделай мяч немного меньше.");
+    expect(result.referencePaths[0]).toBe("books/image-book/pages/001.png");
+    const history = await listBookPageImageHistory({
+      bookId: "image-book",
+      pageNumber: 1,
+      contentRoot: root,
+    });
+    expect(history).toContain("pages/history/001-2026-09-25T15-00-00-000Z.png");
+    expect(
+      await fs.readFile(path.join(root, "books", "image-book", "pages", "001.png")),
+    ).toEqual(Buffer.from(edited));
+    const prompt = await readBookPagePrompt({
+      bookId: "image-book",
+      pageNumber: 1,
+      contentRoot: root,
+    });
+    expect(prompt).toContain("- provider: edit-provider");
+    expect(prompt).toContain("- seed: 42");
+    expect(prompt).toContain("edit_instruction: Сделай мяч немного меньше.");
+  });
+
+  it("keeps the current image ready when an edit provider fails", async () => {
+    const root = await fixture();
+    const current = new Uint8Array([...generatedPng(), 33]);
+    await replaceBookPageImage({
+      bookId: "image-book",
+      pageNumber: 1,
+      bytes: current,
+      mimeType: "image/png",
+      contentRoot: root,
+    });
+    const provider: ImageProvider = {
+      id: "edit-failure",
+      async generate() {
+        throw new Error("Edit failed upstream");
+      },
+    };
+
+    await expect(
+      editBookPageImage({
+        bookId: "image-book",
+        pageNumber: 1,
+        instruction: "Измени только мяч.",
+        provider,
+        contentRoot: root,
+      }),
+    ).rejects.toThrow("Edit failed upstream");
+
+    const book = await getCanonicalBook("image-book", root);
+    expect(book?.pages[0]?.imageStatus).toBe("ready");
+    expect(
+      await fs.readFile(path.join(root, "books", "image-book", "pages", "001.png")),
+    ).toEqual(Buffer.from(current));
+    expect(
+      await listBookPageImageHistory({
+        bookId: "image-book",
+        pageNumber: 1,
+        contentRoot: root,
+      }),
+    ).toEqual([]);
   });
 });
