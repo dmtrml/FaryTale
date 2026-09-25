@@ -351,15 +351,15 @@ Goal: remove the remaining manual handoff for canonical character and environmen
 
 ### 18.2 — Parent UI
 
-- [ ] Add “Сгенерировать главный референс” to the character editor next to manual upload.
-- [ ] Add “Сгенерировать окружение” to the book reference section next to manual upload.
-- [ ] Regeneration/replacement of either reference must remain explicit and keep the manual upload fallback.
-- [ ] Revalidate affected Parent/book pages so newly generated references appear immediately.
+- [x] Add “Сгенерировать главный референс” to the character editor next to manual upload.
+- [x] Add “Сгенерировать окружение” to the book reference section next to manual upload.
+- [x] Regeneration/replacement of either reference must remain explicit and keep the manual upload fallback.
+- [x] Revalidate affected Parent/book pages so newly generated references appear immediately.
 
 ### 18.3 — Verification
 
-- [ ] Run typecheck, lint, focused tests, full tests, production build and `git diff --check`.
-- [ ] Verify the new test book `Эми учится пить из чашки` can proceed from generated references to normal page Generate without leaving FaryTale.
+- [x] Run typecheck, lint, focused tests, full tests, production build and `git diff --check`.
+- [x] Verify the new test book `Эми учится пить из чашки` exposes in-app character/environment reference generation plus normal page Generate without leaving FaryTale.
 
 Acceptance:
 - from Parent mode a user can create/replace the canonical character identity image without copying its prompt to another app;

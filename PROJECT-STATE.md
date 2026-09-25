@@ -6,7 +6,7 @@
 
 ## Current status
 
-**Current phase:** Phase 18 in progress — generate canonical character/environment references inside FaryTale.
+**Current phase:** Phase 18 complete — canonical character/environment references can be generated inside FaryTale.
 
 **Overall state:** FaryTale is a working reader-first family storybook app with parent-only authoring. The primary creation workflow is agent-first: an approved story can be materialized into canonical book/character files plus one prompt per page without manual technical form entry. Existing books remain readable without AI, credentials, a database or internet access.
 
@@ -29,7 +29,7 @@
 Private family story content is intentionally ignored by Git.
 
 Current local content in this checkout:
-- 3 private books are physically present: `emi-and-her-potty`, `miau-tidies-ball` and `miau-washes-paws`.
+- 4 private books are physically present: `emi-and-her-potty`, `miau-tidies-ball`, `miau-washes-paws` and the 6-page test book `emi-learns-to-drink-from-cup` / “Эми учится пить из чашки”.
 - 2 reusable character definitions are physically present: `emi` and `miau`. Their current local canonical JSON does not declare binary identity-reference files yet.
 - The previously materialized `emi-trims-her-nails` / “Эми стрижёт ноготки” and `emi-eats-with-spoon` / “Эми кушает ложкой” remain documented in project history but are not present in this checkout. This is expected because private `content/books/*` and `content/characters/*` are intentionally ignored by Git and therefore may differ between machines.
 - Do not copy private family content into Git merely to make checkouts match. Restore/upload the desired private books and reference assets locally when using them on this computer.
@@ -136,6 +136,8 @@ UX review branch verification on 2026-09-04:
 - Phase 17.5 local Qwen smoke on 2026-09-25 used the parent's actual ComfyUI 0.37.1 standalone installation at `D:\Comfy\ComfyUI` with RTX 3060 12 GB, `qwen_image_2.1_int8_convrot.safetensors`, `qwen3vl_8b_w4a8.safetensors` and `qwen_image_2.1_vae_bf16.safetensors`. The checked-in API workflows completed three real calls through `ComfyUIImageProvider`: prompt-only generate, fresh-canvas generation conditioned on the first result as a reference, and text-guided edit using the second result as image 1. The 1024×576 smoke outputs were ~490 KB, ~610 KB and ~1.15 MB respectively, so the existing 5 MB page-image guard did not need weakening. Temporary smoke assets live under ignored `.scratch/`.
 - Phase 17 final repository verification on 2026-09-25 passed: `npm run typecheck`, `npm run lint`, full `npm test` (24 files / 108 tests), `npm run build`, and `git diff --check`. Operational setup is documented in `README.md`, `docs/MVP.md`, `config/comfyui/README.md` and the committed `.env.example`.
 - Phase 18.1 adds a provider-backed canonical-reference generation service. Character generation reuses the existing canonical character prompt, requests a 1024×1024 image and stores it as the new identity reference; environment generation reuses the existing environment prompt, requests 1024×576 and stores it through the canonical 16:9 environment mutation. Focused verification passed: `npm run typecheck`, 3/3 reference-service tests and `git diff --check`.
+- Phase 18.2 adds explicit Parent controls for provider-backed reference generation while preserving manual upload. Runtime verification on the local dev server confirmed “Сгенерировать главный референс” on the Characters page and both “Сгенерировать окружение” plus normal page “Сгенерировать внутри приложения” on `emi-learns-to-drink-from-cup`; ComfyUI on port 8188 was reachable during the check. No canonical Emi image was generated automatically because choosing a new identity reference remains an explicit parent action.
+- Phase 18 final verification passed on 2026-09-25: `npm run typecheck`, `npm run lint`, full `npm test` (25 files / 111 tests), `npm run build`, and `git diff --check`. README/MVP documentation now describes in-app character/environment reference generation and preserves exact real-world object references as upload-first assets.
 
 ## Git / working state
 
@@ -161,7 +163,7 @@ Read in this order:
 
 ## Exact next action
 
-1. Implement Phase 18.2 buttons beside the existing manual upload controls for character identity and book environment generation.
-2. Show those generation controls only when `FARYTALE_IMAGE_PROVIDER` is not `manual`, preserving upload/copy-prompt fallback.
-3. Verify the controls and generated assets against the local test book `emi-learns-to-drink-from-cup`.
-4. Keep external exact-object references (for example the real cup) upload-first for now; they represent parent-supplied real-world objects rather than synthetic canonical design.
+1. In Parent mode, explicitly generate and visually approve Emi's main identity reference and the test book's environment reference before using them as canonical anchors.
+2. Upload the parent's real cup photo to the declared `cup` external reference.
+3. Run the first real `Эми учится пить из чашки` page Generate → Regenerate → Restore → text Edit acceptance cycle and tune prompts/reference selection only if a concrete consistency problem appears.
+4. Keep mask/brush editing, automatic continuity anchors and whole-book generation queue as later enhancements rather than expanding the MVP pre-emptively.

@@ -45,6 +45,10 @@ import {
   generateBookPageImage,
   restoreBookPageImageVersion,
 } from "@/lib/image-generation/service";
+import {
+  generateBookEnvironmentReference,
+  generateCharacterIdentityReference,
+} from "@/lib/image-generation/reference-service";
 
 export async function enterParentMode() {
   const cookieStore = await cookies();
@@ -257,6 +261,13 @@ export async function replaceBookEnvironmentReferenceAction(bookId: string, form
   revalidatePath(`/parent/books/${bookId}`);
 }
 
+export async function generateBookEnvironmentReferenceAction(bookId: string) {
+  await requireParentMode();
+  const provider = getConfiguredImageProvider();
+  await generateBookEnvironmentReference({ bookId, provider });
+  revalidatePath("/parent/books/" + bookId);
+}
+
 export async function replaceBookExternalReferenceAction(
   bookId: string,
   referenceId: string,
@@ -398,6 +409,14 @@ export async function addCharacterReferenceAction(characterId: string, formData:
     makeIdentity: formData.get("makeIdentity") === "yes",
   });
   revalidatePath("/parent/characters");
+}
+
+export async function generateCharacterIdentityReferenceAction(characterId: string) {
+  await requireParentMode();
+  const provider = getConfiguredImageProvider();
+  await generateCharacterIdentityReference({ characterId, provider });
+  revalidatePath("/parent/characters");
+  revalidatePath("/parent/books");
 }
 
 export async function setCharacterIdentityReferenceAction(characterId: string, referenceId: string) {

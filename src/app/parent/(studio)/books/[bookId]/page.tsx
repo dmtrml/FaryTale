@@ -6,6 +6,7 @@ import {
   deletePageAction,
   duplicatePageAction,
   editPageImageAction,
+  generateBookEnvironmentReferenceAction,
   generatePageImageAction,
   insertPageAction,
   movePageAction,
@@ -115,6 +116,7 @@ export default async function ParentBookPage({
   const updateMetadata = updateBookMetadataAction.bind(null, book.id);
   const replaceCover = replaceBookCoverAction.bind(null, book.id);
   const replaceEnvironmentReference = replaceBookEnvironmentReferenceAction.bind(null, book.id);
+  const generateEnvironmentReference = generateBookEnvironmentReferenceAction.bind(null, book.id);
   const appendPage = insertPageAction.bind(null, book.id);
 
   return (
@@ -287,14 +289,25 @@ export default async function ParentBookPage({
                 {environmentReference ? (
                   <Image unoptimized width={96} height={96} src={`/api/parent/books/${book.id}/asset?path=${encodeURIComponent(environmentReference.path)}`} alt="Референс окружения" className="size-20 shrink-0 rounded-lg bg-white object-contain" />
                 ) : <div className="grid size-20 shrink-0 place-items-center rounded-lg border border-dashed border-[#cfc5b8] bg-white text-xs text-[#756d64]">Нет фото</div>}
-                <form action={replaceEnvironmentReference} className="min-w-0 flex-1">
-                  <ImageUploadField
-                    label={environmentReference ? "Выбрать новый референс" : "Выбрать референс окружения"}
-                    aspect="video"
-                    hint="Только горизонтальный формат 16:9."
-                  />
-                  <button className="mt-2 rounded-xl border border-[#d8d0c5] bg-white px-4 py-2 text-sm font-semibold">{environmentReference ? "Заменить" : "Загрузить"}</button>
-                </form>
+                <div className="min-w-0 flex-1">
+                  {networkImageProvider ? (
+                    <form action={generateEnvironmentReference}>
+                      <button className="w-full rounded-xl bg-[#40382f] px-4 py-2.5 text-sm font-semibold text-white">
+                        {environmentReference
+                          ? "Сгенерировать новое окружение"
+                          : "Сгенерировать окружение"}
+                      </button>
+                    </form>
+                  ) : null}
+                  <form action={replaceEnvironmentReference} className={networkImageProvider ? "mt-3 border-t border-[#ddd4c8] pt-3" : ""}>
+                    <ImageUploadField
+                      label={environmentReference ? "Выбрать новый референс" : "Выбрать референс окружения"}
+                      aspect="video"
+                      hint="Только горизонтальный формат 16:9."
+                    />
+                    <button className="mt-2 rounded-xl border border-[#d8d0c5] bg-white px-4 py-2 text-sm font-semibold">{environmentReference ? "Заменить" : "Загрузить"}</button>
+                  </form>
+                </div>
               </div>
             </div>
 

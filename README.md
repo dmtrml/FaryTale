@@ -96,6 +96,14 @@ page characters → book environment → additional book references → declared
 objects. Qwen requests are capped at 10 images. For Edit, the current page consumes
 image slot 1, leaving up to nine canonical reference slots.
 
+When a real image provider is configured, Parent mode can also prepare the two main
+synthetic canonical references without leaving FaryTale: the Characters page can
+generate/replace a character's main identity reference from its canonical character
+prompt, and a book page can generate/replace its 16:9 environment reference from the
+existing environment prompt. Manual upload remains available beside both controls.
+Parent-supplied exact real-world object references (for example a specific cup, spoon or
+chair) remain upload-first because their purpose is to preserve the parent's actual object.
+
 To enable one-page image generation through the OpenAI Image API instead:
 
 ```text
@@ -137,7 +145,7 @@ The recommended creation path is not manual form entry. An external agent can tu
 npm run agent:materialize -- .scratch/farytale-agent/<book-id>.json
 ```
 
-This creates canonical characters/pages and a prompt for every scene, validates the result, and leaves images for manual generation/upload (`prompt_ready`).
+This creates canonical characters/pages and a prompt for every scene, validates the result, and leaves pages `prompt_ready`. The parent can then explicitly generate canonical character/environment references and page illustrations inside FaryTale, or keep using the manual copy-prompt/upload fallback.
 
 Parent mode includes a persistent light/dark appearance toggle. Until a choice is saved, FaryTale follows the operating-system color preference; reader mode uses the same local preference while print/PDF remains light.
 

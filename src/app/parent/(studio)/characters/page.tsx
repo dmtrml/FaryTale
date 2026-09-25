@@ -4,6 +4,7 @@ import {
   addCharacterReferenceAction,
   createCharacterAction,
   deleteCharacterAction,
+  generateCharacterIdentityReferenceAction,
   removeCharacterReferenceAction,
   setCharacterIdentityReferenceAction,
   updateCharacterAction,
@@ -13,10 +14,13 @@ import { CopyPromptButton } from "@/components/copy-prompt-button";
 import { ImageUploadField } from "@/components/image-upload-field";
 import { composeCharacterGenerationPrompt } from "@/lib/characters/prompt";
 import { loadLibrary } from "@/lib/content/loader";
+import { getServerProviderConfig } from "@/lib/providers/server-config";
 
 export default async function ParentCharactersPage() {
   await connection();
   const { characters, books } = await loadLibrary();
+  const providerConfig = getServerProviderConfig();
+  const networkImageProvider = providerConfig.FARYTALE_IMAGE_PROVIDER !== "manual";
 
   return (
     <main className="mx-auto max-w-6xl px-5 py-8 sm:px-8 sm:py-10">
@@ -44,6 +48,10 @@ export default async function ParentCharactersPage() {
         {characters.map((character) => {
           const update = updateCharacterAction.bind(null, character.id);
           const addReference = addCharacterReferenceAction.bind(null, character.id);
+          const generateIdentityReference = generateCharacterIdentityReferenceAction.bind(
+            null,
+            character.id,
+          );
           const removeCharacter = deleteCharacterAction.bind(null, character.id);
           const usedBy = books.filter((book) => book.characters.includes(character.id) || book.pages.some((page) => page.characters.includes(character.id)));
           const identityReference =
@@ -77,6 +85,15 @@ export default async function ParentCharactersPage() {
                     </div>
                   )}
                   <p className="mt-3 text-xs leading-5 text-[#756d64]">При генерации следующих изображений прикладывайте этот референс вместе с промптом.</p>
+                  {networkImageProvider ? (
+                    <form action={generateIdentityReference} className="mt-4">
+                      <button className="w-full rounded-full bg-[#40382f] px-4 py-2.5 text-xs font-semibold text-white">
+                        {identityReference
+                          ? "Сгенерировать новый главный референс"
+                          : "Сгенерировать главный референс"}
+                      </button>
+                    </form>
+                  ) : null}
                   <form action={addReference} className="mt-4 border-t border-[#e4ddd3] pt-4">
                     <input type="hidden" name="role" value="reference" />
                     <input type="hidden" name="makeIdentity" value="yes" />

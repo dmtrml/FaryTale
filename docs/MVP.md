@@ -66,11 +66,13 @@ Parent mode can:
 - create and edit canonical characters;
 - edit visual identity, palette, fixed traits and do-not-change rules;
 - upload/remove character reference images, edit reference roles and choose the canonical identity reference;
+- generate/replace a character's canonical identity reference through the configured image provider without leaving FaryTale;
 - use a simplified character card that shows the main identity reference plus one ready-to-copy ChatGPT Image prompt assembled automatically from the structured character fields; palette/fixed/do-not-change fields remain available under advanced settings rather than requiring manual prompt assembly;
 - delete an unused character while blocking deletion when a book still references it;
 - create a draft book;
 - use the tool-driven Studio;
 - optionally generate/regenerate one illustration through a configured image provider;
+- generate/replace the canonical 16:9 book environment reference through the configured image provider;
 - automatically attach the available page character, environment and exact object references to the provider request;
 - inspect multiple archived generated variants and restore any previous version without losing the current one;
 - submit a text-guided edit of the current illustration when the configured provider supports editing;
@@ -142,6 +144,13 @@ deferred beyond this first MVP.
 Regeneration and edit history remain ordinary files under `pages/history/`. Parent mode
 can restore an archived version; restore first archives the current image, so switching
 versions is non-destructive.
+
+Canonical reference preparation also uses the same provider abstraction. Character
+identity generation uses the canonical character prompt and stores the returned image as
+the new `identity` reference. Environment generation uses the existing book environment
+prompt, requests 16:9 output and stores it as the canonical `environment` book reference.
+Both actions are explicit Parent actions and keep manual upload controls available. Exact
+parent-supplied real-world object references remain uploads rather than synthetic generation.
 
 When `openai-image` is explicitly configured, one parent-triggered page request:
 
