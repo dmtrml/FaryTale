@@ -135,6 +135,7 @@ UX review branch verification on 2026-09-04:
 - Phase 17.4 focused verification: `npm run typecheck` passed; ComfyUI/OpenAI/reference-pack/image-service/manual-prompt suite passed 5 files / 27 tests; `npm run lint`, `npm run build` and `git diff --check` passed.
 - Phase 17.5 local Qwen smoke on 2026-09-25 used the parent's actual ComfyUI 0.37.1 standalone installation at `D:\Comfy\ComfyUI` with RTX 3060 12 GB, `qwen_image_2.1_int8_convrot.safetensors`, `qwen3vl_8b_w4a8.safetensors` and `qwen_image_2.1_vae_bf16.safetensors`. The checked-in API workflows completed three real calls through `ComfyUIImageProvider`: prompt-only generate, fresh-canvas generation conditioned on the first result as a reference, and text-guided edit using the second result as image 1. The 1024×576 smoke outputs were ~490 KB, ~610 KB and ~1.15 MB respectively, so the existing 5 MB page-image guard did not need weakening. Temporary smoke assets live under ignored `.scratch/`.
 - Phase 17 final repository verification on 2026-09-25 passed: `npm run typecheck`, `npm run lint`, full `npm test` (24 files / 108 tests), `npm run build`, and `git diff --check`. Operational setup is documented in `README.md`, `docs/MVP.md`, `config/comfyui/README.md` and the committed `.env.example`.
+- Phase 18.1 adds a provider-backed canonical-reference generation service. Character generation reuses the existing canonical character prompt, requests a 1024×1024 image and stores it as the new identity reference; environment generation reuses the existing environment prompt, requests 1024×576 and stores it through the canonical 16:9 environment mutation. Focused verification passed: `npm run typecheck`, 3/3 reference-service tests and `git diff --check`.
 
 ## Git / working state
 
@@ -160,7 +161,7 @@ Read in this order:
 
 ## Exact next action
 
-1. Implement Phase 18.1: provider-backed character identity and book-environment reference generation using the existing canonical prompts and save mutations.
-2. Add mocked tests and checkpoint the backend before changing Parent UI.
-3. Implement Phase 18.2 buttons beside the existing manual upload controls, then verify against the local test book `emi-learns-to-drink-from-cup`.
+1. Implement Phase 18.2 buttons beside the existing manual upload controls for character identity and book environment generation.
+2. Show those generation controls only when `FARYTALE_IMAGE_PROVIDER` is not `manual`, preserving upload/copy-prompt fallback.
+3. Verify the controls and generated assets against the local test book `emi-learns-to-drink-from-cup`.
 4. Keep external exact-object references (for example the real cup) upload-first for now; they represent parent-supplied real-world objects rather than synthetic canonical design.

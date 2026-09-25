@@ -342,12 +342,12 @@ Goal: remove the remaining manual handoff for canonical character and environmen
 
 ### 18.1 — Reference-generation service
 
-- [ ] Add one server-side service for provider-backed canonical-reference generation.
-- [ ] Generate a character identity reference from the existing canonical character prompt and save the result as the new `identity` reference.
-- [ ] Generate a 16:9 book environment reference from the existing environment prompt and save it through the canonical environment-reference mutation.
-- [ ] Keep `manual` mode unchanged; generation controls are shown only when a real image provider is configured.
-- [ ] Reuse the existing provider abstraction so ComfyUI/Qwen and OpenAI-backed generation remain interchangeable.
-- [ ] Add mocked regression tests; no live ComfyUI instance is required for automated verification.
+- [x] Add one server-side service for provider-backed canonical-reference generation.
+- [x] Generate a character identity reference from the existing canonical character prompt and save the result as the new `identity` reference.
+- [x] Generate a 16:9 book environment reference from the existing environment prompt and save it through the canonical environment-reference mutation.
+- [x] Keep `manual` mode unchanged; generation controls are shown only when a real image provider is configured.
+- [x] Reuse the existing provider abstraction so ComfyUI/Qwen and OpenAI-backed generation remain interchangeable.
+- [x] Add mocked regression tests; no live ComfyUI instance is required for automated verification.
 
 ### 18.2 — Parent UI
 
