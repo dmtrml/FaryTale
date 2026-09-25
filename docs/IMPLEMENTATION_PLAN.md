@@ -291,12 +291,12 @@ The application runtime must talk to ComfyUI over its local HTTP API. MCP/connec
 
 ### 17.1 — ComfyUI provider foundation
 
-- [ ] Extend server-only image-provider configuration with a `comfyui` provider and local base URL.
-- [ ] Add a `ComfyUIImageProvider` behind the existing `ImageProvider` interface rather than adding a parallel generation subsystem.
-- [ ] Keep workflow JSON outside canonical book data and make workflow paths configurable.
-- [ ] Upload only the references selected for the current page/action.
-- [ ] Submit a ComfyUI prompt, poll its history, fetch the resulting image and return ordinary `GeneratedImageResult` bytes to the existing service.
-- [ ] Add mocked provider tests; automated tests must not require a running ComfyUI instance.
+- [x] Extend server-only image-provider configuration with a `comfyui` provider and local base URL.
+- [x] Add a `ComfyUIImageProvider` behind the existing `ImageProvider` interface rather than adding a parallel generation subsystem.
+- [x] Keep workflow JSON outside canonical book data and make workflow paths configurable.
+- [x] Upload only the references selected for the current page/action.
+- [x] Submit a ComfyUI prompt, poll its history, fetch the resulting image and return ordinary `GeneratedImageResult` bytes to the existing service.
+- [x] Add mocked provider tests; automated tests must not require a running ComfyUI instance.
 
 ### 17.2 — Real external object references and reference packs
 
