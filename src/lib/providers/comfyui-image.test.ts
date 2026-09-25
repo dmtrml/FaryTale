@@ -240,12 +240,85 @@ describe("ComfyUIImageProvider", () => {
     expect(result.mimeType).toBe("image/webp");
   });
 
-  it("fails clearly when the workflow requires a missing reference slot", async () => {
+  it("prunes unused image slots and their dynamic image links", async () => {
+    let submitted: Record<string, unknown> | undefined;
+    const provider = new ComfyUIImageProvider({
+      baseUrl: "http://localhost:8188",
+      workflowPath: "ignored.json",
+      outputNodeId: "9",
+      sleepImpl: async () => undefined,
+      workflowLoader: async () => ({
+        "2": { class_type: "LoadImage", inputs: { image: "__FARYTALE_IMAGE_1__" } },
+        "3": { class_type: "LoadImage", inputs: { image: "__FARYTALE_IMAGE_2__" } },
+        "4": {
+          class_type: "TextEncodeQwenImage21",
+          inputs: {
+            prompt: "__FARYTALE_PROMPT__",
+            "images.image_1": ["2", 0],
+            "images.image_2": ["3", 0],
+          },
+        },
+        "9": { class_type: "SaveImage", inputs: { images: ["8", 0] } },
+      }),
+      fetchImpl: (async (url, init) => {
+        const href = String(url);
+        if (href.endsWith("/upload/image")) {
+          return jsonResponse({ name: "one.png", subfolder: "", type: "input" });
+        }
+        if (href.endsWith("/prompt")) {
+          submitted = JSON.parse(String(init?.body)).prompt;
+          return jsonResponse({ prompt_id: "prune-1" });
+        }
+        if (href.endsWith("/history/prune-1")) {
+          return jsonResponse({
+            "prune-1": {
+              status: { completed: true, status_str: "success" },
+              outputs: {
+                "9": {
+                  images: [{ filename: "result.png", subfolder: "", type: "output" }],
+                },
+              },
+            },
+          });
+        }
+        if (href.includes("/view?")) {
+          return new Response(new Uint8Array([1]), {
+            status: 200,
+            headers: { "Content-Type": "image/png" },
+          });
+        }
+        return new Response(null, { status: 404 });
+      }) as typeof fetch,
+    });
+
+    await provider.generate({
+      prompt: "Используй референс 1 только как внешность.",
+      references: [
+        {
+          path: "one.png",
+          mimeType: "image/png",
+          bytes: new Uint8Array([1]),
+        },
+      ],
+    });
+
+    expect(submitted?.["3"]).toBeUndefined();
+    expect(
+      (submitted?.["4"] as { inputs: Record<string, unknown> }).inputs[
+        "images.image_2"
+      ],
+    ).toBeUndefined();
+    expect(
+      (submitted?.["4"] as { inputs: Record<string, unknown> }).inputs.prompt,
+    ).toContain("<image1>");
+  });
+
+  it("fails rather than silently ignoring more images than the workflow declares", async () => {
     const provider = new ComfyUIImageProvider({
       baseUrl: "http://localhost:8188",
       workflowPath: "ignored.json",
       workflowLoader: async () => ({
-        "2": { inputs: { image: "__FARYTALE_IMAGE_2__" } },
+        "2": { inputs: { image: "__FARYTALE_IMAGE_1__" } },
       }),
       fetchImpl: (async () => new Response(null, { status: 500 })) as typeof fetch,
     });
@@ -254,14 +327,11 @@ describe("ComfyUIImageProvider", () => {
       provider.generate({
         prompt: "scene",
         references: [
-          {
-            path: "one.png",
-            mimeType: "image/png",
-            bytes: new Uint8Array([1]),
-          },
+          { path: "one.png", mimeType: "image/png", bytes: new Uint8Array([1]) },
+          { path: "two.png", mimeType: "image/png", bytes: new Uint8Array([2]) },
         ],
       }),
-    ).rejects.toThrow("requires reference image 2");
+    ).rejects.toThrow("no slot for submitted image 2");
   });
 
   it("returns safe HTTP errors without exposing provider response bodies", async () => {

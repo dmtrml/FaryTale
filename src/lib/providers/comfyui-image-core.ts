@@ -185,6 +185,46 @@ function requiredWorkflowImageSlots(value: unknown, slots = new Set<number>()) {
   return slots;
 }
 
+function qwenImagePrompt(prompt: string, imageCount: number) {
+  let result = prompt;
+  for (let index = imageCount; index >= 1; index -= 1) {
+    result = result.replace(
+      new RegExp(`референс\\s+${index}(?!\\d)`, "gi"),
+      `<image${index}>`,
+    );
+  }
+  return result;
+}
+
+function pruneMissingImageSlots(workflow: Workflow, imageCount: number): Workflow {
+  const cloned = structuredClone(workflow);
+  const removedNodeIds = new Set<string>();
+
+  for (const [nodeId, node] of Object.entries(cloned)) {
+    const slots = requiredWorkflowImageSlots(node);
+    if ([...slots].some((slot) => slot > imageCount)) {
+      removedNodeIds.add(nodeId);
+      delete cloned[nodeId];
+    }
+  }
+
+  for (const node of Object.values(cloned)) {
+    const record = asRecord(node);
+    const inputs = asRecord(record?.inputs);
+    if (!inputs) continue;
+    for (const [key, value] of Object.entries(inputs)) {
+      if (
+        Array.isArray(value) &&
+        typeof value[0] === "string" &&
+        removedNodeIds.has(value[0])
+      ) {
+        delete inputs[key];
+      }
+    }
+  }
+  return cloned;
+}
+
 export class ComfyUIImageProvider implements ImageProvider {
   readonly id = "comfyui";
   private readonly baseUrl: string;
@@ -233,15 +273,16 @@ export class ComfyUIImageProvider implements ImageProvider {
       ...(request.sourceImage ? [request.sourceImage] : []),
       ...(request.references ?? []),
     ];
-    const workflow = await this.workflowLoader(workflowPath);
-    const requiredSlots = requiredWorkflowImageSlots(workflow);
-    for (const slot of requiredSlots) {
-      if (!inputImages[slot - 1]) {
+    const sourceWorkflow = await this.workflowLoader(workflowPath);
+    const declaredSlots = requiredWorkflowImageSlots(sourceWorkflow);
+    for (let slot = 1; slot <= inputImages.length; slot += 1) {
+      if (!declaredSlots.has(slot)) {
         throw new Error(
-          `ComfyUI workflow requires reference image ${slot}, but the request did not provide it.`,
+          `ComfyUI workflow has no slot for submitted image ${slot}.`,
         );
       }
     }
+    const workflow = pruneMissingImageSlots(sourceWorkflow, inputImages.length);
     const uploadedImages: string[] = [];
     for (const reference of inputImages) {
       uploadedImages.push(await this.uploadReference(reference));
@@ -250,7 +291,7 @@ export class ComfyUIImageProvider implements ImageProvider {
     const size = request.size ?? { width: 1920, height: 1080 };
     const seed = request.seed ?? Math.floor(Math.random() * 2_147_483_647);
     const patchedWorkflow = replaceWorkflowTokens(workflow, {
-      prompt,
+      prompt: qwenImagePrompt(prompt, inputImages.length),
       width: size.width,
       height: size.height,
       seed,

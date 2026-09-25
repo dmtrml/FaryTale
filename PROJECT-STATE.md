@@ -132,6 +132,7 @@ UX review branch verification on 2026-09-04:
 - Phase 17.2 verification: `npm run typecheck` passed; focused reference-pack/image-service/authoring/manual-prompt suite passed 4 files / 26 tests; full `npm test` passed 24 files / 100 tests; `npm run lint` and `npm run build` passed; `git diff --check` passed.
 - Phase 17.3 verification: `npm run typecheck` passed; image-generation service suite passed 8/8 including restore/security regression tests; `npm run lint`, `npm run build` and `git diff --check` passed.
 - Phase 17.4 focused verification: `npm run typecheck` passed; ComfyUI/OpenAI/reference-pack/image-service/manual-prompt suite passed 5 files / 27 tests; `npm run lint`, `npm run build` and `git diff --check` passed.
+- Phase 17.5 local Qwen smoke on 2026-09-25 used the parent's actual ComfyUI 0.37.1 standalone installation at `D:\Comfy\ComfyUI` with RTX 3060 12 GB, `qwen_image_2.1_int8_convrot.safetensors`, `qwen3vl_8b_w4a8.safetensors` and `qwen_image_2.1_vae_bf16.safetensors`. The checked-in API workflows completed three real calls through `ComfyUIImageProvider`: prompt-only generate, fresh-canvas generation conditioned on the first result as a reference, and text-guided edit using the second result as image 1. The 1024×576 smoke outputs were ~490 KB, ~610 KB and ~1.15 MB respectively, so the existing 5 MB page-image guard did not need weakening. Temporary smoke assets live under ignored `.scratch/`.
 
 ## Git / working state
 

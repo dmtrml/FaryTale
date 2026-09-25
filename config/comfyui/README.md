@@ -46,3 +46,18 @@ FARYTALE_COMFYUI_MODEL=qwen-image-2.1
 The provider uploads only the references supplied for the current generation request, submits the patched workflow to `/prompt`, polls `/history/<prompt_id>`, then fetches the selected output with `/view`.
 
 Do not commit private reference images, generated family images, credentials, or machine-specific absolute workflow paths.
+
+## Included Qwen-Image-2.1 workflows
+
+This repository includes two API-format workflows aligned with the Qwen-Image-2.1 native nodes available in ComfyUI 0.37.x:
+
+- `qwen-image-2.1-generate.api.json` — text-to-image plus optional multi-image conditioning. Reference images are fed to `TextEncodeQwenImage21`, while sampling uses a fresh FaryTale 16:9 latent so a character reference does not become the composition canvas.
+- `qwen-image-2.1-edit.api.json` — image edit. Image 1 is the current page illustration and its Qwen latent becomes the edit canvas; images 2…10 are canonical references.
+
+The checked-in workflows use the local model filenames currently tested for FaryTale:
+
+- `qwen_image_2.1_int8_convrot.safetensors`
+- `qwen3vl_8b_w4a8.safetensors`
+- `qwen_image_2.1_vae_bf16.safetensors`
+
+If another machine uses different Qwen weight filenames, copy these workflow files locally and point the environment variables at the machine-specific copies rather than changing canonical book data.

@@ -1,0 +1,140 @@
+{
+  "1": {
+    "class_type": "UNETLoader",
+    "inputs": {
+      "unet_name": "qwen_image_2.1_int8_convrot.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "2": {
+    "class_type": "QwenImage21Cache",
+    "inputs": {
+      "model": ["1", 0],
+      "device": "auto",
+      "dtype": "default"
+    }
+  },
+  "3": {
+    "class_type": "CLIPLoader",
+    "inputs": {
+      "clip_name": "qwen3vl_8b_w4a8.safetensors",
+      "type": "qwen_image",
+      "device": "default"
+    }
+  },
+  "4": {
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "qwen_image_2.1_vae_bf16.safetensors"
+    }
+  },
+  "5": {
+    "class_type": "TextEncodeQwenImage21",
+    "inputs": {
+      "clip": ["3", 0],
+      "prompt": "__FARYTALE_PROMPT__",
+      "negative_prompt": "",
+      "resolution": 1024,
+      "vae": ["4", 0],
+      "images.image_1": ["21", 0],
+      "images.image_2": ["22", 0],
+      "images.image_3": ["23", 0],
+      "images.image_4": ["24", 0],
+      "images.image_5": ["25", 0],
+      "images.image_6": ["26", 0],
+      "images.image_7": ["27", 0],
+      "images.image_8": ["28", 0],
+      "images.image_9": ["29", 0],
+      "images.image_10": ["30", 0]
+    }
+  },
+  "7": {
+    "class_type": "KSampler",
+    "inputs": {
+      "model": ["2", 0],
+      "seed": "__FARYTALE_SEED__",
+      "steps": 25,
+      "cfg": 1,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "positive": ["5", 0],
+      "negative": ["5", 1],
+      "latent_image": ["5", 2],
+      "denoise": 1
+    }
+  },
+  "8": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": ["7", 0],
+      "vae": ["4", 0]
+    }
+  },
+  "9": {
+    "class_type": "SaveImage",
+    "inputs": {
+      "images": ["8", 0],
+      "filename_prefix": "FaryTale-edit"
+    }
+  },
+  "21": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "__FARYTALE_IMAGE_1__"
+    }
+  },
+  "22": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "__FARYTALE_IMAGE_2__"
+    }
+  },
+  "23": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "__FARYTALE_IMAGE_3__"
+    }
+  },
+  "24": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "__FARYTALE_IMAGE_4__"
+    }
+  },
+  "25": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "__FARYTALE_IMAGE_5__"
+    }
+  },
+  "26": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "__FARYTALE_IMAGE_6__"
+    }
+  },
+  "27": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "__FARYTALE_IMAGE_7__"
+    }
+  },
+  "28": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "__FARYTALE_IMAGE_8__"
+    }
+  },
+  "29": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "__FARYTALE_IMAGE_9__"
+    }
+  },
+  "30": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "__FARYTALE_IMAGE_10__"
+    }
+  }
+}
