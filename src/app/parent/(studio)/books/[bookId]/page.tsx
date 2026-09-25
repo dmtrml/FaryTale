@@ -13,6 +13,7 @@ import {
   replaceBookEnvironmentReferenceAction,
   replaceBookExternalReferenceAction,
   replacePageImageAction,
+  restorePageImageVersionAction,
   updateBookMetadataAction,
   updatePageCharactersAction,
   updatePageTextAction,
@@ -24,6 +25,7 @@ import { readBookPagePrompts } from "@/lib/content/mutations";
 import { bookIllustrationProgress, bookStatusLabel } from "@/lib/books/presentation";
 import { storyPatternLabels, recommendStoryPattern } from "@/lib/story/rules";
 import { getServerProviderConfig } from "@/lib/providers/server-config";
+import { listBookPageImageHistory } from "@/lib/image-generation/service";
 import { assessIllustrationPrompt } from "@/lib/story/quality";
 import { selectCanonicalIdentityReference } from "@/lib/characters/identity";
 import {
@@ -88,6 +90,9 @@ export default async function ParentBookPage({
   const selectedPage = selectedPageNumber
     ? book.pages.find((page) => page.number === selectedPageNumber) ?? null
     : null;
+  const selectedPageHistory = selectedPage
+    ? await listBookPageImageHistory({ bookId: book.id, pageNumber: selectedPage.number })
+    : [];
   const visiblePages =
     selectedPage && !filteredPages.some((page) => page.number === selectedPage.number)
       ? [...filteredPages, selectedPage].sort((a, b) => a.number - b.number)
@@ -393,6 +398,11 @@ export default async function ParentBookPage({
             const updatePageCharacters = updatePageCharactersAction.bind(null, book.id, page.number);
             const replaceImage = replacePageImageAction.bind(null, book.id, page.number);
             const generateImage = generatePageImageAction.bind(null, book.id, page.number);
+            const restoreImageVersion = restorePageImageVersionAction.bind(
+              null,
+              book.id,
+              page.number,
+            );
             const duplicatePage = duplicatePageAction.bind(null, book.id, page.number);
             const deletePage = deletePageAction.bind(null, book.id, page.number);
             const movePage = movePageAction.bind(null, book.id, page.number);
@@ -505,6 +515,45 @@ export default async function ParentBookPage({
                         <div className="mt-5 flex justify-end border-t border-[#e4ddd3] pt-4">
                           <Link href={pageHref(nextPage.number)} className="inline-flex min-h-11 items-center rounded-full bg-[#40382f] px-5 text-sm font-semibold text-white">Готово → перейти к странице {nextPage.number}</Link>
                         </div>
+                      ) : null}
+
+                      {selectedPageHistory.length ? (
+                        <details className="mt-4 rounded-xl border border-[#e4ddd3] bg-white p-3">
+                          <summary className="cursor-pointer text-sm font-semibold">
+                            Предыдущие варианты · {selectedPageHistory.length}
+                          </summary>
+                          <p className="mt-2 text-xs leading-5 text-[#756d64]">
+                            При восстановлении текущая иллюстрация сначала сама попадёт в историю, поэтому вариант не потеряется.
+                          </p>
+                          <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+                            {selectedPageHistory.map((historyPath, historyIndex) => (
+                              <div key={historyPath} className="rounded-xl border border-[#e4ddd3] p-2">
+                                <div className="aspect-video overflow-hidden rounded-lg bg-[#f4f0e9]">
+                                  <Image
+                                    unoptimized
+                                    width={320}
+                                    height={180}
+                                    src={`/api/parent/books/${book.id}/history?path=${encodeURIComponent(historyPath)}`}
+                                    alt={`Предыдущий вариант страницы ${page.number}`}
+                                    className="size-full object-contain"
+                                  />
+                                </div>
+                                <p className="mt-2 text-xs text-[#756d64]">
+                                  Вариант {selectedPageHistory.length - historyIndex}
+                                </p>
+                                <form action={restoreImageVersion} className="mt-2">
+                                  <input type="hidden" name="historyPath" value={historyPath} />
+                                  <button
+                                    type="submit"
+                                    className="w-full rounded-lg border border-[#d8d0c5] bg-white px-3 py-2 text-xs font-semibold"
+                                  >
+                                    Восстановить
+                                  </button>
+                                </form>
+                              </div>
+                            ))}
+                          </div>
+                        </details>
                       ) : null}
                     </section>
 

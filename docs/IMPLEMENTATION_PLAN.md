@@ -309,10 +309,10 @@ The application runtime must talk to ComfyUI over its local HTTP API. MCP/connec
 
 ### 17.3 — Generate, regenerate and visible variants
 
-- [ ] Keep the existing explicit one-page Generate/Regenerate action and current page-status lifecycle.
-- [ ] Preserve the existing archive-before-regenerate behavior under `pages/history/`.
-- [ ] Surface previous generated variants in Parent mode and allow restoring one as the current page illustration.
-- [ ] Keep manual upload/copy-prompt paths available as fallback even when ComfyUI is configured.
+- [x] Keep the existing explicit one-page Generate/Regenerate action and current page-status lifecycle.
+- [x] Preserve the existing archive-before-regenerate behavior under `pages/history/`.
+- [x] Surface previous generated variants in Parent mode and allow restoring one as the current page illustration.
+- [x] Keep manual upload/copy-prompt paths available as fallback even when ComfyUI is configured.
 
 ### 17.4 — Text-guided image edit
 

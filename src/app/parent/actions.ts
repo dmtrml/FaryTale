@@ -40,7 +40,10 @@ import {
 import { prepareManualStoryDraft } from "@/lib/story/generator";
 import { storyPatternSchema } from "@/lib/content/schemas";
 import { getConfiguredImageProvider } from "@/lib/providers/server-config";
-import { generateBookPageImage } from "@/lib/image-generation/service";
+import {
+  generateBookPageImage,
+  restoreBookPageImageVersion,
+} from "@/lib/image-generation/service";
 
 export async function enterParentMode() {
   const cookieStore = await cookies();
@@ -156,6 +159,18 @@ export async function generatePageImageAction(bookId: string, pageNumber: number
   await requireParentMode();
   const provider = getConfiguredImageProvider();
   await generateBookPageImage({ bookId, pageNumber, provider });
+  revalidatePath(`/parent/books/${bookId}`);
+  revalidatePath(`/books/${bookId}`);
+}
+
+export async function restorePageImageVersionAction(
+  bookId: string,
+  pageNumber: number,
+  formData: FormData,
+) {
+  await requireParentMode();
+  const historyPath = z.string().min(1).max(1000).parse(formData.get("historyPath"));
+  await restoreBookPageImageVersion({ bookId, pageNumber, historyPath });
   revalidatePath(`/parent/books/${bookId}`);
   revalidatePath(`/books/${bookId}`);
 }

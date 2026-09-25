@@ -96,6 +96,79 @@ export async function listBookPageImageHistory({
   }
 }
 
+export async function restoreBookPageImageVersion({
+  bookId,
+  pageNumber,
+  historyPath,
+  contentRoot: customRoot,
+  now,
+}: {
+  bookId: string;
+  pageNumber: number;
+  historyPath: string;
+  contentRoot?: string;
+  now?: string;
+}) {
+  const contentRoot = contentRootPath(customRoot);
+  const book = await getCanonicalBook(bookId, contentRoot);
+  const page = book?.pages.find((item) => item.number === pageNumber);
+  if (!book || !page) throw new Error("Page not found.");
+  if (
+    !isSafeContentPath(historyPath) ||
+    !new RegExp(
+      `^pages/history/${String(pageNumber).padStart(3, "0")}-[^/]+\\.(?:avif|gif|jpe?g|png|webp)$`,
+      "i",
+    ).test(historyPath)
+  ) {
+    throw new Error("Invalid page-image history path.");
+  }
+  const extension = path.extname(historyPath).toLowerCase();
+  const mimeType = mimeByExtension[extension];
+  if (!mimeType) throw new Error("Unsupported history image type.");
+  const source = path.join(contentRoot, "books", bookId, ...historyPath.split("/"));
+  let bytes: Uint8Array;
+  try {
+    bytes = new Uint8Array(await fs.readFile(source));
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+      throw new Error("History image not found.");
+    }
+    throw error;
+  }
+
+  const archivedCurrentPath = await archiveCurrentPageImage({
+    contentRoot,
+    bookId,
+    pageNumber,
+    currentImage: page.image,
+    now,
+  });
+  const restored = await replaceBookPageImage({
+    bookId,
+    pageNumber,
+    bytes,
+    mimeType,
+    contentRoot,
+  });
+  if (page.prompt) {
+    await appendBookPageGenerationProvenance({
+      bookId,
+      pageNumber,
+      status: "ready",
+      provider: "history-restore",
+      previousImagePath: archivedCurrentPath ?? undefined,
+      note: `restored_from: ${historyPath}`,
+      generatedAt: now,
+      contentRoot,
+    });
+  }
+  return {
+    relativePath: restored.relativePath,
+    restoredFrom: historyPath,
+    archivedCurrentPath,
+  };
+}
+
 async function loadPageReferences(
   contentRoot: string,
   book: Book,

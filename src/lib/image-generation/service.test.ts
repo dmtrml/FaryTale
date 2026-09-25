@@ -5,7 +5,11 @@ import { afterEach, describe, expect, it } from "vitest";
 import { getCanonicalBook, readBookPagePrompt, replaceBookPageImage } from "../content/mutations";
 import type { ImageGenerationRequest, ImageProvider } from "../providers/contracts";
 import { ManualImageProvider } from "../providers/manual-image";
-import { generateBookPageImage, listBookPageImageHistory } from "./service";
+import {
+  generateBookPageImage,
+  listBookPageImageHistory,
+  restoreBookPageImageVersion,
+} from "./service";
 
 const roots: string[] = [];
 
@@ -274,5 +278,62 @@ describe("generateBookPageImage", () => {
     expect(await fs.readFile(path.join(root, "books", "image-book", history[0]!))).toEqual(Buffer.from(generatedPng()));
     const prompt = await readBookPagePrompt({ bookId: "image-book", pageNumber: 1, contentRoot: root });
     expect(prompt).toContain(`- previous_image: ${history[0]}`);
+  });
+
+  it("restores a previous version while archiving the current image first", async () => {
+    const root = await fixture();
+    const current = new Uint8Array([...generatedPng(), 88]);
+    const previous = new Uint8Array([...generatedPng(), 77]);
+    await replaceBookPageImage({
+      bookId: "image-book",
+      pageNumber: 1,
+      bytes: current,
+      mimeType: "image/png",
+      contentRoot: root,
+    });
+    const historyPath = "pages/history/001-older.png";
+    const absoluteHistory = path.join(root, "books", "image-book", ...historyPath.split("/"));
+    await fs.mkdir(path.dirname(absoluteHistory), { recursive: true });
+    await fs.writeFile(absoluteHistory, previous);
+
+    const restored = await restoreBookPageImageVersion({
+      bookId: "image-book",
+      pageNumber: 1,
+      historyPath,
+      contentRoot: root,
+      now: "2026-09-25T14:30:00.000Z",
+    });
+
+    expect(restored.restoredFrom).toBe(historyPath);
+    expect(restored.archivedCurrentPath).toBe(
+      "pages/history/001-2026-09-25T14-30-00-000Z.png",
+    );
+    expect(
+      await fs.readFile(path.join(root, "books", "image-book", restored.relativePath)),
+    ).toEqual(Buffer.from(previous));
+    expect(
+      await fs.readFile(
+        path.join(root, "books", "image-book", restored.archivedCurrentPath!),
+      ),
+    ).toEqual(Buffer.from(current));
+    const prompt = await readBookPagePrompt({
+      bookId: "image-book",
+      pageNumber: 1,
+      contentRoot: root,
+    });
+    expect(prompt).toContain("- provider: history-restore");
+    expect(prompt).toContain(`restored_from: ${historyPath}`);
+  });
+
+  it("rejects restoring a history image belonging to another page", async () => {
+    const root = await fixture();
+    await expect(
+      restoreBookPageImageVersion({
+        bookId: "image-book",
+        pageNumber: 1,
+        historyPath: "pages/history/002-wrong.png",
+        contentRoot: root,
+      }),
+    ).rejects.toThrow("Invalid page-image history path");
   });
 });
