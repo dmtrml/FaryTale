@@ -399,3 +399,32 @@ Acceptance:
 - the ComfyUI TextEncodeQwenImage21 node receives a real negative prompt instead of an empty string;
 - current workflow defaults and output resolutions are documented and test-covered;
 - manual prompts and the reader remain unaffected.
+
+## Phase 20 — Scene-first Qwen page composition
+
+Goal: prevent canonical character references from being treated as ready-made cutouts/poses and make the actual page action dominate multi-reference generation.
+
+### 20.1 — Reference semantics and ordering
+
+- [ ] Keep the canonical/manual reference-pack order unchanged for copyable/manual prompts.
+- [ ] For ComfyUI/Qwen page generation only, order available visual references as environment → exact external objects → character identities → other book references.
+- [ ] Feed that same reordered list to both the Qwen prompt builder and provider bytes so `<imageN>` labels can never drift from the actual images.
+- [ ] Treat character references as identity-only anchors for face/hair/age/proportions and explicitly forbid copying their pose, stance, framing, background or temporary outfit into the story scene.
+- [ ] Treat the page scene/action/composition as higher priority than reference-image pose/composition.
+
+### 20.2 — Required exact-object preflight
+
+- [ ] When a Qwen page declares an exact external object reference but its image has not been uploaded, fail before generation with a clear missing-reference error instead of silently generating without that object.
+- [ ] Preserve manual/copy-prompt behavior; the stricter preflight applies only to in-app Qwen generation/editing.
+
+### 20.3 — Verification
+
+- [ ] Add regression tests for Qwen reference ordering, prompt/image numbering, identity-only wording and missing external-reference preflight.
+- [ ] Run typecheck, lint, full tests, production build and `git diff --check`.
+- [ ] Keep the private existing page image untouched; the parent can explicitly regenerate it after the fix.
+
+Acceptance:
+- a Qwen page with character + environment + exact object references receives all three in scene-first order with matching `<imageN>` semantics;
+- the prompt explicitly requires a newly composed story action rather than a standing/cutout copy of the identity reference;
+- a missing declared cup/spoon/etc. blocks Qwen generation instead of producing an incomplete scene;
+- manual/ChatGPT prompt behavior is unchanged.

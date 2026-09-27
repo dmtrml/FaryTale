@@ -6,7 +6,7 @@
 
 ## Current status
 
-**Current phase:** Phase 19 complete — Qwen-native prompt tuning, negative conditioning and explicit ComfyUI workflow defaults are implemented and verified.
+**Current phase:** Phase 20 in progress — scene-first Qwen page composition and exact-object preflight.
 
 **Overall state:** FaryTale is a working reader-first family storybook app with parent-only authoring. The primary creation workflow is agent-first: an approved story can be materialized into canonical book/character files plus one prompt per page without manual technical form entry. Existing books remain readable without AI, credentials, a database or internet access.
 
@@ -166,7 +166,7 @@ Read in this order:
 
 ## Exact next action
 
-1. In Parent mode, generate one new Emi identity-reference candidate and visually compare it with the previously generated result; accept it only if the warmer expression and identity fidelity are better.
-2. Generate/approve the test book environment, upload the real cup photo, then run one page Generate → Regenerate → Restore → text Edit cycle.
-3. If identity fidelity or style still drifts, tune the canonical Emi identity/style source fields first; do not add a translation model or prompt-rewriter runtime dependency unless concrete results show it is necessary.
-4. Keep mask/brush editing, automatic continuity anchors and whole-book generation queues as later enhancements.
+1. Implement Phase 20 Qwen-only scene-first reference ordering and keep prompt numbering synchronized with provider image order.
+2. Strengthen page prompting so character refs are identity-only and the requested scene/action overrides reference pose/composition.
+3. Add a Qwen preflight that blocks generation when a declared exact external object (the test book's `cup`) has no uploaded asset.
+4. Verify without overwriting the current private page image, then let the parent explicitly regenerate page 1.
