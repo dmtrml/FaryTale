@@ -366,3 +366,36 @@ Acceptance:
 - from a book page a user can create/replace the canonical 16:9 environment reference without copying its prompt to another app;
 - generated references become ordinary canonical assets and automatically participate in the existing page Reference Pack;
 - manual uploads remain available and the reader remains independent of all AI providers.
+
+## Phase 19 — Qwen-native prompting and explicit workflow defaults
+
+Goal: tune the local Qwen-Image-2.1 path for predictable children's-book output without changing the manual/ChatGPT authoring prompts or making a custom ComfyUI workflow a hidden dependency.
+
+### 19.1 — Provider prompt layer
+
+- [ ] Keep the existing Russian copyable/manual prompts unchanged for ChatGPT/manual workflows.
+- [ ] Add Qwen-specific English-first prompt builders for character identity references, environment references, page generation and text-guided edits.
+- [ ] Preserve canonical Russian story/identity source text as quoted semantic source where automatic translation would add another model/runtime dependency.
+- [ ] Give toddler/human-child identity references an explicit warm, calm, gently cheerful expression lock so a neutral seed does not drift toward a sad portrait.
+- [ ] Keep emotion constraints scoped: do not globally ban sadness/fear from story pages that may intentionally depict those emotions.
+
+### 19.2 — Negative conditioning and workflow controls
+
+- [ ] Extend image-generation requests with an optional negative prompt.
+- [ ] Add a `__FARYTALE_NEGATIVE_PROMPT__` workflow sentinel and patch it in both generate/edit requests.
+- [ ] Use a conservative children's-book negative preset for anatomy/artifact/text/clutter problems and a stronger cheerful-portrait preset only for canonical child identity references.
+- [ ] Document the checked-in Qwen workflow defaults explicitly: Qwen encoder resolution, output sizes by action, seed behavior, steps, CFG, sampler and scheduler.
+- [ ] Preserve the ability to point FaryTale at a parent-exported API-format ComfyUI workflow through the existing environment variables.
+
+### 19.3 — Verification
+
+- [ ] Add regression tests for Qwen prompt wording, negative-prompt substitution and reference-token conversion.
+- [ ] Run typecheck, lint, full tests, production build and `git diff --check`.
+- [ ] Re-run a local ComfyUI smoke for at least the character-reference path when the local service is available, without automatically replacing an approved canonical family reference unless the test uses scratch content.
+
+Acceptance:
+- Qwen receives English-first operational instructions even when canonical story details are stored in Russian;
+- a generated child identity reference is explicitly biased toward a warm, gentle, slightly smiling expression rather than an unspecified neutral/sad face;
+- the ComfyUI TextEncodeQwenImage21 node receives a real negative prompt instead of an empty string;
+- current workflow defaults and output resolutions are documented and test-covered;
+- manual prompts and the reader remain unaffected.

@@ -6,7 +6,7 @@
 
 ## Current status
 
-**Current phase:** Phase 18 complete — canonical character/environment references can be generated inside FaryTale.
+**Current phase:** Phase 19 in progress — Qwen-native prompt tuning, negative conditioning and explicit ComfyUI workflow defaults.
 
 **Overall state:** FaryTale is a working reader-first family storybook app with parent-only authoring. The primary creation workflow is agent-first: an approved story can be materialized into canonical book/character files plus one prompt per page without manual technical form entry. Existing books remain readable without AI, credentials, a database or internet access.
 
@@ -163,7 +163,7 @@ Read in this order:
 
 ## Exact next action
 
-1. In Parent mode, explicitly generate and visually approve Emi's main identity reference and the test book's environment reference before using them as canonical anchors.
-2. Upload the parent's real cup photo to the declared `cup` external reference.
-3. Run the first real `Эми учится пить из чашки` page Generate → Regenerate → Restore → text Edit acceptance cycle and tune prompts/reference selection only if a concrete consistency problem appears.
-4. Keep mask/brush editing, automatic continuity anchors and whole-book generation queue as later enhancements rather than expanding the MVP pre-emptively.
+1. Implement Phase 19.1 as a provider-only Qwen prompt layer; do not rewrite the existing manual/ChatGPT prompts.
+2. Implement Phase 19.2 negative conditioning with a `__FARYTALE_NEGATIVE_PROMPT__` sentinel in the checked-in Qwen workflows and document actual defaults (25 steps, CFG 1, Euler/simple, random seed, action-specific output sizes).
+3. Verify with focused tests/full regression and, if ComfyUI is available, a scratch character-reference smoke that cannot overwrite an approved private identity asset.
+4. After Phase 19, visually compare a newly generated Emi reference against the prior result before deciding whether any style/emotion tuning needs another iteration.
