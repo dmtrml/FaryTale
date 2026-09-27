@@ -6,7 +6,7 @@
 
 ## Current status
 
-**Current phase:** Phase 19 in progress — Qwen-native prompt tuning, negative conditioning and explicit ComfyUI workflow defaults.
+**Current phase:** Phase 19 complete — Qwen-native prompt tuning, negative conditioning and explicit ComfyUI workflow defaults are implemented and verified.
 
 **Overall state:** FaryTale is a working reader-first family storybook app with parent-only authoring. The primary creation workflow is agent-first: an approved story can be materialized into canonical book/character files plus one prompt per page without manual technical form entry. Existing books remain readable without AI, credentials, a database or internet access.
 
@@ -139,6 +139,8 @@ UX review branch verification on 2026-09-04:
 - Phase 18.2 adds explicit Parent controls for provider-backed reference generation while preserving manual upload. Runtime verification on the local dev server confirmed “Сгенерировать главный референс” on the Characters page and both “Сгенерировать окружение” plus normal page “Сгенерировать внутри приложения” on `emi-learns-to-drink-from-cup`; ComfyUI on port 8188 was reachable during the check. No canonical Emi image was generated automatically because choosing a new identity reference remains an explicit parent action.
 - Phase 18 final verification passed on 2026-09-25: `npm run typecheck`, `npm run lint`, full `npm test` (25 files / 111 tests), `npm run build`, and `git diff --check`. README/MVP documentation now describes in-app character/environment reference generation and preserves exact real-world object references as upload-first assets.
 - Phase 19.1–19.2 adds a ComfyUI/Qwen-only prompt layer while preserving the existing Russian manual/ChatGPT prompts. Qwen operational instructions are English-first, canonical Russian fields remain semantic source data, child identity references explicitly request a warm gentle slight smile/bright attentive eyes, and negative conditioning is now passed into `TextEncodeQwenImage21`. The checked-in fast preset is explicit: encoder resolution 1024, 25 steps, CFG 1, Euler/simple, random seed unless supplied; character 1024×1024, environment 1024×576, page 1920×1080. Focused verification passed: typecheck and 24/24 tests across Qwen prompt, reference service, page service and ComfyUI provider.
+- Phase 19.3 live smoke on 2026-09-27 used the real local ComfyUI service on port 8188 with an entirely fictional scratch toddler character, fixed seed `190927`, 25 steps and 1024×1024 output. The request completed in about 65 seconds; the rendered character had a warm slight smile/bright eyes on a clean neutral background, confirming that the cheerful identity preset and real negative conditioning reached the checked-in workflow. The smoke output and prompt log remain ignored under `.scratch/phase19-qwen-character.png` and `.scratch/phase19-qwen-character-prompt.txt`; no private canonical family asset was replaced.
+- Phase 19 final repository verification passed: `npm run typecheck`, `npm run lint`, full `npm test` (26 files / 116 tests), `npm run build`, and `git diff --check`. The temporary live-smoke test file was removed after the one-off run so normal automated tests remain independent of ComfyUI.
 
 ## Git / working state
 
@@ -164,7 +166,7 @@ Read in this order:
 
 ## Exact next action
 
-1. Implement Phase 19.1 as a provider-only Qwen prompt layer; do not rewrite the existing manual/ChatGPT prompts.
-2. Implement Phase 19.2 negative conditioning with a `__FARYTALE_NEGATIVE_PROMPT__` sentinel in the checked-in Qwen workflows and document actual defaults (25 steps, CFG 1, Euler/simple, random seed, action-specific output sizes).
-3. Verify with focused tests/full regression and, if ComfyUI is available, a scratch character-reference smoke that cannot overwrite an approved private identity asset.
-4. After Phase 19, visually compare a newly generated Emi reference against the prior result before deciding whether any style/emotion tuning needs another iteration.
+1. In Parent mode, generate one new Emi identity-reference candidate and visually compare it with the previously generated result; accept it only if the warmer expression and identity fidelity are better.
+2. Generate/approve the test book environment, upload the real cup photo, then run one page Generate → Regenerate → Restore → text Edit cycle.
+3. If identity fidelity or style still drifts, tune the canonical Emi identity/style source fields first; do not add a translation model or prompt-rewriter runtime dependency unless concrete results show it is necessary.
+4. Keep mask/brush editing, automatic continuity anchors and whole-book generation queues as later enhancements.

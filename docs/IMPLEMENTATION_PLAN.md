@@ -389,9 +389,9 @@ Goal: tune the local Qwen-Image-2.1 path for predictable children's-book output 
 
 ### 19.3 — Verification
 
-- [ ] Add regression tests for Qwen prompt wording, negative-prompt substitution and reference-token conversion.
-- [ ] Run typecheck, lint, full tests, production build and `git diff --check`.
-- [ ] Re-run a local ComfyUI smoke for at least the character-reference path when the local service is available, without automatically replacing an approved canonical family reference unless the test uses scratch content.
+- [x] Add regression tests for Qwen prompt wording, negative-prompt substitution and reference-token conversion.
+- [x] Run typecheck, lint, full tests, production build and `git diff --check`.
+- [x] Re-run a local ComfyUI smoke for at least the character-reference path when the local service is available, without automatically replacing an approved canonical family reference unless the test uses scratch content.
 
 Acceptance:
 - Qwen receives English-first operational instructions even when canonical story details are stored in Russian;
