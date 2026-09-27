@@ -135,6 +135,24 @@ conditioning while sampling onto a fresh 16:9 latent. This lets a character port
 object photo act as a visual anchor without forcing that source image to become the page
 composition.
 
+For the local Qwen provider, FaryTale builds a separate Qwen-oriented request rather
+than changing the existing copyable/manual prompt. Operational instructions are
+English-first, while canonical Russian source details are included as semantic source
+data. Child identity-reference requests explicitly bias toward a warm, calm, gently
+cheerful expression; ordinary story pages only use that positive default when the source
+scene does not explicitly require another emotion.
+
+The checked-in workflows receive request-specific negative conditioning. The general
+book preset targets visible text/watermarks, accidental extra characters, anatomy
+artifacts, clutter and harsh/horror styling. The stronger child-identity preset also
+suppresses sad/gloomy/crying/fearful portrait drift. It is intentionally scoped to the
+canonical identity-reference action rather than applied to all story scenes.
+
+The tested local-performance defaults are: `TextEncodeQwenImage21.resolution=1024`,
+25 steps, CFG 1, Euler sampler, simple scheduler, denoise 1 and a random seed unless one
+is explicitly supplied. Requested outputs are 1024×1024 for character references,
+1024×576 for environment references and 1920×1080 for ordinary page generation.
+
 For Edit, the current page illustration becomes image 1 and the canonical pack follows
 as images 2…10. The parent types a requested change such as “make the spoon smaller”;
 successful edits archive the previous current image before replacement. A failed edit

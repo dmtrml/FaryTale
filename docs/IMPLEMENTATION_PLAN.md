@@ -373,19 +373,19 @@ Goal: tune the local Qwen-Image-2.1 path for predictable children's-book output 
 
 ### 19.1 — Provider prompt layer
 
-- [ ] Keep the existing Russian copyable/manual prompts unchanged for ChatGPT/manual workflows.
-- [ ] Add Qwen-specific English-first prompt builders for character identity references, environment references, page generation and text-guided edits.
-- [ ] Preserve canonical Russian story/identity source text as quoted semantic source where automatic translation would add another model/runtime dependency.
-- [ ] Give toddler/human-child identity references an explicit warm, calm, gently cheerful expression lock so a neutral seed does not drift toward a sad portrait.
-- [ ] Keep emotion constraints scoped: do not globally ban sadness/fear from story pages that may intentionally depict those emotions.
+- [x] Keep the existing Russian copyable/manual prompts unchanged for ChatGPT/manual workflows.
+- [x] Add Qwen-specific English-first prompt builders for character identity references, environment references, page generation and text-guided edits.
+- [x] Preserve canonical Russian story/identity source text as quoted semantic source where automatic translation would add another model/runtime dependency.
+- [x] Give toddler/human-child identity references an explicit warm, calm, gently cheerful expression lock so a neutral seed does not drift toward a sad portrait.
+- [x] Keep emotion constraints scoped: do not globally ban sadness/fear from story pages that may intentionally depict those emotions.
 
 ### 19.2 — Negative conditioning and workflow controls
 
-- [ ] Extend image-generation requests with an optional negative prompt.
-- [ ] Add a `__FARYTALE_NEGATIVE_PROMPT__` workflow sentinel and patch it in both generate/edit requests.
-- [ ] Use a conservative children's-book negative preset for anatomy/artifact/text/clutter problems and a stronger cheerful-portrait preset only for canonical child identity references.
-- [ ] Document the checked-in Qwen workflow defaults explicitly: Qwen encoder resolution, output sizes by action, seed behavior, steps, CFG, sampler and scheduler.
-- [ ] Preserve the ability to point FaryTale at a parent-exported API-format ComfyUI workflow through the existing environment variables.
+- [x] Extend image-generation requests with an optional negative prompt.
+- [x] Add a `__FARYTALE_NEGATIVE_PROMPT__` workflow sentinel and patch it in both generate/edit requests.
+- [x] Use a conservative children's-book negative preset for anatomy/artifact/text/clutter problems and a stronger cheerful-portrait preset only for canonical child identity references.
+- [x] Document the checked-in Qwen workflow defaults explicitly: Qwen encoder resolution, output sizes by action, seed behavior, steps, CFG, sampler and scheduler.
+- [x] Preserve the ability to point FaryTale at a parent-exported API-format ComfyUI workflow through the existing environment variables.
 
 ### 19.3 — Verification
 

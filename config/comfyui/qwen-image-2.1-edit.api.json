@@ -33,7 +33,7 @@
     "inputs": {
       "clip": ["3", 0],
       "prompt": "__FARYTALE_PROMPT__",
-      "negative_prompt": "",
+      "negative_prompt": "__FARYTALE_NEGATIVE_PROMPT__",
       "resolution": 1024,
       "vae": ["4", 0],
       "images.image_1": ["21", 0],
@@ -53,7 +53,7 @@
     "inputs": {
       "model": ["2", 0],
       "seed": "__FARYTALE_SEED__",
-      "steps": 25,
+      "steps": "__FARYTALE_STEPS__",
       "cfg": 1,
       "sampler_name": "euler",
       "scheduler": "simple",

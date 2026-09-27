@@ -10,6 +10,15 @@ import {
 import { composeCharacterGenerationPrompt } from "../characters/prompt";
 import { composeChatEnvironmentPrompt } from "../story/chat-image-prompt";
 import type { ImageProvider } from "../providers/contracts";
+import {
+  QWEN_CHILD_IDENTITY_NEGATIVE_PROMPT,
+  QWEN_BOOK_NEGATIVE_PROMPT,
+  QWEN_CHARACTER_REFERENCE_SIZE,
+  QWEN_DEFAULT_STEPS,
+  QWEN_ENVIRONMENT_REFERENCE_SIZE,
+  composeQwenCharacterReferencePrompt,
+  composeQwenEnvironmentReferencePrompt,
+} from "./qwen-prompt";
 
 type GenerateCharacterReferenceOptions = {
   characterId: string;
@@ -41,12 +50,21 @@ export async function generateCharacterIdentityReference({
   const character = await getCanonicalCharacter(characterId, contentRoot);
   if (!character) throw new Error("Character not found.");
 
-  const prompt = composeCharacterGenerationPrompt(character);
+  const qwen = provider.id === "comfyui";
+  const prompt = qwen
+    ? composeQwenCharacterReferencePrompt(character)
+    : composeCharacterGenerationPrompt(character);
   const result = requireGeneratedResult(
     await provider.generate({
       mode: "generate",
       prompt,
-      size: { width: 1024, height: 1024 },
+      ...(qwen
+        ? {
+            negativePrompt: QWEN_CHILD_IDENTITY_NEGATIVE_PROMPT,
+            steps: QWEN_DEFAULT_STEPS,
+          }
+        : {}),
+      size: QWEN_CHARACTER_REFERENCE_SIZE,
     }),
     "Character reference generation",
   );
@@ -75,12 +93,21 @@ export async function generateBookEnvironmentReference({
   const book = await getCanonicalBook(bookId, contentRoot);
   if (!book) throw new Error("Book not found or invalid.");
   const pagePrompts = await readBookPagePrompts({ bookId, contentRoot });
-  const prompt = composeChatEnvironmentPrompt({ book, pagePrompts });
+  const qwen = provider.id === "comfyui";
+  const prompt = qwen
+    ? composeQwenEnvironmentReferencePrompt({ book, pagePrompts })
+    : composeChatEnvironmentPrompt({ book, pagePrompts });
   const result = requireGeneratedResult(
     await provider.generate({
       mode: "generate",
       prompt,
-      size: { width: 1024, height: 576 },
+      ...(qwen
+        ? {
+            negativePrompt: QWEN_BOOK_NEGATIVE_PROMPT,
+            steps: QWEN_DEFAULT_STEPS,
+          }
+        : {}),
+      size: QWEN_ENVIRONMENT_REFERENCE_SIZE,
     }),
     "Environment reference generation",
   );

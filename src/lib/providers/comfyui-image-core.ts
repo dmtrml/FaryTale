@@ -130,9 +130,11 @@ function replaceWorkflowTokens(
   value: unknown,
   replacements: {
     prompt: string;
+    negativePrompt: string;
     width: number;
     height: number;
     seed: number;
+    steps: number;
     editInstruction?: string;
     uploadedImages: string[];
   },
@@ -150,9 +152,11 @@ function replaceWorkflowTokens(
   }
   if (typeof value !== "string") return value;
   if (value === "__FARYTALE_PROMPT__") return replacements.prompt;
+  if (value === "__FARYTALE_NEGATIVE_PROMPT__") return replacements.negativePrompt;
   if (value === "__FARYTALE_WIDTH__") return replacements.width;
   if (value === "__FARYTALE_HEIGHT__") return replacements.height;
   if (value === "__FARYTALE_SEED__") return replacements.seed;
+  if (value === "__FARYTALE_STEPS__") return replacements.steps;
   if (value === "__FARYTALE_EDIT_INSTRUCTION__") {
     return replacements.editInstruction ?? "";
   }
@@ -189,7 +193,7 @@ function qwenImagePrompt(prompt: string, imageCount: number) {
   let result = prompt;
   for (let index = imageCount; index >= 1; index -= 1) {
     result = result.replace(
-      new RegExp(`референс\\s+${index}(?!\\d)`, "gi"),
+      new RegExp(`(?:референс|reference)\\s+${index}(?!\\d)`, "gi"),
       `<image${index}>`,
     );
   }
@@ -290,11 +294,14 @@ export class ComfyUIImageProvider implements ImageProvider {
 
     const size = request.size ?? { width: 1920, height: 1080 };
     const seed = request.seed ?? Math.floor(Math.random() * 2_147_483_647);
+    const steps = request.steps ?? 25;
     const patchedWorkflow = replaceWorkflowTokens(workflow, {
       prompt: qwenImagePrompt(prompt, inputImages.length),
+      negativePrompt: request.negativePrompt?.trim() ?? "",
       width: size.width,
       height: size.height,
       seed,
+      steps,
       editInstruction: request.editInstruction?.trim() || undefined,
       uploadedImages,
     });

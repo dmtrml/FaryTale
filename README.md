@@ -96,6 +96,20 @@ page characters → book environment → additional book references → declared
 objects. Qwen requests are capped at 10 images. For Edit, the current page consumes
 image slot 1, leaving up to nine canonical reference slots.
 
+The local Qwen path now uses a provider-specific prompt layer instead of sending the
+manual/ChatGPT prompt verbatim. Operational instructions are English-first; canonical
+Russian story/identity details are preserved inside the request as semantic source data.
+Child identity-reference generation explicitly asks for a warm, calm, gently cheerful
+expression with a small natural smile and bright attentive eyes. Qwen also receives a
+real negative-conditioning string rather than an empty negative prompt.
+
+Current checked-in local defaults are: Qwen encoder resolution 1024, 25 steps, CFG 1,
+Euler sampler, simple scheduler and a random seed per request unless a seed is supplied.
+Character references are requested at 1024×1024, environment references at 1024×576 and
+ordinary book pages at 1920×1080. These are FaryTale's tested local-performance defaults,
+not Qwen's maximum/native output sizes. See `config/comfyui/README.md` for the exact
+workflow contract and custom-workflow instructions.
+
 When a real image provider is configured, Parent mode can also prepare the two main
 synthetic canonical references without leaving FaryTale: the Characters page can
 generate/replace a character's main identity reference from its canonical character

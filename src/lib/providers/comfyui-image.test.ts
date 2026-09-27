@@ -24,8 +24,10 @@ describe("ComfyUIImageProvider", () => {
         "1": {
           inputs: {
             text: "__FARYTALE_PROMPT__",
+            negative: "__FARYTALE_NEGATIVE_PROMPT__",
             width: "__FARYTALE_WIDTH__",
             height: "__FARYTALE_HEIGHT__",
+            steps: "__FARYTALE_STEPS__",
           },
         },
         "2": { inputs: { image: "__FARYTALE_IMAGE_1__" } },
@@ -65,7 +67,9 @@ describe("ComfyUIImageProvider", () => {
 
     const result = await provider.generate({
       prompt: "Keep Emi consistent",
+      negativePrompt: "sad expression, watermark",
       seed: 123,
+      steps: 31,
       size: { width: 1664, height: 928 },
       references: [
         {
@@ -88,8 +92,10 @@ describe("ComfyUIImageProvider", () => {
     expect(submitted.client_id).toBe("test-client");
     expect(submitted.prompt["1"].inputs).toEqual({
       text: "Keep Emi consistent",
+      negative: "sad expression, watermark",
       width: 1664,
       height: 928,
+      steps: 31,
     });
     expect(submitted.prompt["2"].inputs.image).toBe("farytale/emi.png");
     expect(calls.filter((call) => call.url.endsWith("/history/prompt-123"))).toHaveLength(2);

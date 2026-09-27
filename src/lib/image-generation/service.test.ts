@@ -145,6 +145,39 @@ describe("generateBookPageImage", () => {
     expect(book?.pages[0]?.image).toBeUndefined();
   });
 
+  it("uses the Qwen provider prompt layer, negative preset and explicit fast-preset steps for ComfyUI", async () => {
+    const root = await fixture();
+    let captured: ImageGenerationRequest | undefined;
+    const provider: ImageProvider = {
+      id: "comfyui",
+      async generate(request) {
+        captured = request;
+        return {
+          kind: "deferred",
+          imageStatus: "prompt_ready",
+          prompt: request.prompt,
+          metadata: { provider: "comfyui" },
+        };
+      },
+    };
+
+    await generateBookPageImage({
+      bookId: "image-book",
+      pageNumber: 1,
+      provider,
+      contentRoot: root,
+    });
+
+    expect(captured?.prompt).toContain(
+      "Create one separate children's picture-book illustration",
+    );
+    expect(captured?.prompt).toContain("SOURCE BRIEF:");
+    expect(captured?.negativePrompt).toContain("duplicate character");
+    expect(captured?.negativePrompt).not.toContain("sad expression");
+    expect(captured?.steps).toBe(25);
+    expect(captured?.size).toEqual({ width: 1920, height: 1080 });
+  });
+
   it("sends the book environment reference after canonical character references", async () => {
     const root = await fixture();
     await fs.mkdir(path.join(root, "books", "image-book", "refs"), { recursive: true });

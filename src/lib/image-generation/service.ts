@@ -16,6 +16,13 @@ import {
   buildReferencePackPlan,
   type AvailableReferencePackItem,
 } from "./reference-pack";
+import {
+  QWEN_BOOK_NEGATIVE_PROMPT,
+  QWEN_DEFAULT_STEPS,
+  QWEN_PAGE_SIZE,
+  composeQwenEditPrompt,
+  composeQwenPagePrompt,
+} from "./qwen-prompt";
 
 const mimeByExtension: Record<string, string> = {
   ".avif": "image/avif",
@@ -266,13 +273,17 @@ export async function generateBookPageImage(options: GeneratePageOptions) {
     buildReferencePackPlan({ book, characters: pageCharacters }),
   );
   const references = await loadPageReferences(contentRoot, referenceItems);
-  const providerPrompt = composeChatPagePrompt({
+  const qwen = options.provider.id === "comfyui";
+  const promptOptions = {
     book,
     page,
     rawPrompt: prompt,
     characters: pageCharacters,
     referenceItems,
-  });
+  };
+  const providerPrompt = qwen
+    ? composeQwenPagePrompt(promptOptions)
+    : composeChatPagePrompt(promptOptions);
   await setBookPageImageStatus({
     bookId: options.bookId,
     pageNumber: options.pageNumber,
@@ -284,7 +295,13 @@ export async function generateBookPageImage(options: GeneratePageOptions) {
     const result = await options.provider.generate({
       prompt: providerPrompt,
       references,
-      size: { width: 1920, height: 1080 },
+      ...(qwen
+        ? {
+            negativePrompt: QWEN_BOOK_NEGATIVE_PROMPT,
+            steps: QWEN_DEFAULT_STEPS,
+          }
+        : {}),
+      size: QWEN_PAGE_SIZE,
     });
 
     if (result.kind === "deferred") {
@@ -389,7 +406,8 @@ export async function editBookPageImage(options: EditPageOptions) {
   );
   const references = await loadPageReferences(contentRoot, referenceItems);
   const sourceImage = await loadCurrentPageImageReference(contentRoot, book, page);
-  const continuityPrompt = composeChatPagePrompt({
+  const qwen = options.provider.id === "comfyui";
+  const continuityOptions = {
     book,
     page,
     rawPrompt,
@@ -402,13 +420,18 @@ export async function editBookPageImage(options: EditPageOptions) {
           "Это основа правки. Сохраняй всё, что пользователь прямо не просит изменить.",
       },
     ],
-  });
-  const providerPrompt = [
-    "Отредактируй референс 1, а не создавай произвольную новую сцену.",
-    `Требуемая правка: ${instruction}`,
-    "Сохрани композицию, персонажей, окружение, стиль и все детали, которые не относятся к запрошенной правке.",
-    continuityPrompt,
-  ].join(" ");
+  };
+  const continuityPrompt = qwen
+    ? composeQwenPagePrompt(continuityOptions)
+    : composeChatPagePrompt(continuityOptions);
+  const providerPrompt = qwen
+    ? composeQwenEditPrompt({ instruction, continuityPrompt })
+    : [
+        "Отредактируй референс 1, а не создавай произвольную новую сцену.",
+        `Требуемая правка: ${instruction}`,
+        "Сохрани композицию, персонажей, окружение, стиль и все детали, которые не относятся к запрошенной правке.",
+        continuityPrompt,
+      ].join(" ");
 
   await setBookPageImageStatus({
     bookId: options.bookId,
@@ -425,7 +448,13 @@ export async function editBookPageImage(options: EditPageOptions) {
       references,
       editInstruction: instruction,
       ...(options.seed !== undefined ? { seed: options.seed } : {}),
-      size: { width: 1920, height: 1080 },
+      ...(qwen
+        ? {
+            negativePrompt: QWEN_BOOK_NEGATIVE_PROMPT,
+            steps: QWEN_DEFAULT_STEPS,
+          }
+        : {}),
+      size: QWEN_PAGE_SIZE,
     });
 
     if (result.kind === "deferred") {

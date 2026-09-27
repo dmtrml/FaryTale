@@ -42,10 +42,12 @@ export type ImageReference = {
 export type ImageGenerationRequest = {
   mode?: "generate" | "edit";
   prompt: string;
+  negativePrompt?: string;
   references?: ImageReference[];
   sourceImage?: ImageReference;
   editInstruction?: string;
   seed?: number;
+  steps?: number;
   size?: {
     width: number;
     height: number;

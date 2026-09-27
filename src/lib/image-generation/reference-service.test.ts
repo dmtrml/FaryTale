@@ -99,7 +99,7 @@ describe("canonical reference generation", () => {
     const root = await fixture();
     let captured: ImageGenerationRequest | undefined;
     const provider: ImageProvider = {
-      id: "fake",
+      id: "comfyui",
       async generate(request) {
         captured = request;
         return {
@@ -121,7 +121,10 @@ describe("canonical reference generation", () => {
     expect(captured?.mode).toBe("generate");
     expect(captured?.size).toEqual({ width: 1024, height: 1024 });
     expect(captured?.references).toBeUndefined();
-    expect(captured?.prompt).toContain("каноническое изображение персонажа «Эми»");
+    expect(captured?.prompt).toContain("Create one canonical character identity reference");
+    expect(captured?.prompt).toContain("small natural smile");
+    expect(captured?.negativePrompt).toContain("sad expression");
+    expect(captured?.steps).toBe(25);
     const character = await getCanonicalCharacter("emi", root);
     const identity = character?.references.find((reference) => reference.role === "identity");
     expect(identity?.id).toBe(generated.referenceId);
@@ -135,7 +138,7 @@ describe("canonical reference generation", () => {
     const root = await fixture();
     let captured: ImageGenerationRequest | undefined;
     const provider: ImageProvider = {
-      id: "fake",
+      id: "comfyui",
       async generate(request) {
         captured = request;
         return {
@@ -156,8 +159,10 @@ describe("canonical reference generation", () => {
 
     expect(captured?.mode).toBe("generate");
     expect(captured?.size).toEqual({ width: 1024, height: 576 });
-    expect(captured?.prompt).toContain("канонический референс окружения");
+    expect(captured?.prompt).toContain("Create one canonical environment reference");
     expect(captured?.prompt).toContain("Светлая домашняя кухня");
+    expect(captured?.negativePrompt).toContain("duplicate character");
+    expect(captured?.steps).toBe(25);
     const book = await getCanonicalBook("cup-book", root);
     expect(book?.references).toContainEqual({
       id: "environment",
