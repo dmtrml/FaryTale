@@ -406,22 +406,22 @@ Goal: prevent canonical character references from being treated as ready-made cu
 
 ### 20.1 — Reference semantics and ordering
 
-- [ ] Keep the canonical/manual reference-pack order unchanged for copyable/manual prompts.
-- [ ] For ComfyUI/Qwen page generation only, order available visual references as environment → exact external objects → character identities → other book references.
-- [ ] Feed that same reordered list to both the Qwen prompt builder and provider bytes so `<imageN>` labels can never drift from the actual images.
-- [ ] Treat character references as identity-only anchors for face/hair/age/proportions and explicitly forbid copying their pose, stance, framing, background or temporary outfit into the story scene.
-- [ ] Treat the page scene/action/composition as higher priority than reference-image pose/composition.
+- [x] Keep the canonical/manual reference-pack order unchanged for copyable/manual prompts.
+- [x] For ComfyUI/Qwen page generation only, order available visual references as environment → exact external objects → character identities → other book references.
+- [x] Feed that same reordered list to both the Qwen prompt builder and provider bytes so `<imageN>` labels can never drift from the actual images.
+- [x] Treat character references as identity-only anchors for face/hair/age/proportions and explicitly forbid copying their pose, stance, framing, background or temporary outfit into the story scene.
+- [x] Treat the page scene/action/composition as higher priority than reference-image pose/composition.
 
 ### 20.2 — Required exact-object preflight
 
-- [ ] When a Qwen page declares an exact external object reference but its image has not been uploaded, fail before generation with a clear missing-reference error instead of silently generating without that object.
-- [ ] Preserve manual/copy-prompt behavior; the stricter preflight applies only to in-app Qwen generation/editing.
+- [x] When a Qwen page declares an exact external object reference but its image has not been uploaded, fail before generation with a clear missing-reference error instead of silently generating without that object.
+- [x] Preserve manual/copy-prompt behavior; the stricter preflight applies only to in-app Qwen generation/editing.
 
 ### 20.3 — Verification
 
-- [ ] Add regression tests for Qwen reference ordering, prompt/image numbering, identity-only wording and missing external-reference preflight.
-- [ ] Run typecheck, lint, full tests, production build and `git diff --check`.
-- [ ] Keep the private existing page image untouched; the parent can explicitly regenerate it after the fix.
+- [x] Add regression tests for Qwen reference ordering, prompt/image numbering, identity-only wording and missing external-reference preflight.
+- [x] Run typecheck, lint, full tests, production build and `git diff --check`.
+- [x] Keep the private existing page image untouched; the parent can explicitly regenerate it after the fix.
 
 Acceptance:
 - a Qwen page with character + environment + exact object references receives all three in scene-first order with matching `<imageN>` semantics;

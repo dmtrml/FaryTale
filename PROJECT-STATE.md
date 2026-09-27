@@ -6,7 +6,7 @@
 
 ## Current status
 
-**Current phase:** Phase 20 in progress — scene-first Qwen page composition and exact-object preflight.
+**Current phase:** Phase 20 complete — scene-first Qwen page composition and exact-object preflight are implemented and verified.
 
 **Overall state:** FaryTale is a working reader-first family storybook app with parent-only authoring. The primary creation workflow is agent-first: an approved story can be materialized into canonical book/character files plus one prompt per page without manual technical form entry. Existing books remain readable without AI, credentials, a database or internet access.
 
@@ -30,7 +30,8 @@ Private family story content is intentionally ignored by Git.
 
 Current local content in this checkout:
 - 4 private books are physically present: `emi-and-her-potty`, `miau-tidies-ball`, `miau-washes-paws` and the 6-page test book `emi-learns-to-drink-from-cup` / “Эми учится пить из чашки”.
-- 2 reusable character definitions are physically present: `emi` and `miau`. Their current local canonical JSON does not declare binary identity-reference files yet.
+- 2 reusable character definitions are physically present: `emi` and `miau`. Emi currently has a canonical identity reference; the test cup book currently has a canonical environment reference.
+- `emi-learns-to-drink-from-cup` declares the exact external object `cup`, but no stored `cup` image is present yet. Phase 20 intentionally blocks in-app Qwen page generation until that photo is uploaded instead of silently omitting it.
 - The previously materialized `emi-trims-her-nails` / “Эми стрижёт ноготки” and `emi-eats-with-spoon` / “Эми кушает ложкой” remain documented in project history but are not present in this checkout. This is expected because private `content/books/*` and `content/characters/*` are intentionally ignored by Git and therefore may differ between machines.
 - Do not copy private family content into Git merely to make checkouts match. Restore/upload the desired private books and reference assets locally when using them on this computer.
 
@@ -141,6 +142,7 @@ UX review branch verification on 2026-09-04:
 - Phase 19.1–19.2 adds a ComfyUI/Qwen-only prompt layer while preserving the existing Russian manual/ChatGPT prompts. Qwen operational instructions are English-first, canonical Russian fields remain semantic source data, child identity references explicitly request a warm gentle slight smile/bright attentive eyes, and negative conditioning is now passed into `TextEncodeQwenImage21`. The checked-in fast preset is explicit: encoder resolution 1024, 25 steps, CFG 1, Euler/simple, random seed unless supplied; character 1024×1024, environment 1024×576, page 1920×1080. Focused verification passed: typecheck and 24/24 tests across Qwen prompt, reference service, page service and ComfyUI provider.
 - Phase 19.3 live smoke on 2026-09-27 used the real local ComfyUI service on port 8188 with an entirely fictional scratch toddler character, fixed seed `190927`, 25 steps and 1024×1024 output. The request completed in about 65 seconds; the rendered character had a warm slight smile/bright eyes on a clean neutral background, confirming that the cheerful identity preset and real negative conditioning reached the checked-in workflow. The smoke output and prompt log remain ignored under `.scratch/phase19-qwen-character.png` and `.scratch/phase19-qwen-character-prompt.txt`; no private canonical family asset was replaced.
 - Phase 19 final repository verification passed: `npm run typecheck`, `npm run lint`, full `npm test` (26 files / 116 tests), `npm run build`, and `git diff --check`. The temporary live-smoke test file was removed after the one-off run so normal automated tests remain independent of ComfyUI.
+- Phase 20 fixes the observed “character cutout pasted onto generated environment” failure mode. Qwen page generation now orders visual anchors environment → exact external objects → character identities → other book refs, uses that exact order for both prompt numbering and provider bytes, and describes character refs as identity-only rather than pose/composition anchors. The page prompt explicitly makes scene action highest priority, forbids neutral reference-sheet standing poses/cutout composition, requires physical integration with furniture/objects and lets page clothing override temporary identity-reference clothing. Missing declared exact-object images now fail before Qwen generation/editing; Parent UI warns about the missing object and disables in-app Generate while leaving manual workflow intact. Verification passed: typecheck, lint, full tests (26 files / 119 tests), production build and `git diff --check`. The existing private page image was not regenerated or overwritten.
 
 ## Git / working state
 
@@ -166,7 +168,7 @@ Read in this order:
 
 ## Exact next action
 
-1. Implement Phase 20 Qwen-only scene-first reference ordering and keep prompt numbering synchronized with provider image order.
-2. Strengthen page prompting so character refs are identity-only and the requested scene/action overrides reference pose/composition.
-3. Add a Qwen preflight that blocks generation when a declared exact external object (the test book's `cup`) has no uploaded asset.
-4. Verify without overwriting the current private page image, then let the parent explicitly regenerate page 1.
+1. In `emi-learns-to-drink-from-cup`, upload the actual cup photo in the declared `cup` external-reference slot; Parent mode should currently show the missing-reference warning and disabled in-app Generate button.
+2. Explicitly regenerate page 1. Qwen should receive environment as image 1, cup as image 2 and Emi identity as image 3; the page action/pose must be newly composed rather than copied from Emi's identity sheet.
+3. Compare the new page against the archived previous variant. If Qwen still copies the identity pose despite the stronger semantics/order, inspect the generated prompt/history and tune conditioning strength/workflow rather than adding more generic prose.
+4. Keep mask/brush editing, automatic continuity anchors and whole-book queues as later enhancements.

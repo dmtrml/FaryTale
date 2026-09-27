@@ -14,6 +14,8 @@ import { composeChatPagePrompt } from "../story/chat-image-prompt";
 import {
   assertQwenReferenceLimit,
   buildReferencePackPlan,
+  missingDeclaredExternalReferenceItems,
+  orderQwenPageReferenceItems,
   type AvailableReferencePackItem,
 } from "./reference-pack";
 import {
@@ -269,11 +271,23 @@ export async function generateBookPageImage(options: GeneratePageOptions) {
   const pageCharacters = page.characters
     .map((characterId) => library.characters.find((item) => item.id === characterId))
     .filter((character): character is Character => Boolean(character));
-  const referenceItems = assertQwenReferenceLimit(
-    buildReferencePackPlan({ book, characters: pageCharacters }),
-  );
-  const references = await loadPageReferences(contentRoot, referenceItems);
   const qwen = options.provider.id === "comfyui";
+  const referencePlan = buildReferencePackPlan({ book, characters: pageCharacters });
+  if (qwen) {
+    const missingExternalReferences = missingDeclaredExternalReferenceItems(referencePlan);
+    if (missingExternalReferences.length) {
+      throw new Error(
+        `Missing required external reference image(s): ${missingExternalReferences
+          .map((item) => item.label)
+          .join(", ")}. Upload them before Qwen page generation.`,
+      );
+    }
+  }
+  const availableReferenceItems = assertQwenReferenceLimit(referencePlan);
+  const referenceItems = qwen
+    ? orderQwenPageReferenceItems(availableReferenceItems)
+    : availableReferenceItems;
+  const references = await loadPageReferences(contentRoot, referenceItems);
   const promptOptions = {
     book,
     page,
@@ -400,13 +414,24 @@ export async function editBookPageImage(options: EditPageOptions) {
   const pageCharacters = page.characters
     .map((characterId) => library.characters.find((item) => item.id === characterId))
     .filter((character): character is Character => Boolean(character));
-  const referenceItems = assertQwenReferenceLimit(
-    buildReferencePackPlan({ book, characters: pageCharacters }),
-    1,
-  );
+  const qwen = options.provider.id === "comfyui";
+  const referencePlan = buildReferencePackPlan({ book, characters: pageCharacters });
+  if (qwen) {
+    const missingExternalReferences = missingDeclaredExternalReferenceItems(referencePlan);
+    if (missingExternalReferences.length) {
+      throw new Error(
+        `Missing required external reference image(s): ${missingExternalReferences
+          .map((item) => item.label)
+          .join(", ")}. Upload them before Qwen page editing.`,
+      );
+    }
+  }
+  const availableReferenceItems = assertQwenReferenceLimit(referencePlan, 1);
+  const referenceItems = qwen
+    ? orderQwenPageReferenceItems(availableReferenceItems)
+    : availableReferenceItems;
   const references = await loadPageReferences(contentRoot, referenceItems);
   const sourceImage = await loadCurrentPageImageReference(contentRoot, book, page);
-  const qwen = options.provider.id === "comfyui";
   const continuityOptions = {
     book,
     page,

@@ -101,18 +101,45 @@ describe("Qwen prompt layer", () => {
       page: book.pages[0]!,
       rawPrompt,
       characters: [emi],
-      referenceItems: [],
+      referenceItems: [
+        {
+          kind: "environment",
+          id: "environment",
+          label: "canonical kitchen",
+          role: "environment",
+        },
+        {
+          kind: "external",
+          id: "cup",
+          label: "exact cup",
+          role: "external",
+        },
+        {
+          kind: "character",
+          id: "emi",
+          label: "canonical Emi identity",
+          role: "identity",
+        },
+      ],
     });
     expect(prompt).toContain("Create one separate children's picture-book illustration");
     expect(prompt).toContain("Эми сидит за маленьким столом");
     expect(prompt).toContain("subtle natural smile");
+    expect(prompt).toContain("SCENE ACTION IS THE HIGHEST PRIORITY");
+    expect(prompt).toContain("<image1> is the canonical ENVIRONMENT/STYLE anchor");
+    expect(prompt).toContain("<image2> is an EXACT OBJECT identity anchor (exact cup)");
+    expect(prompt).toContain("<image3> is a CHARACTER IDENTITY-ONLY anchor");
+    expect(prompt).toContain("DO NOT copy its pose, stance, hand position");
+    expect(prompt).toContain("Do not fall back to a neutral front-facing standing pose");
     expect(prompt).toContain("No visible text");
   });
 
   it("keeps story-page negative conditioning structural and child identity conditioning stronger", () => {
     expect(QWEN_BOOK_NEGATIVE_PROMPT).toContain("duplicate character");
     expect(QWEN_BOOK_NEGATIVE_PROMPT).not.toContain("sad expression");
+    expect(QWEN_BOOK_NEGATIVE_PROMPT).toContain("character pasted over background");
     expect(QWEN_CHILD_IDENTITY_NEGATIVE_PROMPT).toContain("sad expression");
     expect(QWEN_CHILD_IDENTITY_NEGATIVE_PROMPT).toContain("crying");
+    expect(QWEN_CHILD_IDENTITY_NEGATIVE_PROMPT).toContain("underwear-only outfit");
   });
 });

@@ -4,6 +4,8 @@ import {
   assertQwenReferenceLimit,
   availableReferencePackItems,
   buildReferencePackPlan,
+  missingDeclaredExternalReferenceItems,
+  orderQwenPageReferenceItems,
 } from "./reference-pack";
 
 function character(id: string) {
@@ -63,6 +65,19 @@ describe("reference pack", () => {
       "emi",
       "environment",
       "spoon",
+    ]);
+  });
+
+  it("derives a Qwen page order without changing the canonical/manual reference-plan order", () => {
+    const plan = buildReferencePackPlan({ book: book(), characters: [character("emi")] });
+    expect(plan.map((item) => item.id)).toEqual(["emi", "environment", "plate", "spoon"]);
+    expect(missingDeclaredExternalReferenceItems(plan).map((item) => item.id)).toEqual(["plate"]);
+
+    const ordered = orderQwenPageReferenceItems(availableReferencePackItems(plan));
+    expect(ordered.map((item) => [item.kind, item.id])).toEqual([
+      ["environment", "environment"],
+      ["external", "spoon"],
+      ["character", "emi"],
     ]);
   });
 

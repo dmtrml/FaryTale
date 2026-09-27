@@ -23,6 +23,13 @@ export type AvailableReferencePackItem = ReferencePackItem & {
   storage: NonNullable<ReferencePackItem["storage"]>;
 };
 
+const qwenPageReferencePriority: Record<ReferencePackKind, number> = {
+  environment: 0,
+  external: 1,
+  character: 2,
+  book: 3,
+};
+
 export function buildReferencePackPlan({
   book,
   characters,
@@ -111,6 +118,24 @@ export function availableReferencePackItems(items: ReferencePackItem[]) {
   return items.filter(
     (item): item is AvailableReferencePackItem => Boolean(item.storage),
   );
+}
+
+export function missingDeclaredExternalReferenceItems(items: ReferencePackItem[]) {
+  return items.filter((item) => item.kind === "external" && !item.storage);
+}
+
+export function orderQwenPageReferenceItems(
+  items: AvailableReferencePackItem[],
+): AvailableReferencePackItem[] {
+  return items
+    .map((item, index) => ({ item, index }))
+    .sort(
+      (left, right) =>
+        qwenPageReferencePriority[left.item.kind] -
+          qwenPageReferencePriority[right.item.kind] ||
+        left.index - right.index,
+    )
+    .map(({ item }) => item);
 }
 
 export function assertQwenReferenceLimit(

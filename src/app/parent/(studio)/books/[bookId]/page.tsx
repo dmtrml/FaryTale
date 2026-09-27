@@ -75,12 +75,21 @@ export default async function ParentBookPage({
   const bookCharacters = characters.filter((character) => book.characters.includes(character.id));
   const environmentReference = book.references.find((reference) => reference.role === "environment") ?? null;
   const externalReferences = book.authoring?.externalReferences ?? [];
+  const missingExternalReferences = externalReferences.filter(
+    (reference) =>
+      !book.references.some(
+        (stored) => stored.role === "external" && stored.id === reference.id,
+      ),
+  );
   const wholeBookPrompt = composeChatBookPrompt({ book, characters: bookCharacters, pagePrompts });
   const environmentPrompt = composeChatEnvironmentPrompt({ book, pagePrompts });
   const pageByPageOnly = usesPageByPageManualImageMode(book);
   const recommendedPattern = recommendStoryPattern(book.goal.type, book.goal.description);
   const providerConfig = getServerProviderConfig();
   const networkImageProvider = providerConfig.FARYTALE_IMAGE_PROVIDER !== "manual";
+  const qwenMissingRequiredReferences =
+    providerConfig.FARYTALE_IMAGE_PROVIDER === "comfyui" &&
+    missingExternalReferences.length > 0;
   const imageEditAvailable =
     providerConfig.FARYTALE_IMAGE_PROVIDER === "openai-image" ||
     (providerConfig.FARYTALE_IMAGE_PROVIDER === "comfyui" &&
@@ -314,7 +323,7 @@ export default async function ParentBookPage({
             {externalReferences.length ? (
               <div className="rounded-xl bg-[#f4f0e9] p-4 lg:col-span-2">
                 <h3 className="text-sm font-semibold">Дополнительные референсы предметов</h3>
-                <p className="mt-1 text-xs leading-5 text-[#756d64]">Загрузите реальные фотографии один раз. При внутренней генерации FaryTale автоматически добавит доступные референсы после персонажей и окружения.</p>
+                <p className="mt-1 text-xs leading-5 text-[#756d64]">Загрузите реальные фотографии один раз. FaryTale автоматически приложит их к генерации; для Qwen объявленные точные предметы обязательны и без их фото генерация не запускается.</p>
                 <div className="mt-3 grid gap-3 sm:grid-cols-2">
                   {externalReferences.map((reference) => {
                     const storedReference = book.references.find(
@@ -504,9 +513,20 @@ export default async function ParentBookPage({
                             <p className="text-xs font-semibold text-[#786f65]">2 · Создать изображение</p>
                             <p className="mt-2 text-sm leading-6 text-[#70685e]">Откройте ChatGPT Image, приложите главный референс персонажа, референс окружения и все дополнительные референсы из блока «Иллюстрации и референсы», затем вставьте скопированный промпт.</p>
                             {!environmentReference ? <p className="mt-2 text-xs font-semibold text-[#8a493b]">Референс окружения пока не загружен.</p> : null}
+                            {qwenMissingRequiredReferences ? (
+                              <p className="mt-2 text-xs font-semibold text-[#8a493b]">
+                                Для внутренней генерации Qwen сначала загрузите: {missingExternalReferences.map((reference) => reference.label).join(", ")}.
+                              </p>
+                            ) : null}
                             {networkImageProvider && chatPagePrompt ? (
                               <form action={generateImage} className="mt-3">
-                                <button type="submit" className="rounded-full border border-[#d8d0c5] bg-white px-4 py-2 text-sm font-semibold">{page.imageStatus === "ready" ? "Сгенерировать заново внутри приложения" : "Сгенерировать внутри приложения"}</button>
+                                <button
+                                  type="submit"
+                                  disabled={qwenMissingRequiredReferences}
+                                  className="rounded-full border border-[#d8d0c5] bg-white px-4 py-2 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-45"
+                                >
+                                  {page.imageStatus === "ready" ? "Сгенерировать заново внутри приложения" : "Сгенерировать внутри приложения"}
+                                </button>
                               </form>
                             ) : null}
                           </div>

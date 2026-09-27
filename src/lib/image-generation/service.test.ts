@@ -279,6 +279,117 @@ describe("generateBookPageImage", () => {
     expect(captured?.prompt).toContain("референс 4 — Plate");
   });
 
+  it("uses scene-first reference order for Qwen and keeps prompt semantics aligned with the actual image order", async () => {
+    const root = await fixture();
+    await fs.mkdir(path.join(root, "books", "image-book", "refs", "external"), {
+      recursive: true,
+    });
+    await fs.writeFile(
+      path.join(root, "books", "image-book", "refs", "room.png"),
+      Buffer.from([4, 5, 6]),
+    );
+    await fs.writeFile(
+      path.join(root, "books", "image-book", "refs", "external", "cup.png"),
+      Buffer.from([1, 4, 7]),
+    );
+    const bookPath = path.join(root, "books", "image-book", "book.json");
+    const raw = JSON.parse(await fs.readFile(bookPath, "utf8"));
+    raw.references = [
+      { id: "environment", path: "refs/room.png", role: "environment" },
+      { id: "cup", path: "refs/external/cup.png", role: "external" },
+    ];
+    raw.authoring = {
+      skill: "childrens-story-creator-v1",
+      ageBand: "18-24m",
+      storyPattern: "habit-routine",
+      externalReferences: [
+        {
+          id: "cup",
+          label: "Exact cup",
+          instruction: "Keep the exact shape and color.",
+        },
+      ],
+      outline: [
+        { pageNumber: 1, beat: "One" },
+        { pageNumber: 2, beat: "Two" },
+      ],
+    };
+    await fs.writeFile(bookPath, JSON.stringify(raw));
+
+    let captured: ImageGenerationRequest | undefined;
+    const provider: ImageProvider = {
+      id: "comfyui",
+      async generate(request) {
+        captured = request;
+        return {
+          kind: "deferred",
+          imageStatus: "prompt_ready",
+          prompt: request.prompt,
+          metadata: { provider: "comfyui" },
+        };
+      },
+    };
+
+    const result = await generateBookPageImage({
+      bookId: "image-book",
+      pageNumber: 1,
+      provider,
+      contentRoot: root,
+    });
+
+    expect(captured?.references?.map((item) => item.role)).toEqual([
+      "environment",
+      "external:cup",
+      "identity",
+    ]);
+    expect(result.referencePaths).toEqual([
+      "books/image-book/refs/room.png",
+      "books/image-book/refs/external/cup.png",
+      "characters/miau/refs/canonical.png",
+    ]);
+    expect(captured?.prompt).toContain("<image1> is the canonical ENVIRONMENT/STYLE anchor");
+    expect(captured?.prompt).toContain("<image2> is an EXACT OBJECT identity anchor (Exact cup)");
+    expect(captured?.prompt).toContain("<image3> is a CHARACTER IDENTITY-ONLY anchor");
+  });
+
+  it("blocks Qwen generation when a declared exact external object has no uploaded image", async () => {
+    const root = await fixture();
+    const bookPath = path.join(root, "books", "image-book", "book.json");
+    const raw = JSON.parse(await fs.readFile(bookPath, "utf8"));
+    raw.authoring = {
+      skill: "childrens-story-creator-v1",
+      ageBand: "18-24m",
+      storyPattern: "habit-routine",
+      externalReferences: [{ id: "cup", label: "Exact cup" }],
+      outline: [
+        { pageNumber: 1, beat: "One" },
+        { pageNumber: 2, beat: "Two" },
+      ],
+    };
+    await fs.writeFile(bookPath, JSON.stringify(raw));
+
+    let called = false;
+    const provider: ImageProvider = {
+      id: "comfyui",
+      async generate() {
+        called = true;
+        throw new Error("should not be called");
+      },
+    };
+
+    await expect(
+      generateBookPageImage({
+        bookId: "image-book",
+        pageNumber: 1,
+        provider,
+        contentRoot: root,
+      }),
+    ).rejects.toThrow("Missing required external reference image(s): Exact cup");
+    expect(called).toBe(false);
+    const book = await getCanonicalBook("image-book", root);
+    expect(book?.pages[0]?.imageStatus).toBe("prompt_ready");
+  });
+
   it("archives the previous ready image before a successful regeneration", async () => {
     const root = await fixture();
     await replaceBookPageImage({

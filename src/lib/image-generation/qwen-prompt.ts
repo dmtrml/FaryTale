@@ -30,6 +30,16 @@ export const QWEN_BOOK_NEGATIVE_PROMPT = [
   "harsh dramatic shadows",
   "horror atmosphere",
   "adult glamour styling",
+  "character sheet composition",
+  "paper doll",
+  "cutout character",
+  "sticker-like character",
+  "front-facing idle standing pose",
+  "neutral showcase pose",
+  "floating character",
+  "character pasted over background",
+  "disconnected character and environment",
+  "weak object interaction",
 ].join(", ");
 
 export const QWEN_CHILD_IDENTITY_NEGATIVE_PROMPT = [
@@ -43,6 +53,7 @@ export const QWEN_CHILD_IDENTITY_NEGATIVE_PROMPT = [
   "angry expression",
   "frown",
   "blank lifeless expression",
+  "underwear-only outfit",
 ].join(", ");
 
 export function isChildCharacter(character: Character) {
@@ -82,6 +93,9 @@ export function composeQwenCharacterReferencePrompt(character: Character) {
     child
       ? "Expression and mood: warm, calm, gently cheerful and emotionally safe. Use a small natural smile, bright attentive friendly eyes, relaxed eyebrows and a relaxed face. The expression should feel curious and content, not posed or exaggerated."
       : "Expression and mood: warm, calm, friendly and natural.",
+    child
+      ? "For this canonical identity reference, use an ordinary fully clothed everyday outfit. Do not choose underwear, training briefs, diapers, swimwear or other scene-specific temporary clothing merely because a special story context mentions that it may sometimes be allowed."
+      : "",
     "Show exactly one character, centered and easy to inspect, in a clean three-quarter or full-body character-reference composition with simple negative space.",
     "Use a polished children's-book illustration style with soft natural light, rounded readable forms and restrained background detail.",
     "Preserve the exact identity traits, age impression, proportions, hair or fur colors, face structure and recurring clothing described in the canonical source.",
@@ -118,10 +132,29 @@ export function composeQwenPagePrompt(options: {
 }) {
   const sourceBrief = composeChatPagePrompt(options);
   const hasChild = options.characters.some(isChildCharacter);
+  const referenceSemantics = (options.referenceItems ?? []).map((item, index) => {
+    const token = `<image${index + 1}>`;
+    switch (item.kind) {
+      case "environment":
+        return `${token} is the canonical ENVIRONMENT/STYLE anchor. Preserve its design language, recurring layout and objects, but recompose camera placement and staging as needed for the page action.`;
+      case "external":
+        return `${token} is an EXACT OBJECT identity anchor (${item.label}). Preserve that object's shape, color, material, proportions and distinctive construction while placing it naturally into the new scene.`;
+      case "character":
+        return `${token} is a CHARACTER IDENTITY-ONLY anchor (${item.label}). Preserve face, hair, age impression, body proportions and stable identity traits. DO NOT copy its pose, stance, hand position, gaze direction, camera framing, background, character-sheet composition or temporary/reference outfit. Create a new body pose and interaction required by this page.`;
+      default:
+        return `${token} is an additional canonical visual anchor (${item.label}). Reuse only the stable design information relevant to the new page scene.`;
+    }
+  });
   return [
     "Create one separate children's picture-book illustration.",
     "Output composition: horizontal 16:9. Create a single image, not a collage, storyboard or multi-panel layout.",
-    "Use every attached reference image as a canonical visual constraint. Do not redesign identities, recurring environments or exact recurring objects.",
+    "This is a NEWLY COMPOSED STORY SCENE, not a character reference sheet and not a character cutout placed over an environment image.",
+    "SCENE ACTION IS THE HIGHEST PRIORITY. The body pose, seating/standing state, hand placement, gaze direction, camera framing and object interaction must be newly composed to perform the source scene exactly. Reference-image pose or composition must never override the requested action.",
+    "Use every attached reference image only for the canonical information assigned to it below:",
+    ...referenceSemantics,
+    "Integrate the character physically into the scene with coherent perspective, contact, occlusion, scale and lighting. Never make the character look pasted, floating or disconnected from furniture and objects.",
+    "If the source scene says the character is sitting, the character must be sitting. If it names a key object or interaction, that object and relationship must be clearly visible. Do not fall back to a neutral front-facing standing pose.",
+    "Clothing must follow the page/book source. Do not inherit scene-specific or showcase clothing from the identity reference unless the page source explicitly requires it.",
     hasChild
       ? "For child characters, keep the scene emotionally safe and age-appropriate. Unless the source scene explicitly requests another emotion, use a warm calm expression with a subtle natural smile and bright attentive eyes."
       : "",

@@ -96,4 +96,16 @@ sentinels you want FaryTale to control, and point
 `FARYTALE_COMFYUI_GENERATE_WORKFLOW` / `FARYTALE_COMFYUI_EDIT_WORKFLOW` at the
 custom files. Values that are not represented by sentinels remain owned by that workflow.
 
+For ordinary Qwen story-page generation, FaryTale deliberately uses a scene-first
+reference order: canonical environment → uploaded exact external objects → character
+identity references → other book references. The same ordered list is used to build the
+prompt and to upload image bytes, so `<imageN>` always refers to the intended asset.
+Character images are identity-only anchors: the prompt explicitly tells Qwen not to copy
+their reference-sheet pose, stance, framing, background or temporary outfit. The page
+scene/action/composition takes priority over reference-image composition.
+
+If a book declares an exact external object reference (for example the parent's real cup)
+but no image has been uploaded for it, in-app Qwen generation/editing is blocked before a
+provider request is sent. Manual/copy-prompt workflows remain available.
+
 If another machine uses different Qwen weight filenames, copy these workflow files locally and point the environment variables at the machine-specific copies rather than changing canonical book data.
